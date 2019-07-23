@@ -1,0 +1,293 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:bi="http://java.sun.com/jsf/composite/cashTransaction">
+
+    <ui:define name="content">
+        <h:panelGroup >
+            <h:form  >
+                <p:panel rendered="#{!cashOutController.printPreview}">
+                    <f:facet name="header">
+                        <h:outputLabel value="CASH OUT"/>                        
+                    </f:facet>
+                    <h:panelGrid columns="2">
+                        <p:panel>
+                            <f:facet name="header">
+                                <h:outputLabel value="NOTE"/>
+                            </f:facet>
+                            <h:panelGrid columns="6" >
+                                <h:outputLabel value="1/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty1}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="2/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty2}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="5/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty5}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="10/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty10}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="20/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty20}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="50/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty50}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="100/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty100}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="200/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty200}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="500/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty500}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="1000/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty1000}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="2000/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty2000}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                                <h:outputLabel value="5000/="/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.qty5000}">
+                                    <f:ajax event="keyup" execute="@this" render=":#{p:component('panTot')}" listener="#{cashOutController.calTotal()}" />
+                                </p:inputText>
+                            </h:panelGrid>
+                        </p:panel>
+                        <p:panel id="panSummery">
+                            <f:facet name="header">
+                                <h:outputLabel value="Summery"/>
+                            </f:facet>
+                            <h:panelGrid columns="2">                                
+                                <h:outputLabel value="Cal Cash Value" />
+                                <p:inputText id="panTot" value="#{cashOutController.bill.cashTransaction.cashValue}" disabled="true" >
+                                </p:inputText>
+                                <h:outputLabel value="Credit Card Tot" />
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.creditCardValue}" disabled="true"  >
+                                </p:inputText>
+                                <h:outputLabel value="Slip Total"/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.slipValue}" disabled="true" >
+                                </p:inputText>
+                                <h:outputLabel value="Cheque Total"/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.chequeValue}" disabled="true" >
+                                </p:inputText>
+                                <h:outputLabel value="Credit Total"/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.creditValue}" disabled="true" >
+                                </p:inputText>
+                                <h:outputLabel value="IOU Total"/>
+                                <p:inputText value="#{cashOutController.bill.cashTransaction.iouValue}" disabled="true" >
+                                </p:inputText>
+                            </h:panelGrid>
+                        </p:panel>
+                        <p:panel>
+                            <f:facet name="header">
+                                <h:outputLabel value="TO DRAWER DETAIL"/>
+                            </f:facet>
+                            <h:panelGrid columns="3">      
+                                <h:outputLabel value="To Cashier"/>
+                                <p:autoComplete converter="webUs" 
+                                                completeMethod="#{webUserController.completeUser}" 
+                                                forceSelection="true"
+                                                var="w" 
+                                                itemLabel="#{w.webUserPerson.name}" 
+                                                itemValue="#{w}"
+                                                value="#{cashOutController.bill.toWebUser}" >
+                                    <p:column headerText="Name">
+                                        <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Code">
+                                        <h:outputLabel value="#{w.code}"/>
+                                    </p:column>
+                                </p:autoComplete>
+                                <!--                                <h:outputLabel value="Cash : " />
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.runningBallance}"
+                                                                               style="float:  right;">
+                                                                    <f:convertNumber pattern="#000.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="Credit Card : "/>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.creditCardBallance}"
+                                                                               style="float:  right;">
+                                                                    <f:convertNumber pattern="#000.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="Cheque  : "/>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.chequeBallance}"
+                                                                               style="float:  right;">
+                                                                    <f:convertNumber pattern="#000.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="Slip  : "/>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.slipBallance}"
+                                                                               style="float:  right;">
+                                                                    <f:convertNumber pattern="#000.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="Credit  : "/>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.creditBallance}"
+                                                                               style="float:  right;">
+                                                                    <f:convertNumber pattern="#,##0.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="IOU  : "/>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.iouBallance}"
+                                                                               style="float:  right;">
+                                                                    <f:convertNumber pattern="#,##0.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="Short  : " rendered="#{cashOutController.bill.toWebUser.drawer.shortBallance lt 0}" style="color: red;"/>
+                                                                <h:outputLabel value="Exess  : " rendered="#{cashOutController.bill.toWebUser.drawer.shortBallance gt 0}" style="color: green;"/>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.shortBallance}"
+                                                                               style="float:  right;color: red;" rendered="#{cashOutController.bill.toWebUser.drawer.shortBallance lt 0}" >
+                                                                    <f:convertNumber pattern="#,##0.00"/>
+                                                                </h:outputLabel>
+                                                                <h:outputLabel value="#{cashOutController.bill.toWebUser.drawer.shortBallance}"
+                                                                               style="float:  right;color: green;" rendered="#{cashOutController.bill.toWebUser.drawer.shortBallance gt 0}" >
+                                                                    <f:convertNumber pattern="#,##0.00"/>
+                                                                </h:outputLabel>-->
+                            </h:panelGrid>
+                        </p:panel>
+                        <p:panel >
+                            <p:dataTable value="#{cashOutController.billItems}" var="bi" selection="#{cashOutController.selectedBillItems}"
+                                         rowIndexVar="i" scrollable="true" 
+                                         scrollHeight="150" rowKey="#{bi.id}"  >
+                                <f:facet name="header">
+                                    <p:outputLabel value="Cheque,Credit Card,Credit,Slip &amp; IOU Transations" />
+                                </f:facet>
+                                <f:ajax  event="rowSelectCheckbox" execute="@this" listener="#{cashOutController.pendingTransationsHandOver()}"   
+                                         render=":#{p:component('panSummery')}"  />  
+
+                                <f:ajax  event="rowSelect" execute="@this" listener="#{cashOutController.pendingTransationsHandOver()}"   
+                                         render=":#{p:component('panSummery')}"  />  
+
+                                <f:ajax  event="rowUnselectCheckbox" execute="@this" listener="#{cashOutController.pendingTransationsHandOver()}"   
+                                         render=":#{p:component('panSummery')}"  />  
+
+                                <f:ajax  event="toggleSelect" execute="@this" listener="#{cashOutController.pendingTransationsHandOver()}"   
+                                         render=":#{p:component('panSummery')}"  /> 
+                                <p:column selectionMode="multiple" ></p:column>
+                                <p:column headerText="NO">
+                                    <p:outputLabel value="#{i+1}" />
+                                </p:column>
+                                <p:column headerText="Item">
+                                    <p:outputLabel value="#{bi.item.name}" />
+                                </p:column>
+                                <p:column headerText="Discription">
+                                    <p:outputLabel value="#{bi.descreption}" />
+                                </p:column>
+                                <p:column headerText="Date">
+                                    <p:outputLabel value="#{bi.fromTime}" >
+                                        <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                                    </p:outputLabel>
+                                </p:column>
+                                <p:column headerText="Created At">
+                                    <p:outputLabel value="#{bi.createdAt}" >
+                                        <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                                    </p:outputLabel>
+                                </p:column>
+                                <p:column headerText="Amount">
+                                    <p:outputLabel value="#{bi.netValue}" >
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </p:outputLabel>
+                                </p:column>
+                            </p:dataTable>
+                        </p:panel>
+                        <p:panel>
+                            <f:facet name="header">
+                                <h:outputLabel value="CURRENT DRAWER DETAIL (#{sessionController.loggedUser.webUserPerson.nameWithTitle})"/>
+                            </f:facet>
+                            <h:panelGrid columns="2">      
+                                <h:outputLabel value="Cash :" />
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.runningBallance}"
+                                               style="float:  right;">
+                                    <f:convertNumber pattern="#000.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="CreditCard : "/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.creditCardBallance}"
+                                               style="float:  right;">
+                                    <f:convertNumber pattern="#000.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="Cheque  : "/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.chequeBallance}"
+                                               style="float:  right;">
+                                    <f:convertNumber pattern="#000.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="Slip  : "/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.slipBallance}"
+                                               style="float:  right;">
+                                    <f:convertNumber pattern="#000.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="Credit  : "/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.creditBallance}"
+                                               style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="IOU  : "/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.iouBallance}"
+                                               style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="Short" style="color: red;" rendered="#{sessionController.loggedUser.drawer.shortBallance lt 0}"/>
+                                <h:outputLabel value="Exess" style="color: green;" rendered="#{sessionController.loggedUser.drawer.shortBallance gt 0}"/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.shortBallance}" 
+                                               rendered="#{sessionController.loggedUser.drawer.shortBallance lt 0}" style="float:  right;color: red;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.shortBallance}" 
+                                               rendered="#{sessionController.loggedUser.drawer.shortBallance gt 0}" style="float:  right;color: green;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="Total  : " style="color: blue;"/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.runningBallance+sessionController.loggedUser.drawer.creditCardBallance+
+                                                        sessionController.loggedUser.drawer.chequeBallance+sessionController.loggedUser.drawer.slipBallance+
+                                                        sessionController.loggedUser.drawer.creditBallance+sessionController.loggedUser.drawer.iouBallance+
+                                                        sessionController.loggedUser.drawer.shortBallance}"
+                                               style="float:  right;color: blue;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+
+<!--                                <h:outputLabel value="Cahsier Short"/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.cashierShortBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                                <h:outputLabel value="Cashier Excess"/>
+                                <h:outputLabel value="#{sessionController.loggedUser.drawer.cashierExcessBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>-->
+                            </h:panelGrid>
+                        </p:panel>
+
+
+
+                        <p:panel>
+                            <p:panel header="Comments">
+                                <p:inputTextarea value="#{cashOutController.bill.comments}"/>
+                            </p:panel>
+                            <p:commandButton ajax="false" value="Settle" action="#{cashOutController.settle()}"/>
+                            <p:commandButton ajax="false" value="Clear" action="#{cashOutController.makeNull()}"/>
+                        </p:panel>
+                    </h:panelGrid>
+                </p:panel>
+
+                <p:panel rendered="#{cashOutController.printPreview}">
+                    <p:commandButton ajax="false" value="New Bill" actionListener="#{cashOutController.makeNull()}"/>
+
+                    <bi:cashOut  bill="#{cashOutController.bill}"/>
+                </p:panel>
+            </h:form>
+        </h:panelGroup>
+
+    </ui:define>
+
+</ui:composition>

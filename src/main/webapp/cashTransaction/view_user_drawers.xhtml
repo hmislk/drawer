@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+
+
+    <ui:define name="content">
+        <h:panelGroup rendered="false" >
+            <h:outputLabel value="You are NOT authorized"/>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="true" >
+            <h:form  >
+                
+                <h:panelGrid columns="3" >
+                    <p:commandButton ajax="false" value="Process" action="#{commonReportSession.createWebUserDrawers()}"/>
+                    <p:commandButton value="Print" ajax="false" >
+                        <p:printer target="gpBillPreview" ></p:printer>
+                    </p:commandButton>
+                    <p:commandButton value="Excel" ajax="false">
+                        <pe:exporter type="xlsx" target="tbl" fileName="Cash Book" />
+                    </p:commandButton>
+                </h:panelGrid>
+                <p:panel id="gpBillPreview" styleClass="noBorder summeryBorder" >
+                    <p:dataTable id="tbl" value="#{commonReportSession.webUsers}"
+                                 var="u" >
+<!--                        <p:column headerText="Drawer Name">
+                            <h:outputLabel value="#{u.drawer.name}"/>
+                        </p:column>-->
+                        <p:column headerText="Cashier Name">
+                            <h:outputLabel value="#{u.webUserPerson.name} (#{u.code})"/>
+                        </p:column>                    
+                        <p:column headerText="Cash Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.runningBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.cashTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Cheque Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.chequeBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.chequeTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Credit Card Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.creditCardBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.cardTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Slip Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.slipBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.slipTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="IOU Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.iouBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.iouTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Credit Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.creditBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.creditTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Short Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.shortBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.shortTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Total" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.runningBallance+u.drawer.chequeBallance+u.drawer.creditCardBallance+u.drawer.slipBallance+u.drawer.iouBallance+u.drawer.creditBallance+u.drawer.shortBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.cashTotal+commonReportSession.chequeTotal+commonReportSession.cardTotal+commonReportSession.slipTotal+commonReportSession.iouTotal+commonReportSession.creditTotal+commonReportSession.shortTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+<!--                        <p:column headerText="Cashier Short Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.cashierShortBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.cashierShortTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>
+                        <p:column headerText="Cashier Excess Value" styleClass="numberCol">
+                            <h:outputLabel value="#{u.drawer.cashierExcessBallance}">
+                                <f:convertNumber pattern="#,##0.00"/>
+                            </h:outputLabel>
+                            <f:facet name="footer" >
+                                <h:outputLabel value="#{commonReportSession.cashierExcessTotal}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputLabel>
+                            </f:facet>
+                        </p:column>-->
+                    </p:dataTable>
+                </p:panel>
+            </h:form>
+
+        </h:panelGroup>
+
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,459 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns:cc="http://java.sun.com/jsf/composite"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:p="http://primefaces.org/ui"
+       xmlns:f="http://java.sun.com/jsf/core">
+
+    <!-- INTERFACE -->
+    <cc:interface>
+        <cc:attribute name="bill" />       
+        <cc:attribute name="dup" />
+    </cc:interface>
+
+    <!-- IMPLEMENTATION -->
+    <cc:implementation>
+
+        <div >
+
+            <div >
+                <div >
+                    <h:form> 
+
+                        <h:outputStylesheet name="printing_1.css" library="css" />
+
+                        <p:commandButton value="Print" ajax="false" action="#" >
+                            <p:printer target="gpBillPreview" ></p:printer>
+                        </p:commandButton>
+
+                        <div  class="fiveinchbillBreakRuhunuDouble">
+
+                            <h:panelGroup   id="gpBillPreview"   >
+
+
+                                <div>
+                                    <div style="position: absolute!important;
+                                         left: 50%!important;
+                                         top: 2%!important;
+                                         text-align: center;
+                                         font-weight: bold;
+                                         font-size: 15px!important;" >
+                                        <h:outputLabel value="CASH OUT"   />                           
+                                    </div>
+
+                                    <div style="position: absolute; left: 0%;top: 5%;" >                                                  
+                                        <h:outputLabel value="Bill No" />  
+                                    </div>
+                                    <div style="position: absolute; left: 10%; top: 5%;" >                                                  
+                                        <h:outputLabel value=":" />  
+                                    </div>
+                                    <div style="position: absolute; left: 12%; top: 5%;" >                                                  
+                                        <h:outputLabel value="#{cc.attrs.bill.insId}" />  
+                                        <h:outputLabel value="  **Duplicate" rendered="#{cc.attrs.dup eq true}" />
+                                    </div>
+
+                                    <div style="position: absolute; left: 0%;top: 6.5%;" >                                                  
+                                        <h:outputLabel value="Bill At" />  
+                                    </div>
+                                    <div style="position: absolute; left: 10%; top: 6.5%;" >                                                  
+                                        <h:outputLabel value=":" />  
+                                    </div>
+                                    <div style="position: absolute; left: 12%; top: 6.5%;">                       
+                                        <h:outputLabel value="#{cc.attrs.bill.createdAt}" >
+                                            <f:convertDateTime pattern="YYYY MM dd hh:mm:ss a"/>
+                                        </h:outputLabel>
+                                    </div>
+
+                                    <div style="position: absolute; left: 0%;top: 8%;" >                                                  
+                                        <h:outputLabel value="From" />  
+                                    </div>
+                                    <div style="position: absolute; left: 10%; top: 8%;" >                                                  
+                                        <h:outputLabel value=":" />  
+                                    </div>
+                                    <div style="position: absolute; left: 12%; top: 8%;">                       
+                                        <h:outputLabel value="#{cc.attrs.bill.creater.webUserPerson.name} (#{cc.attrs.bill.creater.code})" >
+                                        </h:outputLabel>
+                                    </div>
+
+                                    <div style="position: absolute; left: 0%;top: 9.5%;" >                                                  
+                                        <h:outputLabel value="To" />  
+                                    </div>
+                                    <div style="position: absolute; left: 10%; top: 9.5%;" >                                                  
+                                        <h:outputLabel value=":" />  
+                                    </div>
+                                    <div style="position: absolute; left: 12%; top: 9.5%;">                       
+                                        <h:outputLabel value="#{cc.attrs.bill.toWebUser.webUserPerson.name} (#{cc.attrs.bill.toWebUser.code})" >
+                                        </h:outputLabel>
+                                    </div>
+                                </div>
+
+                                <div class="items3">
+
+                                    <p:panel styleClass="noBorder summeryBorder">
+                                        <p:dataTable value="#{billSearch.billsCashIn}" var="b" rendered="#{billSearch.billsCashIn.size()>0}" >
+                                            <f:facet name="header" >
+                                                <p:outputLabel value="Cash In" />
+                                            </f:facet>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Bill No" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{b.insId}" />
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Date" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{b.createdAt}" >
+                                                    <f:convertDateTime pattern="yy MM dd HH:mm:ss" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="From" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{b.fromWebUser.webUserPerson.name}" rendered="#{b.billType eq 'CashIn'}"/>
+                                                <p:outputLabel value="#{b.toWebUser.webUserPerson.name}" rendered="#{b.billType eq 'CashOut'}"/>
+                                            </p:column>
+                                            <p:column styleClass="numberCol">
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Value" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{b.netTotal}" >
+                                                    <f:convertNumber pattern="#,##0.00" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panel>
+
+                                    <p:panel styleClass="noBorder summeryBorder">
+                                        <p:dataTable value="#{cc.attrs.bill.billItemsSummery}" var="bi" rendered="#{cc.attrs.bill.billItems.size()>0}" >
+                                            <f:facet name="header" >
+                                                <p:outputLabel value="Summery" />
+                                            </f:facet>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Name" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.item.name}" />
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="No" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.agentRefNo}" />
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="From" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.fromTime}" >
+                                                    <f:convertDateTime pattern="yy MM dd HH:mm:ss" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="To" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.toTime}" >
+                                                    <f:convertDateTime pattern="yy MM dd HH:mm:ss" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                            <p:column styleClass="numberCol">
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Value" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.netValue}" >
+                                                    <f:convertNumber pattern="#,##0.00" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panel>
+
+                                    <p:panel styleClass="noBorder summeryBorder" >
+                                        <table>
+                                            <tr>
+                                                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                                <td style="float: right;"><h:outputLabel value="---------------" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td><h:outputLabel value="Cash In + Summery" style="font-weight: bold;" /></td>
+                                                <td><h:outputLabel value=" " /></td>
+                                                <td><h:outputLabel value="#{billSearch.total}" 
+                                                                   style="float: right;">
+                                                        <f:convertNumber pattern="#,##0.00"/>
+                                                    </h:outputLabel></td>
+                                            </tr>
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                                <td style="float: right;"><h:outputLabel value="=========" /></td>
+                                            </tr>
+                                        </table>
+                                    </p:panel>
+                                    <p:panel styleClass="noBorder summeryBorder" >
+                                        <h:panelGrid columns="3" >
+                                            <h:outputLabel value="Cash Value" rendered="#{cc.attrs.bill.cashTransaction.cashValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.cashValue ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashValue}" rendered="#{cc.attrs.bill.cashTransaction.cashValue ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="Credit Card Value" rendered="#{cc.attrs.bill.cashTransaction.creditCardValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.creditCardValue ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.creditCardValue}" rendered="#{cc.attrs.bill.cashTransaction.creditCardValue ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="Cheque Value" rendered="#{cc.attrs.bill.cashTransaction.chequeValue  ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.chequeValue  ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.chequeValue}" rendered="#{cc.attrs.bill.cashTransaction.chequeValue  ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="Slip Value" rendered="#{cc.attrs.bill.cashTransaction.slipValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.slipValue ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.slipValue}" rendered="#{cc.attrs.bill.cashTransaction.slipValue  ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="Credit Value" rendered="#{cc.attrs.bill.cashTransaction.creditValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.creditValue ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.creditValue}" rendered="#{cc.attrs.bill.cashTransaction.creditValue ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="IOU Value" rendered="#{cc.attrs.bill.cashTransaction.iouValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.iouValue ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.iouValue}" rendered="#{cc.attrs.bill.cashTransaction.iouValue ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            
+                                            <h:outputLabel value="Cashier Short Value" rendered="#{cc.attrs.bill.cashTransaction.cashierShortValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.cashierShortValue ne 0}"/>
+                                            <h:outputLabel value="#{0-cc.attrs.bill.cashTransaction.cashierShortValue}" rendered="#{cc.attrs.bill.cashTransaction.cashierShortValue ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="Cashier Excess Value" rendered="#{cc.attrs.bill.cashTransaction.cashierExcessValue ne 0}"/>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.cashierExcessValue ne 0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashierExcessValue}" rendered="#{cc.attrs.bill.cashTransaction.cashierExcessValue ne 0}"
+                                                           style="float: right;">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                        </h:panelGrid>
+                                    </p:panel>
+
+                                    <p:panel styleClass="noBorder summeryBorder" >
+                                        <table>
+                                            <tr>
+                                                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                                <td style="float: right;"><h:outputLabel value="---------------" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td><h:outputLabel value="Total Collection" style="font-weight: bold;"/></td>
+                                                <td><h:outputLabel value=" " /></td>
+                                                <td><h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashValue+cc.attrs.bill.cashTransaction.creditCardValue+
+                                                                            cc.attrs.bill.cashTransaction.chequeValue+cc.attrs.bill.cashTransaction.slipValue+
+                                                                            cc.attrs.bill.cashTransaction.creditValue+cc.attrs.bill.cashTransaction.iouValue-
+                                                                            cc.attrs.bill.cashTransaction.cashierShortValue-cc.attrs.bill.cashTransaction.cashierExcessValue}" 
+                                                                   style="float: right;">
+                                                        <f:convertNumber pattern="#,##0.00"/>
+                                                    </h:outputLabel></td>
+                                            </tr>
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                                <td style="float: right;"><h:outputLabel value="=========" /></td>
+                                            </tr>
+                                        </table>
+                                    </p:panel>
+                                    <p:panel styleClass="noBorder summeryBorder" >
+                                        <f:facet name="header">
+                                            <h:outputLabel value="NOTE"/>
+                                        </f:facet>
+                                        <h:panelGrid columns="8" style="text-align: right;" >
+                                            <h:outputLabel value="1 x " rendered="#{cc.attrs.bill.cashTransaction.qty1>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty1}" rendered="#{cc.attrs.bill.cashTransaction.qty1>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty1>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty1*1}" rendered="#{cc.attrs.bill.cashTransaction.qty1>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="2 x " rendered="#{cc.attrs.bill.cashTransaction.qty2>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty2}" rendered="#{cc.attrs.bill.cashTransaction.qty2>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty2>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty2*2}" rendered="#{cc.attrs.bill.cashTransaction.qty2>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="5 x " rendered="#{cc.attrs.bill.cashTransaction.qty5>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty5}" rendered="#{cc.attrs.bill.cashTransaction.qty5>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty5>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty5*5}" rendered="#{cc.attrs.bill.cashTransaction.qty5>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="10 x " rendered="#{cc.attrs.bill.cashTransaction.qty10>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty10}" rendered="#{cc.attrs.bill.cashTransaction.qty10>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty10>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty10*10}" rendered="#{cc.attrs.bill.cashTransaction.qty10>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="20 x " rendered="#{cc.attrs.bill.cashTransaction.qty20>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty20}" rendered="#{cc.attrs.bill.cashTransaction.qty20>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty20>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty20*20}" rendered="#{cc.attrs.bill.cashTransaction.qty20>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="50 x " rendered="#{cc.attrs.bill.cashTransaction.qty50>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty50}" rendered="#{cc.attrs.bill.cashTransaction.qty50>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty50>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty50*50}" rendered="#{cc.attrs.bill.cashTransaction.qty50>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="100 x " rendered="#{cc.attrs.bill.cashTransaction.qty100>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty100}" rendered="#{cc.attrs.bill.cashTransaction.qty100>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty100>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty100*100}" rendered="#{cc.attrs.bill.cashTransaction.qty100>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="200 x " rendered="#{cc.attrs.bill.cashTransaction.qty200>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty200}" rendered="#{cc.attrs.bill.cashTransaction.qty200>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty200>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty200*200}" rendered="#{cc.attrs.bill.cashTransaction.qty200>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="500 x " rendered="#{cc.attrs.bill.cashTransaction.qty500>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty500}" rendered="#{cc.attrs.bill.cashTransaction.qty500>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty500>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty500*500}" rendered="#{cc.attrs.bill.cashTransaction.qty500>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="1000 x " rendered="#{cc.attrs.bill.cashTransaction.qty1000>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty1000}" rendered="#{cc.attrs.bill.cashTransaction.qty1000>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty1000>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty1000*1000}" rendered="#{cc.attrs.bill.cashTransaction.qty1000>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value="2000 x " rendered="#{cc.attrs.bill.cashTransaction.qty2000>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty2000}" rendered="#{cc.attrs.bill.cashTransaction.qty2000>0}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty2000>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty2000*2000}"  rendered="#{cc.attrs.bill.cashTransaction.qty2000>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+
+                                            <h:outputLabel value="5000 x " rendered="#{cc.attrs.bill.cashTransaction.qty5000>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty5000}">
+                                                <f:convertNumber pattern="#"/>
+                                            </h:outputLabel>
+                                            <h:outputLabel value=" = " rendered="#{cc.attrs.bill.cashTransaction.qty5000>0}"/>
+                                            <h:outputLabel value="#{cc.attrs.bill.cashTransaction.qty5000*5000}" rendered="#{cc.attrs.bill.cashTransaction.qty5000>0}">
+                                                <f:convertNumber pattern="#,##0.00"/>
+                                            </h:outputLabel>
+                                        </h:panelGrid>
+                                    </p:panel>
+
+
+
+                                    <p:panel styleClass="noBorder summeryBorder">
+                                        <p:dataTable value="#{cc.attrs.bill.billItemsSettle}" var="bi" rendered="#{cc.attrs.bill.billItems.size()>0}"  >
+                                            <f:facet name="header" >
+                                                <p:outputLabel value="Cheque,Credit Card,Credit,Slip &amp; IOU Transations" />
+                                            </f:facet>
+                                            <p:column styleClass="idCol" >
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Name" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.item.name}" />
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Descreption" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.descreption}" />
+                                            </p:column>
+                                            <p:column styleClass="idCol">
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Date" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.fromTime}" >
+                                                    <f:convertDateTime pattern="yy/MM/dd" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                            <p:column styleClass="numberCol">
+                                                <f:facet name="header" >
+                                                    <p:outputLabel value="Value" />
+                                                </f:facet>
+                                                <p:outputLabel value="#{bi.netValue}" >
+                                                    <f:convertNumber pattern="#,##0.00" />
+                                                </p:outputLabel>
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panel>
+                                    
+                                    <p:panel styleClass="noBorder summeryBorder" >
+                                        <table>
+                                            <tr>
+                                                <td><h:outputLabel value="#{cc.attrs.bill.toWebUser.webUserPerson.name}(#{cc.attrs.bill.toWebUser.code})" style="text-decoration: overline;" /></td>
+                                                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                                <td><h:outputLabel value="#{cc.attrs.bill.creater.webUserPerson.name}(#{cc.attrs.bill.creater.code})" style="text-decoration: overline;" /></td>
+                                            </tr>
+                                        </table>
+                                    </p:panel>
+
+
+<!--                                    <p:panel rendered="#{cc.attrs.bill.comments ne null or cc.attrs.bill.comments ne ''}" styleClass="noBorder summeryBorder" >
+    <f:facet name="header">
+        <h:outputLabel value="Comment"/>
+    </f:facet>
+    <h:panelGrid columns="2" style="text-align: right;">
+        <h:outputLabel value="#{cc.attrs.bill.comments}"/>
+    </h:panelGrid>
+</p:panel>-->
+
+                                </div>
+
+
+
+                            </h:panelGroup>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+
+
+    </cc:implementation>
+</html>

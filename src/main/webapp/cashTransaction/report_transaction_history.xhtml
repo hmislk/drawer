@@ -1,0 +1,293 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <body>
+        <ui:composition template="/resources/template/template.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <p:panel>
+                        <f:facet name="header" >
+                            <h:outputLabel value="CASH BILL SEARCH "/>                          
+                            <h:panelGrid columns="2" >
+                                <h:outputLabel value="From Date"/>
+                                <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.fromDate}" 
+                                            navigator="false" pattern="dd MMMM yyyy hh:mm:ss a" />
+                                <h:outputLabel value="To Date"/>
+                                <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.toDate}" 
+                                            navigator="false" pattern="dd MMMM yyyy hh:mm:ss a" />
+                                <h:outputLabel value="Cashier"/>
+                                <p:autoComplete converter="webUs" disabled="#{!webUserController.hasPrivilege('CashTransactionReportChangeUser')}"
+                                                completeMethod="#{webUserController.completeUser}" 
+                                                forceSelection="true"
+                                                var="w" 
+                                                itemLabel="#{w.webUserPerson.name}" 
+                                                itemValue="#{w}"
+                                                value="#{searchController.webUser}" >
+                                </p:autoComplete>
+                                <h:panelGrid columns="3" >
+                                    <p:commandButton id="btnSearch" ajax="false" value="Search" action="#{searchController.createTableCashTransactionHistory()}"/>
+                                    <p:commandButton value="Print" ajax="false" >
+                                        <p:printer target="gpBillPreview" ></p:printer>
+                                    </p:commandButton>
+                                    <p:commandButton value="Excel" ajax="false">
+                                        <pe:exporter type="xlsx" target="tblBills" fileName="Cash Book" />
+                                    </p:commandButton>
+                                </h:panelGrid>
+                            </h:panelGrid>
+                        </f:facet>
+
+                        <p:panel styleClass="noBorder summeryBorder" id="gpBillPreview">
+                            <p:dataTable rowIndexVar="i" id="tblBills" 
+                                         value="#{searchController.cashTransactionHistories}" var="c"  
+                                         style="min-width: 100%;"  >
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column headerText="No" rowspan="2"></p:column>
+                                        <p:column headerText="Transaction Type" rowspan="2"></p:column>
+                                        <p:column headerText="Bill No" rowspan="2"></p:column>
+                                        <p:column headerText="Created At" rowspan="2"></p:column>
+                                        <p:column headerText="Cash" colspan="3"></p:column>
+                                        <p:column headerText="Cheque" colspan="3"></p:column>
+                                        <p:column headerText="Credit Card" colspan="3"></p:column>
+                                        <p:column headerText="Slip" colspan="3"></p:column>
+                                        <p:column headerText="IOU" colspan="3"></p:column>
+                                        <p:column headerText="Credit" colspan="3"></p:column>
+                                        <p:column headerText="Short" colspan="3"></p:column>
+                                        <p:column headerText="Cashier Short" colspan="3"></p:column>
+                                        <p:column headerText="Cashier Excess" colspan="3"></p:column>
+                                        <p:column headerText="Total Transaction Value" rowspan="2"></p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                        <p:column headerText="Bef."></p:column>
+                                        <p:column headerText="Tra."></p:column>
+                                        <p:column headerText="Aft."></p:column>
+                                    </p:row>
+                                </p:columnGroup>
+                                <p:column >
+                                    <h:outputLabel value="#{i+1}"/>
+                                </p:column>
+
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.inOutType.lable}" />
+                                </p:column>                            
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.insId}" />
+                                    <h:outputLabel  value="(#{c.cashTransaction.bill.billedBill.insId})" rendered="#{c.cashTransaction.bill.billedBill ne null}"/>
+                                    <h:outputLabel  value="#{c.cashTransaction.referanceBill.insId}" />
+                                    <h:outputLabel  value="(#{c.cashTransaction.referanceBill.billedBill.insId})" rendered="#{c.cashTransaction.referanceBill.billedBill ne null}"/>
+                                </p:column>                            
+
+                                <p:column style="min-width: 160px">                                
+                                    <h:outputLabel  value="#{c.createdAt}">
+                                        <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                                    </h:outputLabel>
+                                </p:column>     
+
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>                            
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.cashValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>                            
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashBallance+c.cashTransaction.cashValue}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column> 
+
+                                <p:column headerText="Cheque" >                                
+                                    <h:outputLabel  value="#{c.chequeBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column> 
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.chequeValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.chequeValue+c.chequeBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column headerText="Credit Card" >                                
+                                    <h:outputLabel  value="#{c.creditCardBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column> 
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.creditCardValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.creditCardValue+c.creditCardBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column headerText="Slip" >                                
+                                    <h:outputLabel  value="#{c.slipBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>  
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.slipValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.slipValue+c.slipBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column headerText="IOU" >                                
+                                    <h:outputLabel  value="#{c.iouBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>  
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.iouValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.iouValue+c.iouBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column headerText="Credit" >                                
+                                    <h:outputLabel  value="#{c.creditBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>  
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.creditValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.creditValue+c.creditBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column headerText="Short" >                                
+                                    <h:outputLabel  value="#{c.shortBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>   
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.shortValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.shortValue+c.shortBallance}"
+                                                    rendered="#{(c.cashTransaction.shortValue+c.shortBallance) lt 0}"
+                                                    style="float: right;color: red;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                    <h:outputLabel  value="#{c.cashTransaction.shortValue+c.shortBallance}"
+                                                    rendered="#{(c.cashTransaction.shortValue+c.shortBallance) eq 0}"
+                                                    style="float: right;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                    <h:outputLabel  value="#{c.cashTransaction.shortValue+c.shortBallance}"
+                                                    rendered="#{(c.cashTransaction.shortValue+c.shortBallance) gt 0}"
+                                                    style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashierShortBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>  
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.cashierShortValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.cashierShortValue+c.cashierShortBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashierExcessBallance}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>  
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.cashierExcessValue}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.cashierExcessValue+c.cashierExcessBallance}" style="float: right;color: green;">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>
+
+                                <p:column  >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.netTotal}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                    <h:outputLabel  value="#{c.cashTransaction.referanceBill.netTotal}" style="float: right">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputLabel>
+                                </p:column>                            
+
+                            </p:dataTable>
+                        </p:panel>
+
+
+                    </p:panel>
+
+                </h:form>
+            </ui:define>
+
+
+        </ui:composition>
+
+    </body>
+</html>

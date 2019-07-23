@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="content">
+        <h:form>
+            <p:panel >
+                <f:facet name="header">
+                    <h:panelGrid columns="2" >
+                        <h:outputLabel value="From Date"/>
+                        <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm a" >      
+                        </p:calendar>
+                        <h:outputLabel value="To Date"/>
+                        <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm a" >                                                                              
+                        </p:calendar>
+                        <h:outputLabel value="User"/>
+                        <p:autoComplete converter="webUs" 
+                                                        completeMethod="#{webUserController.completeUser}" 
+                                                        forceSelection="true"
+                                                        var="w" 
+                                                        itemLabel="#{w.webUserPerson.name}" 
+                                                        itemValue="#{w}"
+                                                        value="#{searchController.reportKeyWord.user}" />
+                        
+                        <h:outputLabel value="Institution"/>
+                        <p:autoComplete styleClass="noPrintButton"  value="#{searchController.reportKeyWord.institution}" 
+                                        completeMethod="#{institutionController.completeIns}" 
+                                        var="dept" itemValue="#{dept}" itemLabel="#{dept.name}" forceSelection="true" />
+
+                        <h:outputText  value="Department" />
+                        <p:autoComplete value="#{searchController.reportKeyWord.department}" 
+                                        completeMethod="#{departmentController.completeDept}"
+                                        var="dept" itemValue="#{dept}" itemLabel="#{dept.name}"
+                                        forceSelection="true"
+                                        converter="dep">
+                            <p:column headerText="Department">
+                                <h:outputLabel value="#{dept.name}"/>
+                            </p:column>
+                            <p:column headerText="Institution">
+                                <h:outputLabel value="#{dept.institution.name}"/>
+                            </p:column>
+                        </p:autoComplete>
+                        <p:commandButton id="btnSearch" ajax="false" value="Search" action="#{searchController.createCashBook}"/>
+                    </h:panelGrid>
+                </f:facet>
+
+
+
+                <p:dataTable value="#{searchController.billItems}" var="bi" >
+                    <p:column headerText="Bill No">                      
+                        <h:outputLabel value="#{bi.bill.insId}"/>                         
+                    </p:column>
+                    <p:column headerText="Created at"  >
+                        <h:outputLabel value="#{bi.bill.createdAt}" >
+                            <f:convertDateTime pattern="dd MM yyyy hh mm a"/>
+                        </h:outputLabel>
+                        <br/>
+                        <h:panelGroup rendered="#{bi.bill.cancelled}" >
+                            <h:outputLabel style="color: red;" value="Cancelled at " />
+                            <h:outputLabel style="color: red;" rendered="#{bi.bill.cancelled}" 
+                                           value="#{bi.bill.cancelledBill.createdAt}" >
+                                <f:convertDateTime pattern="dd MMM yyyy hh mm a"/>
+                            </h:outputLabel>
+                        </h:panelGroup>
+
+                    </p:column>                 
+                    <p:column headerText="From User" >                      
+                        <h:outputLabel value="#{bi.bill.creater.webUserPerson.name}" >                                      
+                        </h:outputLabel>                          
+                        <br/>
+                        <h:panelGroup rendered="#{bi.bill.cancelled}" >
+                            <h:outputLabel style="color: red;" value="Cancelled By " />
+                            <h:outputLabel style="color: red;" rendered="#{bi.bill.cancelled}" 
+                                           value="#{bi.bill.cancelledBill.creater.webUserPerson.name}" >                                       
+                            </h:outputLabel>
+                        </h:panelGroup>
+                    </p:column> 
+                    <p:column headerText="To User" >                      
+                        <h:outputLabel value="#{bi.bill.toWebUser.webUserPerson.name}" >                                      
+                        </h:outputLabel>                          
+                    </p:column> 
+                    <p:column headerText="Item" >                      
+                        <h:outputLabel value="#{bi.item.name}" >                                      
+                        </h:outputLabel>                          
+                    </p:column> 
+                    <p:column headerText="Department" >                      
+                        <h:outputLabel value="#{bi.item.department.name}" >                                      
+                        </h:outputLabel>                          
+                    </p:column> 
+                    <p:column headerText="Institution" >                      
+                        <h:outputLabel value="#{bi.item.institution.name}" >                                      
+                        </h:outputLabel>                          
+                    </p:column> 
+                    <p:column headerText="Total" >
+                        <h:outputLabel value="#{bi.netValue}" style="float: right;">
+                            <f:convertNumber pattern="#,##0.00" />
+                        </h:outputLabel>
+                    </p:column>
+                    <p:column headerText="Cumilative Total" >
+                        <h:outputLabel value="#{bi.totalGrnQty}" style="float: right;">
+                            <f:convertNumber pattern="#,##0.00" />
+                        </h:outputLabel>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </h:form>
+    </ui:define>  
+
+</ui:composition>

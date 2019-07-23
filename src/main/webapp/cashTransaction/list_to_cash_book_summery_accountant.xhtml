@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ui:define name="content">
+        <h:form>
+            <p:panel >
+                <f:facet name="header">
+                    <h:panelGrid columns="1" >
+                        <h:panelGrid columns="2" >
+                            <h:outputLabel value="From Date"/>
+                            <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a" >      
+                            </p:calendar>
+                            <h:outputLabel value="To Date"/>
+                            <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a" >                                                                              
+                            </p:calendar>
+                            <h:outputLabel value="Detail"/>
+                            <p:selectBooleanCheckbox value="#{searchController.onlyRealized}" />
+                            <h:outputLabel value="Detail"/>
+                            <p:selectOneRadio value="#{searchController.reportKeyWord.string}" >
+                                <f:selectItem itemValue="0" itemLabel="All" />
+                                <f:selectItem itemValue="1" itemLabel="Cashier" />
+                                <f:selectItem itemValue="2" itemLabel="Cashier RPS" />
+                            </p:selectOneRadio>
+                        </h:panelGrid>
+                        <h:panelGrid columns="3" >
+                            <p:commandButton id="btnSearch" ajax="false" value="Search" action="#{searchController.createCashBook3DAccountant()}"/>
+                            <p:commandButton value="Print" ajax="false" >
+                                <p:printer target="gpBillPreview" ></p:printer>
+                            </p:commandButton>
+                            <p:commandButton value="Excel" ajax="false">
+                                <pe:exporter type="xlsx" target="tbl1" fileName="Cash Book" />
+                            </p:commandButton>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </f:facet>
+
+                <p:panel id="gpBillPreview" styleClass="noBorder summeryBorder" >
+                    <p:dataTable id="tbl1" value="#{searchController.cashBookRows}" var="r" rowIndexVar="i">
+                        <f:facet name="header">
+                            <h:outputText value="Cash Book"/><br></br>
+                            <h:outputText value="From - "/>
+                            <h:outputText value="#{searchController.reportKeyWord.fromDate}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                            <h:outputText value=" - To - "/>
+                            <h:outputText value="#{searchController.reportKeyWord.toDate}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </f:facet>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="No"/>
+                            </f:facet>
+                            <h:outputText value="#{i+1}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Bill No"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string1}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="From"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string2}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="To"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string3}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Created At"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string4}" />
+                        </p:column>
+                        <p:column rendered="#{searchController.onlyRealized}">
+                            <f:facet name="header">
+                                <h:outputText value="From Time"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string5}" />
+                        </p:column>
+                        <p:column rendered="#{searchController.onlyRealized}">
+                            <f:facet name="header">
+                                <h:outputText value="To Time"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string6}" />
+                        </p:column>
+                        <p:column rendered="#{searchController.onlyRealized}">
+                            <f:facet name="header">
+                                <h:outputText value="Summery No"/>
+                            </f:facet>
+                            <h:outputText value="#{r.string7}" />
+                        </p:column>
+                        <p:columns value="#{searchController.columnModels}" var="column" styleClass="numberCol">
+                            <f:facet name="header">
+                                <h:outputText value="#{column.header}" />
+                            </f:facet>
+                            <h:outputText value="-" rendered="#{r.totals[column.property] eq 0}" >
+                            </h:outputText>
+                            <h:outputText value="#{r.totals[column.property]}" rendered="#{r.totals[column.property] ne 0}" >
+                                <f:convertNumber pattern="#,##0.00" />
+                            </h:outputText>
+                        </p:columns>
+
+
+                    </p:dataTable>
+                </p:panel>
+
+
+            </p:panel>
+        </h:form>
+    </ui:define>  
+
+</ui:composition>

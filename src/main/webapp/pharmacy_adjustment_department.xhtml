@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ph="http://java.sun.com/jsf/composite/pharmacy">
+
+    <body>
+
+        <ui:composition template="./resources/template/template.xhtml">
+
+            <ui:define name="content">
+
+                <h:form>
+
+                    <h:panelGrid columns="2" styleClass="alignTop">
+
+                        <p:panel header="Department Stock Adjustment : Quantity" rendered="#{!pharmacyAdjustmentController.printPreview}" >
+                            <h:panelGrid columns="3" >
+                                <h:outputLabel value="Item" ></h:outputLabel>
+                                <p:autoComplete   forceSelection="true"  id="acStock" value="#{pharmacyAdjustmentController.item}" 
+                                                  completeMethod="#{ampController.completeAmp}" var="i" itemLabel="#{i.name}" itemValue="#{i}" >
+                                    <p:column headerText="Code">
+                                        <h:outputLabel value="#{i.code}" ></h:outputLabel>
+                                    </p:column>
+                                    <p:column headerText="Item">
+                                        <h:outputLabel value="#{i.name}" ></h:outputLabel>
+                                    </p:column>
+                                </p:autoComplete>
+                                <p:commandButton ajax="false" value="List Batches" action="#{pharmacyAdjustmentController.listStocks}" ></p:commandButton>
+                            </h:panelGrid>
+                            <p:dataTable value="#{pharmacyAdjustmentController.stocks}" var="s" >
+                                <p:column headerText="Name" >
+                                    <h:outputLabel value="#{s.itemBatch.item.name}" ></h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Retail Sale Rate" >
+                                    <h:outputLabel value="#{s.itemBatch.retailsaleRate}" >
+                                        <f:convertNumber pattern="#,##0.00" ></f:convertNumber>
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Purchase Rate">
+                                    <h:outputLabel value="#{s.itemBatch.purcahseRate}" >
+                                        <f:convertNumber pattern="#,##0.00" ></f:convertNumber>
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Stocks">
+                                    <h:outputLabel value="#{s.stock}" >
+                                        <f:convertNumber pattern="#,###" ></f:convertNumber>
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Expiary">
+                                    <h:outputLabel value="#{s.itemBatch.dateOfExpire}" >
+                                        <f:convertDateTime pattern="MMM yyyy" ></f:convertDateTime>
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Select the Batch" >
+                                    <p:commandButton ajax="false" value="To Adjust"  >
+                                        <f:setPropertyActionListener target="#{pharmacyAdjustmentController.stock}" value="#{s}" ></f:setPropertyActionListener>
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+
+
+
+                        </p:panel>
+
+                        <h:panelGrid columns="2" rendered="#{pharmacyAdjustmentController.stock ne null}" >
+                            <h:panelGrid columns="2">
+                                <h:outputLabel value="Current Quentity" ></h:outputLabel>
+                                <h:outputLabel value="#{pharmacyAdjustmentController.stock.stock}" ></h:outputLabel>
+                                <h:outputLabel value="New Quentity" ></h:outputLabel>
+                                <p:inputText value="#{pharmacyAdjustmentController.qty}" ></p:inputText>
+                                <h:outputLabel value="Comment" ></h:outputLabel>
+                                <p:inputTextarea value="#{pharmacyAdjustmentController.comment}" ></p:inputTextarea>
+                                <h:outputLabel value="" ></h:outputLabel>
+                                <p:commandButton id="btnAdjust" value="Make Adjustment" ajax="false" 
+                                                 action="#{pharmacyAdjustmentController.adjustDepartmentStock()}" ></p:commandButton>
+                                <p:defaultCommand target="btnAdjust"/>
+                            </h:panelGrid>
+
+                        </h:panelGrid>
+
+                    </h:panelGrid>
+                </h:form>
+
+            </ui:define>
+
+
+        </ui:composition>
+
+    </body>
+</html>

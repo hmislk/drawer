@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+    <body>
+
+        <ui:composition template="/resources/template/template.xhtml">
+
+            <ui:define name="content">
+                <h:form>
+                    <h:panelGrid columns="2">
+                        <p:panel header="Reports">
+                            <h:panelGrid columns="1">
+                                <p:commandButton value="List User Drawer Ballance"   action="view_user_drawers"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportDrawer')}" />   
+                                <!--<p:commandButton value="List Drawer User Ballance"   action="view_drawer_users"  ajax="false" />-->   
+                                <p:commandButton value="History"   action="report_transaction_history"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportHistory')}" />   
+                                <p:commandButton value="Cash Not Recive List"   action="list_to_cash_not_recieve"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashNotReceive')}" />   
+                                <!--<p:commandButton value="Cash Book"   action="list_to_cash_book"  ajax="false" />-->   
+                            </h:panelGrid>
+                        </p:panel> 
+                        <p:panel header="Summery" >
+                            <p:commandButton value="Cash Book 3D"   action="list_to_cash_book_summery_accountant"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                        </p:panel>
+                    </h:panelGrid>  
+
+                </h:form>
+            </ui:define>
+
+
+        </ui:composition>
+
+    </body>
+</html>

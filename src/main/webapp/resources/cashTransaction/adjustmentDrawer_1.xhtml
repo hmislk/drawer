@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="http://java.sun.com/jsf/composite"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <!-- INTERFACE -->
+    <cc:interface>
+        <cc:attribute name="bill" />
+        <cc:attribute name="str" />
+        <cc:attribute name="dup" />
+    </cc:interface>
+
+    <!-- IMPLEMENTATION -->
+    <cc:implementation>
+        <h:outputStylesheet library="css" name="printing_1.css"/>
+        <div class="fiveinchbillBreakRuhunu" >
+
+
+            <div class="header">
+                <h:outputLabel value="Adjustment Note : " />  
+                <h:outputLabel value=" #{cc.attrs.str}" />  
+            </div>
+            <div class="cel1R1L" >                                                  
+                <h:outputLabel value="Bill No" />  
+            </div>
+            <div class="cel1R1C" >                                                  
+                <h:outputLabel value="" />  
+            </div>
+            <div class="cel1R1V" >                                                  
+                <h:outputLabel value="#{cc.attrs.bill.insId}" />  
+                <h:outputLabel value="  **Duplicate" rendered="#{cc.attrs.dup eq true}" />
+            </div>
+
+            <div class="cel1R2L" >                                                  
+                <h:outputLabel value="Adjusted At" />  
+            </div>
+            <div class="cel1R2C" >                                                  
+                <h:outputLabel value="" />  
+            </div>
+            <div class="cel1R2V">                       
+                <h:outputLabel value="#{cc.attrs.bill.createdAt}" >
+                    <f:convertDateTime pattern="YYYY MM dd hh:mm:ss a"/>
+                </h:outputLabel>
+            </div>
+
+            <div class="cel1R3L" >                                                  
+                <h:outputLabel value="Adjusted By" />  
+            </div>
+            <div class="cel1R3C" >                                                  
+                <h:outputLabel value="" />  
+            </div>
+            <div class="cel1R3V">                       
+                <h:outputLabel value="#{cc.attrs.bill.creater.webUserPerson.name} (#{cc.attrs.bill.creater.code})" >
+                    <f:convertDateTime pattern="YYYY MM dd hh:mm:ss a"/>
+                </h:outputLabel>
+            </div>
+
+            <div class="cel1R4L" >                                                  
+                <h:outputLabel value="Department" rendered="#{cc.attrs.bill.toDepartment ne null}" />  
+            </div>
+            <div class="cel1R4C" >                                                  
+                <h:outputLabel value="" rendered="#{cc.attrs.bill.toDepartment ne null}" />  
+            </div>
+            <div class="cel1R4V">                       
+                <h:outputLabel value="#{cc.attrs.bill.toDepartment.name}" rendered="#{cc.attrs.bill.toDepartment ne null}" />
+            </div>
+
+            <div class="items2"  >
+                <div>
+                    <h:panelGrid columns="2" rendered="#{cc.attrs.bill.toDepartment ne null}">
+                        <h:outputLabel value="Before Balance "/>
+                        <h:outputLabel value="#{cc.attrs.bill.billItems.get(0).cashTransactionHistory.beforeBalance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Trans Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.billItems.get(0).cashTransactionHistory.transactionValue}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="After Balance "/>
+                        <h:outputLabel value="#{cc.attrs.bill.billItems.get(0).cashTransactionHistory.transactionValue+cc.attrs.bill.billItems.get(0).cashTransactionHistory.beforeBalance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                    </h:panelGrid>
+                </div>
+                <div >
+                    <h:panelGrid columns="2" style="min-width: 100%;" rendered="#{cc.attrs.bill.toDepartment ne null}">
+                        <h:outputLabel value="Comment" ></h:outputLabel>
+                        <h:outputLabel value="#{cc.attrs.bill.comments}" >
+                        </h:outputLabel>
+                    </h:panelGrid>
+                </div>
+            </div>
+
+            <div class="items2" >
+                <div >
+                    <h:panelGrid columns="2" rendered="#{cc.attrs.bill.toDepartment eq null}">
+                        <f:facet name="header">
+                            <h:outputLabel value="Before Adjustment"/>
+                        </f:facet>
+                        <h:outputLabel value="Cash Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.cashBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Credit Card Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.creditCardBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Cheque Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.chequeBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Slip Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.slipBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Credit Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.creditBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="IOU Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.iouBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Short/Exess Value"/>                                
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashTransactionHistory.shortBallance}" >
+                            <f:convertNumber pattern="#,##0.00"/> 
+                        </h:outputLabel>
+                    </h:panelGrid>
+
+                    <h:panelGrid columns="2" rendered="#{cc.attrs.bill.toDepartment eq null}">
+                        <f:facet name="header">
+                            <h:outputLabel value="After Adjustment"/>
+                        </f:facet>
+                        <h:outputLabel value="Cash Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.cashValue+cc.attrs.bill.cashTransaction.cashTransactionHistory.cashBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Credit Card Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.creditCardValue+cc.attrs.bill.cashTransaction.cashTransactionHistory.creditCardBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Cheque Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.chequeValue+cc.attrs.bill.cashTransaction.cashTransactionHistory.chequeBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Slip Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.slipValue+cc.attrs.bill.cashTransaction.cashTransactionHistory.slipBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Credit Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.creditValue+cc.attrs.bill.cashTransaction.cashTransactionHistory.creditBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="IOU Value "/>
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.iouValue+cc.attrs.bill.cashTransaction.cashTransactionHistory.iouBallance}"
+                                       style="float: right;">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="Short/Exess Value"/>                                
+                        <h:outputLabel value="#{cc.attrs.bill.cashTransaction.shortValue +cc.attrs.bill.cashTransaction.cashTransactionHistory.shortBallance}" >
+                            <f:convertNumber pattern="#,##0.00"/> 
+                        </h:outputLabel>
+                    </h:panelGrid>
+                </div>
+                <div >
+                    <h:panelGrid columns="2" style="min-width: 100%;" rendered="#{cc.attrs.bill.toDepartment eq null}">
+                        <h:outputLabel value="Comment" ></h:outputLabel>
+                        <h:outputLabel value="#{cc.attrs.bill.comments}" >
+                        </h:outputLabel>
+                    </h:panelGrid>
+                </div>
+            </div>
+
+
+        </div>
+    </cc:implementation>
+</html>
