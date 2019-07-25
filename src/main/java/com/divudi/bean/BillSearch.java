@@ -1026,7 +1026,7 @@ public class BillSearch implements Serializable {
                     cb.setReferanceCashTransaction(tmp);
                     getBillFacade().edit(cb);
 
-                    getCashTransactionBean().deductFromBallance(getSessionController().getLoggedUser().getDrawer(), tmp);
+                    getCashTransactionBean().deductFromBallanceCashOutCancel(getSessionController().getLoggedUser().getDrawer(), tmp);
                 }
                 //---Cancel Cash Transactions----
 

@@ -90,7 +90,7 @@ public class DrawerAdjustmentController implements Serializable {
         value = null;
         adjustmentBill = null;
         department = null;
-        webUser=null;
+        webUser = null;
     }
 
     private void saveAdjustmentBill() {
@@ -106,7 +106,7 @@ public class DrawerAdjustmentController implements Serializable {
         getAdjustmentBill().setFromInstitution(getSessionController().getLoggedUser().getDepartment().getInstitution());
         getAdjustmentBill().setComments(comment);
         //creater link in to history of drawer approved user use as a creater
-        getAdjustmentBill().setApproveUser(getSessionController().getLoggedUser());
+        getAdjustmentBill().setApproveUser(getWebUser());
         getAdjustmentBill().setApproveAt(new Date());
         if (getAdjustmentBill().getId() == null) {
             getBillFacade().create(getAdjustmentBill());
@@ -194,7 +194,6 @@ public class DrawerAdjustmentController implements Serializable {
 //            cashTransaction.setIouValue(getSessionController().getLoggedUser().getDrawer().getIouBallance());
 //            cashTransaction.setShortValue(getSessionController().getLoggedUser().getDrawer().getShortBallance());
 //        }
-
         if (difference < 0) {
             //  //System.err.println("Adding");
             if (paymentMethod != null) {
@@ -438,8 +437,8 @@ public class DrawerAdjustmentController implements Serializable {
     }
 
     public WebUser getWebUser() {
-        if (webUser==null) {
-            webUser=new WebUser();
+        if (webUser == null) {
+            webUser = new WebUser();
         }
         return webUser;
     }

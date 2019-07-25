@@ -211,7 +211,7 @@ public class CashTransaction implements Serializable {
             slipValue = 0 - cashTransaction.getSlipValue();
         }
         if (cashTransaction.getCreditValue() != null) {
-            creditValue = 0 - cashTransaction.getSlipValue();
+            creditValue = 0 - cashTransaction.getCreditValue();
         }
         if (cashTransaction.getIouValue() != null) {
             iouValue = 0 - cashTransaction.getIouValue();

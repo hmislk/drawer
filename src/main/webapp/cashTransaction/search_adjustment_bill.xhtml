@@ -33,10 +33,7 @@
 
 
 
-                        <p:dataTable rowIndexVar="i" id="tblBills" value="#{searchController.bills}" var="pi" paginator="true" paginatorAlwaysVisible="true"
-                                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-                                 rowsPerPageTemplate="10,30,50"
-                                 rows="50">
+                        <p:dataTable rowIndexVar="i" id="tblBills" value="#{searchController.bills}" var="pi">
                             <p:column headerText="No" styleClass="alignTop">
                                 <h:outputLabel value="#{i+1}"/>
                             </p:column>
@@ -52,11 +49,16 @@
                             <p:column headerText="Department" styleClass="alignTop"  >
                                 <h:outputLabel value="#{pi.toDepartment.name}"/>
                             </p:column>
+                            <p:column headerText="Adjused By" styleClass="alignTop"  >
+                                <h:outputLabel value="#{pi.approveUser.webUserPerson.name}"/>
+                            </p:column>
+                            <p:column headerText="User" styleClass="alignTop"  >
+                                <h:outputLabel value="#{pi.creater.webUserPerson.name}"/>
+                            </p:column>
                           
                             <p:column headerText="Billed At"  >
-                                <h:outputLabel value="Billed at " />
                                 <h:outputLabel value="#{pi.createdAt}" >
-                                    <f:convertDateTime pattern="dd MM yy hh mm a"/>
+                                    <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a"/>
                                 </h:outputLabel>                               
                             </p:column>     
 

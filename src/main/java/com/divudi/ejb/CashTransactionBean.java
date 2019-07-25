@@ -729,7 +729,10 @@ public class CashTransactionBean {
         Drawer fetchedDrw = getDrawerFacade().find(drawer.getId());
 
         if (cashTransaction.getCashValue() != null) {
+            System.out.println("fetchedDrw.getRunningBallance() = " + fetchedDrw.getRunningBallance());
+            System.out.println("cashTransaction.getCashValue() = " + cashTransaction.getCashValue());
             fetchedDrw.setRunningBallance(fetchedDrw.getRunningBallance() + Math.abs(cashTransaction.getCashValue()));
+            System.out.println("fetchedDrw.getRunningBallance() = " + fetchedDrw.getRunningBallance());
         }
         if (cashTransaction.getChequeValue() != null) {
             fetchedDrw.setChequeBallance(fetchedDrw.getChequeBallance() + Math.abs(cashTransaction.getChequeValue()));
@@ -822,7 +825,9 @@ public class CashTransactionBean {
         Drawer fetchedDrw = getDrawerFacade().find(drawer.getId());
 
         if (cashTransaction.getCashValue() != null) {
+            System.out.println("fetchedDrw.getRunningBallance() = " + fetchedDrw.getRunningBallance());
             fetchedDrw.setRunningBallance(fetchedDrw.getRunningBallance() - Math.abs(cashTransaction.getCashValue()));
+            System.out.println("fetchedDrw.getRunningBallance() = " + fetchedDrw.getRunningBallance());
         }
         if (cashTransaction.getChequeValue() != null) {
             fetchedDrw.setChequeBallance(fetchedDrw.getChequeBallance() - Math.abs(cashTransaction.getChequeValue()));
@@ -838,6 +843,54 @@ public class CashTransactionBean {
         }
         if (cashTransaction.getIouValue() != null) {
             fetchedDrw.setIouBallance(fetchedDrw.getIouBallance() - Math.abs(cashTransaction.getIouValue()));
+        }
+        if (cashTransaction.getShortValue() != null) {
+            fetchedDrw.setShortBallance(fetchedDrw.getShortBallance() + cashTransaction.getShortValue());
+        }
+//        if (cashTransaction.getCashierShortValue() != null) {
+//            fetchedDrw.setCashierShortBallance(fetchedDrw.getCashierShortBallance() - Math.abs(cashTransaction.getCashierShortValue()));
+//        }
+//        if (cashTransaction.getCashierExcessValue() != null) {
+//            fetchedDrw.setCashierExcessBallance(fetchedDrw.getCashierExcessBallance() - Math.abs(cashTransaction.getCashierExcessValue()));
+//        }
+
+        getDrawerFacade().edit(fetchedDrw);
+
+        return true;
+    }
+
+    public boolean deductFromBallanceCashOutCancel(Drawer drawer, CashTransaction cashTransaction) {
+        if (drawer == null) {
+            return false;
+        }
+
+        if (drawer.getId() == null) {
+            return false;
+        }
+
+        deductFromTransactionHistory(cashTransaction, drawer);
+
+        Drawer fetchedDrw = getDrawerFacade().find(drawer.getId());
+
+        if (cashTransaction.getCashValue() != null) {
+            System.out.println("fetchedDrw.getRunningBallance() = " + fetchedDrw.getRunningBallance());
+            fetchedDrw.setRunningBallance(fetchedDrw.getRunningBallance() + cashTransaction.getCashValue());
+            System.out.println("fetchedDrw.getRunningBallance() = " + fetchedDrw.getRunningBallance());
+        }
+        if (cashTransaction.getChequeValue() != null) {
+            fetchedDrw.setChequeBallance(fetchedDrw.getChequeBallance() + cashTransaction.getChequeValue());
+        }
+        if (cashTransaction.getCreditCardValue() != null) {
+            fetchedDrw.setCreditCardBallance(fetchedDrw.getCreditCardBallance() + cashTransaction.getCreditCardValue());
+        }
+        if (cashTransaction.getSlipValue() != null) {
+            fetchedDrw.setSlipBallance(fetchedDrw.getSlipBallance() + cashTransaction.getSlipValue());
+        }
+        if (cashTransaction.getCreditValue() != null) {
+            fetchedDrw.setCreditBallance(fetchedDrw.getCreditBallance() + cashTransaction.getCreditValue());
+        }
+        if (cashTransaction.getIouValue() != null) {
+            fetchedDrw.setIouBallance(fetchedDrw.getIouBallance() + cashTransaction.getIouValue());
         }
         if (cashTransaction.getShortValue() != null) {
             fetchedDrw.setShortBallance(fetchedDrw.getShortBallance() + cashTransaction.getShortValue());

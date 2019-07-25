@@ -21,7 +21,23 @@
                     <p:panel header="Drawer Adjustment Cheque" 
                              rendered="#{!drawerAdjustmentController.printPreview}">
                         <h:panelGrid columns="2" >
-                            <h:panelGrid columns="2">                                
+                            <h:panelGrid columns="2">
+                                <h:outputLabel value="User"/>
+                                <p:autoComplete converter="webUs"  
+                                                completeMethod="#{webUserController.completeUser}" 
+                                                forceSelection="true"
+                                                var="w" 
+                                                itemLabel="#{w.webUserPerson.name}" 
+                                                itemValue="#{w}"
+                                                value="#{drawerAdjustmentController.webUser}" >
+                                    <p:column headerText="Name">
+                                        <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Code">
+                                        <h:outputLabel value="#{w.code}"/>
+                                    </p:column>
+                                    <f:ajax event="itemSelect" execute="@this" render=":#{p:component('det')}" />
+                                </p:autoComplete>
                                 <h:outputLabel value="New Cheque Value"/>
                                 <p:inputText value="#{drawerAdjustmentController.value}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
@@ -41,36 +57,35 @@
                                 </f:facet>
 
                                 <h:outputLabel value="Drawer Name"/>
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.name}" />
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.name}" />
                                 <h:outputLabel value="Cash Vale"/>
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.runningBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.runningBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
                                 <h:outputLabel value="Cheque Value"/>
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.chequeBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.chequeBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
                                 <h:outputLabel value="Slip Value"/>                                
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.slipBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.slipBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
                                 <h:outputLabel value="Credit Card Value"/>                                
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.creditCardBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.creditCardBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
                                 <h:outputLabel value="Credit Value"/>                                
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.creditBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.creditBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
                                 <h:outputLabel value="IOU Value"/>                                
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.iouBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.iouBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
                                 <h:outputLabel value="Short/Exess Value"/>                                
-                                <h:outputLabel value="#{sessionController.loggedUser.drawer.shortBallance}" >
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.shortBallance}" >
                                     <f:convertNumber pattern="#,##0.00"/> 
                                 </h:outputLabel>
-
                             </h:panelGrid>
                         </h:panelGrid>
                     </p:panel>

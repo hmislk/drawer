@@ -77,12 +77,12 @@
                                     </h:panelGrid>
                                 </p:panel>
                                 <p:panel header="Summery Add" >
-                                    <p:panelGrid columns="2">
+                                    <h:panelGrid columns="2">
 
                                         <h:outputLabel value="Summery"/>                        
                                         <p:autoComplete id="lstSelect1"  size="10" value="#{summeryController.currentBillItem.item}" 
                                                         forceSelection="true"
-                                                        style="min-width: 223px" 
+                                                        style="min-width: 223px" disabled="#{summeryController.currentBillItem.id ne null}"
                                                         completeMethod="#{summeryController.completeSummery}" 
                                                         var="myItem" itemValue="#{myItem}" itemLabel="#{myItem.name}" >
                                             <p:column headerText="Item">
@@ -109,10 +109,10 @@
 
                                         <h:outputLabel value="Add"/> 
                                         <p:commandButton ajax="false" value="Add Summery" action="#{summeryController.addSummery()}"/>
-                                    </p:panelGrid>
+                                    </h:panelGrid>
                                 </p:panel>
                                 <p:panel header="Cheque,Credit Card,Credit,Slip &amp; IOU Add" >
-                                    <p:panelGrid columns="2">
+                                    <h:panelGrid columns="2">
 
                                         <h:outputLabel value="Item"/>
                                         <p:selectOneMenu value="#{summeryController.currentSetlleBillItem.item}"  >
@@ -132,7 +132,7 @@
 
                                         <h:outputLabel value="Add"/> 
                                         <p:commandButton ajax="false" value="Add Item" action="#{summeryController.addSettleItem()}"/>
-                                    </p:panelGrid>
+                                    </h:panelGrid>
                                 </p:panel>
 
                             </h:panelGrid>
@@ -140,7 +140,7 @@
                         <p:panel>
                             <h:panelGrid columns="2">
                                 <h:panelGrid columns="1">
-                                    <p:panel>
+                                    <p:panel styleClass="noBorder summeryBorder">
                                         <f:facet name="header">
                                             <h:outputLabel value="Pending Tranactions"/>
                                         </f:facet>
@@ -405,8 +405,7 @@
                             <p:panel styleClass="noBorder summeryBorder90width">
                                 <p:dataTable value="#{summeryController.billItemsSettle}" var="bi" 
                                              selection="#{summeryController.selectedBillItemsSettle}"
-                                             rowIndexVar="i" scrollable="true" 
-                                             scrollHeight="150" rowKey="#{bi.id}"  >
+                                             rowIndexVar="i" rowKey="#{bi.id}"  >
                                     <f:facet name="header">
                                         <p:outputLabel value="Cheque,Credit Card,Credit,Slip &amp; IOU Transations" />
                                     </f:facet>
