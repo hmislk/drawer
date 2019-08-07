@@ -51,6 +51,8 @@
                                         <p:column headerText="No" rowspan="2"></p:column>
                                         <p:column headerText="Transaction Type" rowspan="2"></p:column>
                                         <p:column headerText="Bill No" rowspan="2"></p:column>
+                                        <p:column headerText="From" rowspan="2"></p:column>
+                                        <p:column headerText="To" rowspan="2"></p:column>
                                         <p:column headerText="Created At" rowspan="2"></p:column>
                                         <p:column headerText="Cash" colspan="3"></p:column>
                                         <p:column headerText="Cheque" colspan="3"></p:column>
@@ -59,17 +61,9 @@
                                         <p:column headerText="IOU" colspan="3"></p:column>
                                         <p:column headerText="Credit" colspan="3"></p:column>
                                         <p:column headerText="Short" colspan="3"></p:column>
-                                        <p:column headerText="Cashier Short" colspan="3"></p:column>
-                                        <p:column headerText="Cashier Excess" colspan="3"></p:column>
                                         <p:column headerText="Total Transaction Value" rowspan="2"></p:column>
                                     </p:row>
                                     <p:row>
-                                        <p:column headerText="Bef."></p:column>
-                                        <p:column headerText="Tra."></p:column>
-                                        <p:column headerText="Aft."></p:column>
-                                        <p:column headerText="Bef."></p:column>
-                                        <p:column headerText="Tra."></p:column>
-                                        <p:column headerText="Aft."></p:column>
                                         <p:column headerText="Bef."></p:column>
                                         <p:column headerText="Tra."></p:column>
                                         <p:column headerText="Aft."></p:column>
@@ -105,6 +99,16 @@
                                     <h:outputLabel  value="(#{c.cashTransaction.bill.billedBill.insId})" rendered="#{c.cashTransaction.bill.billedBill ne null}"/>
                                     <h:outputLabel  value="#{c.cashTransaction.referanceBill.insId}" />
                                     <h:outputLabel  value="(#{c.cashTransaction.referanceBill.billedBill.insId})" rendered="#{c.cashTransaction.referanceBill.billedBill ne null}"/>
+                                </p:column>                            
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.fromWebUser.webUserPerson.name}" />
+                                    <h:outputLabel  value="#{c.cashTransaction.referanceBill.fromWebUser.webUserPerson.name}" />
+                                </p:column>                            
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.toWebUser.webUserPerson.name}" />
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.toInstitution.name}" />
+                                    <h:outputLabel  value=" / #{c.cashTransaction.bill.fromDepartment.name}" rendered="#{c.cashTransaction.bill.fromDepartment ne null}"/>
+                                    
                                 </p:column>                            
 
                                 <p:column style="min-width: 160px">                                
@@ -233,37 +237,6 @@
                                     <h:outputLabel  value="#{c.cashTransaction.shortValue+c.shortBallance}"
                                                     rendered="#{(c.cashTransaction.shortValue+c.shortBallance) gt 0}"
                                                     style="float: right;color: green;">
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </h:outputLabel>
-                                </p:column>
-
-                                <p:column >                                
-                                    <h:outputLabel  value="#{c.cashierShortBallance}" style="float: right">
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </h:outputLabel>
-                                </p:column>  
-                                <p:column >                                
-                                    <h:outputLabel  value="#{c.cashTransaction.cashierShortValue}" style="float: right">
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </h:outputLabel>
-                                </p:column>
-                                <p:column >                                
-                                    <h:outputLabel  value="#{c.cashTransaction.cashierShortValue+c.cashierShortBallance}" style="float: right;color: green;">
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </h:outputLabel>
-                                </p:column>
-                                <p:column >                                
-                                    <h:outputLabel  value="#{c.cashierExcessBallance}" style="float: right">
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </h:outputLabel>
-                                </p:column>  
-                                <p:column >                                
-                                    <h:outputLabel  value="#{c.cashTransaction.cashierExcessValue}" style="float: right">
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </h:outputLabel>
-                                </p:column>
-                                <p:column >                                
-                                    <h:outputLabel  value="#{c.cashTransaction.cashierExcessValue+c.cashierExcessBallance}" style="float: right;color: green;">
                                         <f:convertNumber pattern="#,##0.00" />
                                     </h:outputLabel>
                                 </p:column>

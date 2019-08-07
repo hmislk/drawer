@@ -77,7 +77,7 @@ public class CashTransactionHistory implements Serializable {
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date retiredAt;
     private String retireComments;
-
+    
     public Long getId() {
         return id;
     }

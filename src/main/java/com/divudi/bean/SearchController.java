@@ -40,6 +40,7 @@ import com.divudi.entity.CancelledBill;
 import com.divudi.entity.Department;
 import com.divudi.entity.Summery;
 import com.divudi.entity.WebUser;
+import com.divudi.entity.cashTransaction.CashTransaction;
 import com.divudi.entity.cashTransaction.CashTransactionHistory;
 import com.divudi.facade.CashTransactionHistoryFacade;
 import com.divudi.facade.util.JsfUtil;
@@ -2532,6 +2533,44 @@ public class SearchController implements Serializable {
         temMap.put("td", getToDate());
 
         cashTransactionHistories = getCashTransactionHistoryFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
+        System.out.println("cashTransactionHistories.size() = " + cashTransactionHistories.size());
+        double tot = 0.0;
+        if (cashTransactionHistories.size() > 0) {
+            List<CashTransactionHistory> historys = new ArrayList<>();
+            CashTransactionHistory open = new CashTransactionHistory();
+            CashTransactionHistory close = new CashTransactionHistory();
+            open.setCashTransaction(new CashTransaction());
+            close.setCashTransaction(new CashTransaction());
+            open.getCashTransaction().setCashValue(cashTransactionHistories.get(0).getCashBallance());
+            open.getCashTransaction().setChequeValue(cashTransactionHistories.get(0).getChequeBallance());
+            open.getCashTransaction().setCreditCardValue(cashTransactionHistories.get(0).getCreditCardBallance());
+            open.getCashTransaction().setCreditValue(cashTransactionHistories.get(0).getCreditBallance());
+            open.getCashTransaction().setSlipValue(cashTransactionHistories.get(0).getSlipBallance());
+            open.getCashTransaction().setIouValue(cashTransactionHistories.get(0).getIouBallance());
+            open.getCashTransaction().setShortValue(cashTransactionHistories.get(0).getShortBallance());
+            historys.add(open);
+            historys.addAll(cashTransactionHistories);
+            for (CashTransactionHistory cth : historys) {
+                cth.getCashTransaction().setTotal(cth.getCashTransaction().getCashValue()
+                        + cth.getCashTransaction().getChequeValue() + cth.getCashTransaction().getIouValue()
+                        + cth.getCashTransaction().getCreditCardValue() + cth.getCashTransaction().getCreditValue()
+                        + cth.getCashTransaction().getSlipValue() + cth.getCashTransaction().getShortValue());
+                tot += cth.getCashTransaction().getTotal();
+                cth.getCashTransaction().setTotalCumilative(tot);
+
+                close.getCashTransaction().setCashValue(close.getCashTransaction().getCashValue() + cth.getCashTransaction().getCashValue());
+                close.getCashTransaction().setChequeValue(close.getCashTransaction().getChequeValue() + cth.getCashTransaction().getChequeValue());
+                close.getCashTransaction().setCreditCardValue(close.getCashTransaction().getCreditCardValue() + cth.getCashTransaction().getCreditCardValue());
+                close.getCashTransaction().setCreditValue(close.getCashTransaction().getCreditValue() + cth.getCashTransaction().getCreditValue());
+                close.getCashTransaction().setSlipValue(close.getCashTransaction().getSlipValue() + cth.getCashTransaction().getSlipValue());
+                close.getCashTransaction().setIouValue(close.getCashTransaction().getIouValue() + cth.getCashTransaction().getIouValue());
+                close.getCashTransaction().setShortValue(close.getCashTransaction().getShortValue() + cth.getCashTransaction().getShortValue());
+                close.getCashTransaction().setTotal(close.getCashTransaction().getTotal() + cth.getCashTransaction().getTotal());
+            }
+            cashTransactionHistories = new ArrayList<>();
+            cashTransactionHistories.addAll(historys);
+            cashTransactionHistories.add(close);
+        }
 
         System.out.println("cashTransactionHistories.size() = " + cashTransactionHistories.size());
     }
@@ -3737,7 +3776,18 @@ public class SearchController implements Serializable {
                         row.setString3(b.getToWebUser().getWebUserPerson().getName());
                     }
                     if (b.getToInstitution() != null) {
-                        row.setString3(b.getToInstitution().getName());
+                        if (row.getString3() != null && row.getString3().length() > 0) {
+                            row.setString3(row.getString3() + " / " + b.getToInstitution().getName());
+                        } else {
+                            row.setString3(b.getToInstitution().getName());
+                        }
+                    }
+                    if (b.getFromDepartment() != null) {
+                        if (row.getString3() != null && row.getString3().length() > 0) {
+                            row.setString3(row.getString3() + " / " + b.getFromDepartment().getName());
+                        } else {
+                            row.setString3(b.getFromDepartment().getName());
+                        }
                     }
                     if (b.getCreatedAt() != null) {
                         row.setString4(format.format(b.getCreatedAt()));
@@ -3763,9 +3813,20 @@ public class SearchController implements Serializable {
                 if (b.getToWebUser() != null) {
                     row.setString3(b.getToWebUser().getWebUserPerson().getName());
                 }
-//                if (b.getToInstitution() != null) {
-//                    row.setString3(b.getToInstitution().getName());
-//                }
+                if (b.getToInstitution() != null) {
+                    if (row.getString3() != null && row.getString3().length() > 0) {
+                        row.setString3(row.getString3() + " / " + b.getToInstitution().getName());
+                    } else {
+                        row.setString3(b.getToInstitution().getName());
+                    }
+                }
+                if (b.getFromDepartment() != null) {
+                    if (row.getString3() != null && row.getString3().length() > 0) {
+                        row.setString3(row.getString3() + " / " + b.getFromDepartment().getName());
+                    } else {
+                        row.setString3(b.getFromDepartment().getName());
+                    }
+                }
                 if (b.getCreatedAt() != null) {
                     row.setString4(format.format(b.getCreatedAt()));
                 }
@@ -3808,7 +3869,7 @@ public class SearchController implements Serializable {
 
         m.put("toDate", getReportKeyWord().getToDate());
         m.put("fromDate", getReportKeyWord().getFromDate());
-        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver,BillType.DrawerAdjustment,}));
+        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver, BillType.DrawerAdjustment,}));
 //        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.CashSettle,
 //            BillType.CreditCardSettle,
 //            BillType.ChequeSettle,
@@ -3902,7 +3963,7 @@ public class SearchController implements Serializable {
         m.put("dep", dep);
 //        m.put("toDate", getReportKeyWord().getToDate());
 //        m.put("fromDate", getReportKeyWord().getFromDate());
-        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver,BillType.DrawerAdjustment,}));
+        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver, BillType.DrawerAdjustment,}));
 //        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.CashSettle,
 //            BillType.CreditCardSettle,
 //            BillType.ChequeSettle,
@@ -4072,7 +4133,7 @@ public class SearchController implements Serializable {
         m.put("fromDate", getReportKeyWord().getFromDate());
 //        m.put("type", Summery.class);
         m.put("dep", dep);
-        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver,BillType.DrawerAdjustment,}));
+        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver, BillType.DrawerAdjustment,}));
 //        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.CashSettle,
 //            BillType.CreditCardSettle,
 //            BillType.ChequeSettle,
@@ -4105,7 +4166,7 @@ public class SearchController implements Serializable {
             sql += " order by cth.id desc ";
             m.put("dep", dep);
 //            m.put("type", Summery.class);
-            m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver,BillType.DrawerAdjustment,}));
+            m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver, BillType.DrawerAdjustment,}));
             m.put("fromDate", getReportKeyWord().getFromDate());
             cth = getCashTransactionHistoryFacade().findFirstBySQL(sql, m, TemporalType.TIMESTAMP);
 //            System.out.println("+++cth = " + cth);
@@ -4210,7 +4271,7 @@ public class SearchController implements Serializable {
                 + " and bi.bill.id=:id ";
 
         m.put("id", id);
-        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver,BillType.DrawerAdjustment,}));
+        m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.HandOver, BillType.DrawerAdjustment,}));
 //        System.out.println("+++++++++m = " + m);
 //        System.out.println("+++++++++sql = " + sql);
         items = getBillItemFacade().findBySQL(sql, m);

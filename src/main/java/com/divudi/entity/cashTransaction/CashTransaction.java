@@ -19,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
 
 /**
  *
@@ -81,6 +82,11 @@ public class CashTransaction implements Serializable {
 
     @OneToOne(mappedBy = "referanceCashTransaction")
     private Bill referanceBill;
+    
+    @Transient
+    private double total;
+    @Transient
+    private double totalCumilative;
     
     public Double getCashValue() {
         if (cashValue==null) {
@@ -526,6 +532,22 @@ public class CashTransaction implements Serializable {
 
     public void setCashierExcessValue(Double cashierExcessValue) {
         this.cashierExcessValue = cashierExcessValue;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public double getTotalCumilative() {
+        return totalCumilative;
+    }
+
+    public void setTotalCumilative(double totalCumilative) {
+        this.totalCumilative = totalCumilative;
     }
 
 }

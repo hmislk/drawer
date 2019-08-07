@@ -17,6 +17,7 @@
                                 <p:commandButton value="List User Drawer Ballance"   action="view_user_drawers"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportDrawer')}" />   
                                 <!--<p:commandButton value="List Drawer User Ballance"   action="view_drawer_users"  ajax="false" />-->   
                                 <p:commandButton value="History"   action="report_transaction_history"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportHistory')}" />   
+                                <p:commandButton value="History Print"   action="report_transaction_history_print"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportHistory')}" />   
                                 <p:commandButton value="Cash Not Recive List"   action="list_to_cash_not_recieve"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashNotReceive')}" />   
                                 <!--<p:commandButton value="Cash Book"   action="list_to_cash_book"  ajax="false" />-->   
                             </h:panelGrid>
