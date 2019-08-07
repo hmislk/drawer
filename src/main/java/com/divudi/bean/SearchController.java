@@ -2915,10 +2915,12 @@ public class SearchController implements Serializable {
     public void createTableHandOverApprove() {
         String s = "";
         if (getSearchKeyword().getString().equals("1")) {
-            s = " and b.approveUser is not null ";
+            s = " and b.approveUser is not null "
+                    + " and b.cancelled=false ";
         }
         if (getSearchKeyword().getString().equals("2")) {
-            s = " and b.approveUser is null ";
+            s = " and b.approveUser is null "
+                    + " and b.cancelled=false ";
         }
 //        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
         bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s);

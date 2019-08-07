@@ -935,7 +935,7 @@ public class BillSearch implements Serializable {
     }
 
     public void cancelCashInBill() {
-        if (comment==null || comment.equals(" ")) {
+        if (comment == null || comment.equals(" ")) {
             JsfUtil.addErrorMessage("Please Select a Comment");
             return;
         }
@@ -983,7 +983,7 @@ public class BillSearch implements Serializable {
     }
 
     public void cancelCashOutBill() {
-        if (comment==null || comment.equals(" ")) {
+        if (comment == null || comment.equals(" ")) {
             JsfUtil.addErrorMessage("Please Select a Comment");
             return;
         }
@@ -1045,6 +1045,8 @@ public class BillSearch implements Serializable {
                         bi.getReferanceBillItem().setSettled(false);
                         bi.getReferanceBillItem().setSettler(null);
                         bi.getReferanceBillItem().setSettleAt(null);
+                        bi.setHandOvered(false);
+                        bi.setHandOverAt(null);
                         getBillItemFacade().edit(bi.getReferanceBillItem());
                     }
                     System.out.println("bi.isHandOvered() = " + bi.isHandOvered());
@@ -1069,7 +1071,7 @@ public class BillSearch implements Serializable {
             JsfUtil.addErrorMessage("You can't Cancel Bill.This Bill Hand Overed.");
             return;
         }
-        if (comment==null || comment.equals(" ")) {
+        if (comment == null || comment.equals(" ")) {
             JsfUtil.addErrorMessage("Please Select a Comment");
             return;
         }
