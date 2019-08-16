@@ -92,6 +92,8 @@ public class SearchController implements Serializable {
     EnumController enumController;
     @Inject
     TransferController transferController;
+    @Inject
+    WebUserController webUserController;
     Institution institution;
     Institution bank;
     Department department;
@@ -736,14 +738,14 @@ public class SearchController implements Serializable {
         HashMap tmp = new HashMap();
         tmp.put("toDate", getToDate());
         tmp.put("fromDate", getFromDate());
-        tmp.put("toWeb", getSessionController().getLoggedUser());
+//        tmp.put("toWeb", getSessionController().getLoggedUser());
         tmp.put("bts", Arrays.asList(new BillType[]{BillType.CashOut, BillType.SummeryOut, BillType.HandOver}));
 //        tmp.put("bTp", BillType.CashOut);
 //        tmp.put("bTp2", BillType.SummeryOut);
 
-        sql = "Select b From Bill b where "
+        sql = "Select b From BilledBill b where "
                 + " b.retired=false "
-                + " and b.toWebUser=:toWeb "
+                //                + " and b.toWebUser=:toWeb "
                 + " and b.billType in :bts "
                 //                + " and (b.billType= :bTp or b.billType= :bTp2) "
                 + " and b.createdAt between :fromDate and :toDate ";
@@ -763,9 +765,17 @@ public class SearchController implements Serializable {
             tmp.put("dep", "%" + getSearchKeyword().getPersonName().trim().toUpperCase() + "%");
         }
 
-        sql += " order by b.createdAt desc  ";
+        if (!getWebUserController().hasPrivilege("CashTransactionAdministrationSearchWithOutUser")) {
+            sql += " and b.toWebUser=:toWeb ";
+            tmp.put("toWeb", getSessionController().getLoggedUser());
+        }
 
-        bills = getBillFacade().findBySQL(sql, tmp, TemporalType.TIMESTAMP, 50);
+        sql += " order by b.createdAt desc  ";
+        if (getReportKeyWord().isBool()) {
+            bills = getBillFacade().findBySQL(sql, tmp, TemporalType.TIMESTAMP);
+        } else {
+            bills = getBillFacade().findBySQL(sql, tmp, TemporalType.TIMESTAMP, 50);
+        }
         List<Bill> removeBills = new ArrayList<>();
         for (Bill b : bills) {
             if (b.getBillType() == BillType.HandOver && b.getPaymentMethod() != PaymentMethod.IOU) {
@@ -4302,6 +4312,14 @@ public class SearchController implements Serializable {
 
     public void setCashBookRows(List<CashBookRow> cashBookRows) {
         this.cashBookRows = cashBookRows;
+    }
+
+    public WebUserController getWebUserController() {
+        return webUserController;
+    }
+
+    public void setWebUserController(WebUserController webUserController) {
+        this.webUserController = webUserController;
     }
 
 //     public List<Bill> getInstitutionPaymentBills() {

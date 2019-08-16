@@ -1,0 +1,140 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:bi="http://java.sun.com/jsf/composite/cashTransaction">
+
+    <ui:define name="content">
+        <h:panelGroup >
+            <h:form  >
+                <p:panel >
+                    <f:facet name="header">
+                        <h:outputLabel value="Cash Settle By Bulk Cashier"/>                        
+                    </f:facet>
+                    <h:panelGrid columns="2">
+                        <p:panel id="det">
+                            <f:facet name="header">
+                                <h:outputLabel value="CURRENT DRAWER DETAIL (#{drawerAdjustmentController.webUser.drawer.name})"/>
+                            </f:facet>
+                            <h:panelGrid columns="2">  
+                                <h:outputLabel value="User"/>
+                                <p:autoComplete converter="webUs"  styleClass="shortinput"
+                                                completeMethod="#{webUserController.completeUser}" 
+                                                forceSelection="true"
+                                                var="w" 
+                                                itemLabel="#{w.webUserPerson.name}" 
+                                                itemValue="#{w}"
+                                                value="#{drawerAdjustmentController.webUser}" >
+                                    <p:column headerText="Name">
+                                        <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Code">
+                                        <h:outputLabel value="#{w.code}"/>
+                                    </p:column>
+                                    <f:ajax event="itemSelect" execute="@this" render=":#{p:component('det')}" />
+                                </p:autoComplete>
+                                <h:outputLabel value="Drawer Name"/>
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.name}" />
+                                <h:outputLabel value="Cash Vale"/>
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.runningBallance}"  style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                                <h:outputLabel value="Cheque Value"/>
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.chequeBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                                <h:outputLabel value="Slip Value"/>                                
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.slipBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                                <h:outputLabel value="Credit Card Value"/>                                
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.creditCardBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                                <h:outputLabel value="Credit Value"/>                                
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.creditBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                                <h:outputLabel value="IOU Value"/>                                
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.iouBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                                <h:outputLabel value="Short/Exess Value"/>                                
+                                <h:outputLabel value="#{drawerAdjustmentController.webUser.drawer.shortBallance}" style="float:  right;">
+                                    <f:convertNumber pattern="#,##0.00"/> 
+                                </h:outputLabel>
+                            </h:panelGrid>
+                        </p:panel>
+
+                        <p:panel header="Settle" id="panSettle">
+                            <h:panelGrid columns="2">
+                                <p:outputLabel value="Settle Type" />
+                                <p:selectOneMenu value="#{drawerAdjustmentController.reportKeyWord.paymentMethod}"  >
+                                    <f:selectItem itemLabel="Select Item" />
+                                    <f:selectItems value="#{enumController.settleTypes}" var="i" itemLabel="#{i.label}" itemValue="#{i}" />
+                                    <f:ajax event="change" execute="@this" render=":#{p:component('settle')} panSettle" listener="#{drawerAdjustmentController.listnerPaymentMethordChange}" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+                        </p:panel>
+
+
+                    </h:panelGrid>
+                    <h:panelGrid columns="2" id="settle">
+
+                        <p:panel>
+                            <f:facet name="header">
+                                <h:outputLabel value="NOTE"/>
+                            </f:facet>
+                            <p:dataTable value="#{drawerAdjustmentController.billItems}" var="bi"
+                                         rowIndexVar="i" scrollable="true" 
+                                         scrollHeight="300" >
+                                <f:facet name="header">
+                                    <p:outputLabel value="Cheque,Credit Card,Credit,Slip &amp; IOU Transations" />
+                                </f:facet>
+                                <p:column headerText="NO">
+                                    <p:outputLabel value="#{i+1}" />
+                                </p:column>
+                                <p:column headerText="Item">
+                                    <!--<p:outputLabel value="#{bi.item.name}" />-->
+                                    <p:selectOneMenu value="#{bi.item}"  >
+                                        <f:selectItems value="#{summeryController.settleItems}" var="i" itemLabel="#{i.name}" itemValue="#{i}" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column headerText="Discription">
+                                    <p:outputLabel value="#{bi.descreption}" />
+                                </p:column>
+                                <p:column headerText="Date">
+                                    <p:outputLabel value="#{bi.fromTime}" >
+                                        <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                                    </p:outputLabel>
+                                </p:column>
+                                <p:column headerText="Created At">
+                                    <p:outputLabel value="#{bi.createdAt}" >
+                                        <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                                    </p:outputLabel>
+                                </p:column>
+                                <p:column headerText="Amount">
+                                    <p:outputLabel value="#{bi.netValue}" >
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </p:outputLabel>
+                                </p:column>
+                                <p:column headerText="Update">
+                                    <p:commandButton value="update" action="#{drawerAdjustmentController.updateBillItem(bi)}" ajax="false"
+                                                     onclick="if (!confirm('Are you sure you want to Update?')) return false;" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:panel>
+                    </h:panelGrid>
+
+                </p:panel>
+
+            </h:form>
+        </h:panelGroup>
+
+    </ui:define>
+
+</ui:composition>

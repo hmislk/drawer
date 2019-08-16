@@ -125,6 +125,12 @@ public class BillItem implements Serializable {
     private List<BillFee> proFees = new ArrayList<>();
     @OneToOne(mappedBy = "billItem")
     private CashTransactionHistory cashTransactionHistory;
+    
+    private boolean authorized;
+    private String authorizedComment;
+    @Temporal(javax.persistence.TemporalType.DATE)
+    private Date authorizedAt;
+    private WebUser authorizedBy;
 
     public void copy(BillItem billItem) {
         item = billItem.getItem();
@@ -634,6 +640,38 @@ public class BillItem implements Serializable {
 
     public void setCashTransactionHistory(CashTransactionHistory cashTransactionHistory) {
         this.cashTransactionHistory = cashTransactionHistory;
+    }
+
+    public boolean isAuthorized() {
+        return authorized;
+    }
+
+    public void setAuthorized(boolean authorized) {
+        this.authorized = authorized;
+    }
+
+    public Date getAuthorizedAt() {
+        return authorizedAt;
+    }
+
+    public void setAuthorizedAt(Date authorizedAt) {
+        this.authorizedAt = authorizedAt;
+    }
+
+    public WebUser getAuthorizedBy() {
+        return authorizedBy;
+    }
+
+    public void setAuthorizedBy(WebUser authorizedBy) {
+        this.authorizedBy = authorizedBy;
+    }
+
+    public String getAuthorizedComment() {
+        return authorizedComment;
+    }
+
+    public void setAuthorizedComment(String authorizedComment) {
+        this.authorizedComment = authorizedComment;
     }
 
 }

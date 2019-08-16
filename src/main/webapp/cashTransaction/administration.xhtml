@@ -17,6 +17,9 @@
                             <p:commandButton value="Set Drawer To User"   action="set_drawer_to_user"  ajax="false" disabled="true" />   
                             <p:commandButton value="Summery Item" action="/cashTransaction/summery_item_master"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionAdministrationSettleItem')}" />   
                             <p:commandButton value="Settle Item" action="/cashTransaction/settle_item_master"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionAdministrationSummeryItem')}" />   
+                            <p:commandButton value="Edit hand Over Item" action="/cashTransaction/admin_edit_hand_over_items"  ajax="false" 
+                                             rendered="#{webUserController.hasPrivilege('CashTransactionAdministrationEditHandoverItem')}" 
+                                             actionListener="#{drawerAdjustmentController.listnerPaymentMethordChange}" />   
                         </h:panelGrid>
                     </p:panel>
                 </h:form>

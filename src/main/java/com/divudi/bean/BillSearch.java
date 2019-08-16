@@ -1045,8 +1045,8 @@ public class BillSearch implements Serializable {
                         bi.getReferanceBillItem().setSettled(false);
                         bi.getReferanceBillItem().setSettler(null);
                         bi.getReferanceBillItem().setSettleAt(null);
-                        bi.setHandOvered(false);
-                        bi.setHandOverAt(null);
+                        bi.getReferanceBillItem().setHandOvered(false);
+                        bi.getReferanceBillItem().setHandOverAt(null);
                         getBillItemFacade().edit(bi.getReferanceBillItem());
                     }
                     System.out.println("bi.isHandOvered() = " + bi.isHandOvered());

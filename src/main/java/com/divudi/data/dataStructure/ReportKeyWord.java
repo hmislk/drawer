@@ -5,6 +5,7 @@
  */
 package com.divudi.data.dataStructure;
 
+import com.divudi.data.PaymentMethod;
 import com.divudi.ejb.CommonFunctions;
 import com.divudi.entity.Department;
 import com.divudi.entity.Institution;
@@ -29,11 +30,15 @@ public class ReportKeyWord {
     Institution institution;
     Department department;
     WebUser user;
+    WebUser fromUser;
+    WebUser toUser;
     Item item;
     Summery summery;
     Settle settle;
     boolean bool;
     String string = "0";
+    String string1 = "0";
+    PaymentMethod paymentMethod;
 
     public Date getFromDate() {
         if (fromDate == null) {
@@ -130,5 +135,37 @@ public class ReportKeyWord {
 
     public void setString(String string) {
         this.string = string;
+    }
+
+    public WebUser getFromUser() {
+        return fromUser;
+    }
+
+    public void setFromUser(WebUser fromUser) {
+        this.fromUser = fromUser;
+    }
+
+    public WebUser getToUser() {
+        return toUser;
+    }
+
+    public void setToUser(WebUser toUser) {
+        this.toUser = toUser;
+    }
+
+    public String getString1() {
+        return string1;
+    }
+
+    public void setString1(String string1) {
+        this.string1 = string1;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
