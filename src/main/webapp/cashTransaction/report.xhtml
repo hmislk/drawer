@@ -23,7 +23,10 @@
                             </h:panelGrid>
                         </p:panel> 
                         <p:panel header="Summery" >
-                            <p:commandButton value="Cash Book 3D"   action="list_to_cash_book_summery_accountant"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                            <h:panelGrid columns="1">
+                                <p:commandButton value="Cash Book 3D"   action="list_to_cash_book_summery_accountant"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                                <p:commandButton value="Shif End Summery Report"   action="report_summery_check_and_approve"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                            </h:panelGrid>
                         </p:panel>
                     </h:panelGrid>  
 

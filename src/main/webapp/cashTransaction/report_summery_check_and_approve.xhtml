@@ -1,0 +1,235 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ui:define name="content">
+        <h:form>
+            <p:panel >
+                <f:facet name="header">
+                    <h:panelGrid columns="1" >
+                        <h:panelGrid columns="2" >
+                            <h:outputText  value="Consider Date" />
+                            <p:selectOneRadio value="#{drawerReportController.reportKeyWord.string1}" >
+                                <f:selectItem itemLabel="Create" itemValue="0" />
+                                <f:selectItem itemLabel="Summery From" itemValue="1" />
+                                <f:selectItem itemLabel="Summery To" itemValue="2" />
+                            </p:selectOneRadio>
+                            <h:outputLabel value="From Date"/>
+                            <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{drawerReportController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a" >      
+                            </p:calendar>
+                            <h:outputLabel value="To Date"/>
+                            <p:calendar styleClass="dateTimePicker" id="toDate" value="#{drawerReportController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a" >                                                                              
+                            </p:calendar>
+                            <h:outputLabel value="Summery"/>                        
+                            <p:autoComplete size="10" value="#{drawerReportController.reportKeyWord.item}" 
+                                            forceSelection="true"
+                                            style="min-width: 223px" 
+                                            completeMethod="#{summeryController.completeSummery}" 
+                                            var="myItem" itemValue="#{myItem}" itemLabel="#{myItem.name}" >
+                                <p:column headerText="Item">
+                                    <h:outputLabel value="#{myItem.name}" ></h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Department">
+                                    <h:outputLabel value="#{myItem.department.name}" ></h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Institution">
+                                    <h:outputLabel value="#{myItem.institution.name}" ></h:outputLabel>
+                                </p:column>
+                            </p:autoComplete>
+                            <h:outputLabel value="From Cashier"/>
+                            <p:autoComplete converter="webUs" 
+                                            completeMethod="#{webUserController.completeUser}" 
+                                            forceSelection="true"
+                                            var="w" 
+                                            itemLabel="#{w.webUserPerson.name}" 
+                                            itemValue="#{w}"
+                                            value="#{drawerReportController.reportKeyWord.fromUser}" >
+                                <p:column headerText="Name">
+                                    <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                </p:column>
+                                <p:column headerText="Code">
+                                    <h:outputLabel value="#{w.code}"/>
+                                </p:column>
+                            </p:autoComplete>
+                            <h:outputLabel value="To Cashier"/>
+                            <p:autoComplete converter="webUs" 
+                                            completeMethod="#{webUserController.completeUser}" 
+                                            forceSelection="true"
+                                            var="w" 
+                                            itemLabel="#{w.webUserPerson.name}" 
+                                            itemValue="#{w}"
+                                            value="#{drawerReportController.reportKeyWord.toUser}" >
+                                <p:column headerText="Name">
+                                    <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                </p:column>
+                                <p:column headerText="Code">
+                                    <h:outputLabel value="#{w.code}"/>
+                                </p:column>
+                            </p:autoComplete>
+                            <h:outputText  value="Institution" />
+                            <p:autoComplete styleClass="noPrintButton"  value="#{drawerReportController.reportKeyWord.institution}" 
+                                            completeMethod="#{institutionController.completeIns}" 
+                                            var="dept" itemValue="#{dept}" itemLabel="#{dept.name}" forceSelection="true" />
+
+                            <h:outputText  value="Department" />
+                            <p:autoComplete value="#{drawerReportController.reportKeyWord.department}" 
+                                            completeMethod="#{departmentController.completeDept}"
+                                            var="dept" itemValue="#{dept}" itemLabel="#{dept.name}"
+                                            forceSelection="true"
+                                            converter="dep">
+                                <p:column headerText="Department">
+                                    <h:outputLabel value="#{dept.name}"/>
+                                </p:column>
+                                <p:column headerText="Institution">
+                                    <h:outputLabel value="#{dept.institution.name}"/>
+                                </p:column>
+                            </p:autoComplete>
+                            <h:outputText  value="Search By" />
+                            <p:selectOneRadio value="#{drawerReportController.reportKeyWord.string}" >
+                                <f:selectItem itemLabel="All" itemValue="0" />
+                                <f:selectItem itemLabel="Authorized" itemValue="1" />
+                                <f:selectItem itemLabel="Not Authorized" itemValue="2" />
+                            </p:selectOneRadio>
+                        </h:panelGrid>
+                        <h:panelGrid columns="3" >
+                            <p:commandButton id="btnSearch" ajax="false" value="Search" action="#{drawerReportController.createSummeryTable}"/>
+                            <p:commandButton value="Print" ajax="false" >
+                                <p:printer target="gpBillPreview" ></p:printer>
+                            </p:commandButton>
+                            <p:commandButton value="Excel" ajax="false">
+                                <pe:exporter type="xlsx" target="tbl1" fileName="Cash Book" />
+                            </p:commandButton>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </f:facet>
+
+                <p:panel id="gpBillPreview" styleClass="noBorder summeryBorder" >
+                    <p:dataTable id="tbl1" value="#{drawerReportController.billItems}" var="bi" rowIndexVar="i">
+                        <f:facet name="header">
+                            <h:outputText value="Shift End Summery Report"/><br></br>
+                            <h:outputText value="From - "/>
+                            <h:outputText value="#{drawerReportController.reportKeyWord.fromDate}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                            <h:outputText value=" - To - "/>
+                            <h:outputText value="#{drawerReportController.reportKeyWord.toDate}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </f:facet>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="No"/>
+                            </f:facet>
+                            <h:outputText value="#{i+1}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Summery No"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.agentRefNo}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Summery"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.item.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Department"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.item.department.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Institution"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.item.institution.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="From"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.fromWebUser.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="To"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.toWebUser.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Created At"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.createdAt}" >
+                                <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="From Time"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.fromTime}" >
+                                <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="To Time"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.toTime}" >
+                                <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column styleClass="numberCol">
+                            <f:facet name="header" >
+                                <h:outputText value="Value"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.netValue}" >
+                                <f:convertNumber pattern="#,##0.00" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Comment"/>
+                            </f:facet>
+                            <p:inputText value="#{bi.authorizedComment}" disabled="#{bi.authorized}" >
+                            </p:inputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Authorized"/>
+                            </f:facet>
+                            <p:commandButton value="Authorized" action="#{drawerReportController.summeryAuthorized(bi)}" rendered="#{!bi.authorized}" ajax="false"/>
+                            <p:commandButton value="Un Authorized" action="#{drawerReportController.summeryUnAuthorized(bi)}" rendered="#{bi.authorized}" ajax="false" onclick="if (!confirm('Are you sure you want to Un-Authorized?'))
+                                        return false;"/>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Authrized By"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.authorizedBy.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Authrized At"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.authorizedAt}" >
+                                <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+
+
+            </p:panel>
+        </h:form>
+    </ui:define>  
+
+</ui:composition>

@@ -190,6 +190,9 @@ public enum Privileges {
     CashTransactionAdministration,
     CashTransactionAdministrationSettleItem,
     CashTransactionAdministrationSummeryItem,
+    CashTransactionAdministrationSearchAll,
+    CashTransactionAdministrationSearchWithOutUser,
+    CashTransactionAdministrationEditHandoverItem,
     CashTransactionSearchHandOver,
     CashTransactionReportChangeUser,
     

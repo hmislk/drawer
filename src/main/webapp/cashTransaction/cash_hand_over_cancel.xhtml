@@ -13,7 +13,7 @@
                 <h:form>
                     <h:panelGroup rendered="#{!billSearch.printPreview}" styleClass="alignTop" >
                         <p:panel  header="Cancellation">
-                            <h:commandButton value="Cancel" action="#{billSearch.cancelCashHandOverBill()}" disabled="#{billSearch.bill.backwardReferenceBill ne null}" >
+                            <h:commandButton value="Cancel" action="#{billSearch.cancelCashHandOverBill()}" disabled="#{billSearch.bill.backwardReferenceBill ne null}" onclick="if (!confirm('Are you sure you want to Cancel?')) return false;" >
                             </h:commandButton>                            
                         </p:panel>
                         <p:panelGrid columns="2" style="width: 100%;">

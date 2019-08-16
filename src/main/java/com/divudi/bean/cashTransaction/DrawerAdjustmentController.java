@@ -9,12 +9,14 @@ import com.divudi.bean.SessionController;
 import com.divudi.data.BillNumberSuffix;
 import com.divudi.data.BillType;
 import com.divudi.data.PaymentMethod;
+import com.divudi.data.dataStructure.ReportKeyWord;
 import com.divudi.ejb.BillNumberBean;
 import com.divudi.ejb.CashTransactionBean;
 import com.divudi.entity.Bill;
 import com.divudi.entity.BillItem;
 import com.divudi.entity.BilledBill;
 import com.divudi.entity.Department;
+import com.divudi.entity.Settle;
 import com.divudi.entity.cashTransaction.CashTransaction;
 import com.divudi.entity.WebUser;
 import com.divudi.facade.BillFacade;
@@ -23,8 +25,13 @@ import com.divudi.facade.WebUserFacade;
 import com.divudi.facade.util.JsfUtil;
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -57,6 +64,10 @@ public class DrawerAdjustmentController implements Serializable {
     String comment;
     String radioVal = "0";
     private boolean printPreview;
+    
+    ReportKeyWord reportKeyWord;
+    
+    List<BillItem> billItems;
 
     /**
      * Creates a new instance of PharmacySaleController
@@ -306,6 +317,61 @@ public class DrawerAdjustmentController implements Serializable {
 
         printPreview = true;
     }
+    
+    public void listnerPaymentMethordChange() {
+        if (getReportKeyWord().getPaymentMethod() != null) {
+            switch (getReportKeyWord().getPaymentMethod()) {
+                case Card:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Card},webUser);
+                    break;
+                case Cheque:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Cheque},webUser);
+                    break;
+                case Slip:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Slip},webUser);
+                    break;
+                case Credit:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Credit},webUser);
+                    break;
+                case IOU:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.IOU},webUser);
+                    break;
+            }
+        }
+
+    }
+    
+    private void createBillItemTable(PaymentMethod[] pms,WebUser wu) {
+        String sql;
+        Map m = new HashMap();
+        billItems = new ArrayList<>();
+
+        sql = " select bi from BillItem bi where "
+                + " bi.retired=false "
+                + " and bi.creater=:user "
+                + " and bi.handOvered=false "
+                + " and bi.referanceBillItem is not null "
+                + " and bi.settled=false "
+                + " and bi.item.paymentMethod in :pm "
+                + " and type(bi.item)=:class "
+                + " order by bi.createdAt ";
+
+        m.put("pm", Arrays.asList(pms));
+        m.put("user", wu);
+        m.put("class", Settle.class);
+
+        billItems = getBillItemFacade().findBySQL(sql, m);
+
+        System.out.println("billItems.size() = " + billItems.size());
+    }
+    
+    public void updateBillItem(BillItem bi){
+        bi.setEditedAt(new Date());
+        bi.setEditor(getSessionController().getLoggedUser());
+        getBillItemFacade().edit(bi);
+        JsfUtil.addErrorMessage("Updated");
+        listnerPaymentMethordChange();
+    }
 
     private double roundOff(double d) {
         DecimalFormat newFormat = new DecimalFormat("#.##");
@@ -445,6 +511,25 @@ public class DrawerAdjustmentController implements Serializable {
 
     public void setWebUser(WebUser webUser) {
         this.webUser = webUser;
+    }
+
+    public ReportKeyWord getReportKeyWord() {
+        if (reportKeyWord==null) {
+            reportKeyWord=new ReportKeyWord();
+        }
+        return reportKeyWord;
+    }
+
+    public void setReportKeyWord(ReportKeyWord reportKeyWord) {
+        this.reportKeyWord = reportKeyWord;
+    }
+
+    public List<BillItem> getBillItems() {
+        return billItems;
+    }
+
+    public void setBillItems(List<BillItem> billItems) {
+        this.billItems = billItems;
     }
 
 }

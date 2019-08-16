@@ -272,6 +272,9 @@ public class UserPrivilageController implements Serializable {
         TreeNode node2208a=new PrivilageNode("Administration Menu", node2208, Privileges.CashTransactionAdministration);
         TreeNode node2208b=new PrivilageNode("Settle Item", node2208, Privileges.CashTransactionAdministrationSettleItem);
         TreeNode node2208c=new PrivilageNode("Summery Item", node2208, Privileges.CashTransactionAdministrationSummeryItem);
+        TreeNode node2208d=new PrivilageNode("Search All", node2208, Privileges.CashTransactionAdministrationSearchAll);
+        TreeNode node2208e=new PrivilageNode("Search Without Users", node2208, Privileges.CashTransactionAdministrationSearchWithOutUser);
+        TreeNode node2208f=new PrivilageNode("Edit Hand Over Item", node2208, Privileges.CashTransactionAdministrationEditHandoverItem);
         
         TreeNode node2209=new PrivilageNode("Hand Over", node22, Privileges.CashTransactionSearchHandOver);
         

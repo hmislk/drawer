@@ -49,7 +49,7 @@
                                 <p:inputTextarea value="#{drawerAdjustmentController.comment}"  />
 
                                 <p:commandButton value="Make Adjustment" ajax="false" 
-                                                 action="#{drawerAdjustmentController.saveAdjustBillCashBook()}" />
+                                                 action="#{drawerAdjustmentController.saveAdjustBillCashBook()}" onclick="if (!confirm('Are you sure you want to Make Adjustment?')) return false;" />
                                 <p:commandButton ajax="false" action="#{drawerAdjustmentController.makeNull()}"
                                                  value="New Adjustment"/>
                             </h:panelGrid>
