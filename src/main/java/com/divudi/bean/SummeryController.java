@@ -117,13 +117,24 @@ public class SummeryController implements Serializable {
         totalCalculated = 0.0;
         total = 0.0;
         ListBills = new ArrayList<>();
+        Date d = new Date();
+        commonFunctions.timeDeffrenceCalculate(d, "(1)");//1
         createSummeryBillItemTable();
+        commonFunctions.timeDeffrenceCalculate(d, "(2)");//2
         createSettleBillItemTable();
+        commonFunctions.timeDeffrenceCalculate(d, "(3)");//3
         calTotal();
+        commonFunctions.timeDeffrenceCalculate(d, "(4)");//4
         pendingTransationsCalculations();
+        commonFunctions.timeDeffrenceCalculate(d, "(5)");//5
         fetshListToCashRecieve();
+        commonFunctions.timeDeffrenceCalculate(d, "(6)");//6
+//        fetshListToCashRecieveNew();
+//        commonFunctions.timeDeffrenceCalculate(d, "(6-New)");//6
         fetchListToCashRecieveFrom();
+        commonFunctions.timeDeffrenceCalculate(d, "(7)");//7
         fetchListBillsCashIn();
+        commonFunctions.timeDeffrenceCalculate(d, "(8)");//8
         printPreview = false;
     }
 
@@ -931,6 +942,7 @@ public class SummeryController implements Serializable {
         getBill().getCashTransaction().setSlipValue(0.0);
         getBill().getCashTransaction().setIouValue(0.0);
         getBill().getCashTransaction().setChequeValue(0.0);
+        selectedBillItems=new ArrayList<>();
         if (getBill().getPaymentMethod() != null) {
             switch (getBill().getPaymentMethod()) {
                 case Card:
@@ -1168,9 +1180,9 @@ public class SummeryController implements Serializable {
 
         for (Bill b : bills) {
             if (b.getForwardReferenceBills() != null && !b.getForwardReferenceBills().isEmpty()) {
-                System.out.println("b.getForwardReferenceBills().size() = " + b.getForwardReferenceBills().size());
+//                System.out.println("b.getForwardReferenceBills().size() = " + b.getForwardReferenceBills().size());
             } else {
-                System.out.println("b.getInsId() = " + b.getInsId());
+//                System.out.println("b.getInsId() = " + b.getInsId());
 //                JsfUtil.addErrorMessage("Please Settle Cash In Transactions 1");
                 b.setOk(true);
                 ListBills.add(b);
@@ -1185,6 +1197,7 @@ public class SummeryController implements Serializable {
 //                }
             }
         }
+        System.out.println("ListBills.size(1) = " + ListBills.size());
 
         sql = "Select b From Bill b where "
                 + " b.retired=false"
@@ -1212,10 +1225,70 @@ public class SummeryController implements Serializable {
                 }
             }
         }
-        System.out.println("ListBills.size(1) = " + ListBills.size());
+        System.out.println("ListBills.size(2) = " + ListBills.size());
         return ListBills;
 
     }
+
+//    private List<Bill> fetshListToCashRecieveNew() {
+//        ListBills = new ArrayList<>();
+//
+//        String sql;
+//        HashMap m = new HashMap();
+//
+//        sql = "Select b From Bill b where "
+//                + " b.retired=false "
+//                + " and b.cancelled=false "
+//                + " and b.toWebUser=:toWeb "
+//                + " and b.id in (select rb.forwardReferenceBill.id From Bill rb where rb.retired=false and rb.forwardReferenceBill.id=b.id) "
+//                + " and (b.billType= :bTp or b.billType= :bTp2) "
+//                + " and b.createdAt between :fromDate and :toDate ";
+//
+//        m.put("fromDate", getCommonFunctions().getDayBeforeOrAfterMonths(-1, true));
+//        m.put("toDate", getCommonFunctions().getEndOfDay(new Date()));
+//        m.put("toWeb", getSessionController().getLoggedUser());
+//        m.put("bTp", BillType.CashOut);
+//        m.put("bTp2", BillType.SummeryOut);
+//
+//        List<Bill> bills = getBillFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
+//
+//        for (Bill b : bills) {
+//                System.out.println("b.getInsId() = " + b.getInsId());
+//                b.setOk(true);
+//                ListBills.add(b);
+//        }
+//        System.out.println("ListBills.size(1) = " + ListBills.size());
+//
+//        sql = "Select b From Bill b where "
+//                + " b.retired=false"
+//                + " and b.cancelled=false "
+//                + " and b.toWebUser=:toWeb "
+//                //                + " and b.forwardReferenceBills is not null "
+//                + " and (b.billType= :bTp or b.billType= :bTp2) "
+//                + " and b.createdAt between :fromDate and :toDate ";
+//
+//        bills = getBillFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
+//
+//        for (Bill b : bills) {
+//            if (!b.checkActiveForwardReference()) {
+//                System.out.println("b.getInsId() = " + b.getInsId());
+////                JsfUtil.addErrorMessage("Please Settle Cash In Transactions 2");
+//                boolean flag = false;
+//                for (Bill bb : ListBills) {
+//                    if (b.equals(bb)) {
+//                        flag = true;
+//                    }
+//                }
+//                if (!flag) {
+//                    b.setOk(true);
+//                    ListBills.add(b);
+//                }
+//            }
+//        }
+//        System.out.println("ListBills.size(2) = " + ListBills.size());
+//        return ListBills;
+//
+//    }
 
     private List<Bill> fetchListToCashRecieveFrom() {
 //        List<Bill> list=new ArrayList<>();
@@ -1471,6 +1544,7 @@ public class SummeryController implements Serializable {
         m.put("class", Settle.class);
 
         billItemsSettle = getBillItemFacade().findBySQL(sql, m);
+        System.out.println("billItemsSettle.size() = " + billItemsSettle.size());
         List<BillItem> items = new ArrayList<>();
         for (BillItem bi : billItemsSettle) {
 //            System.out.println("bi = " + bi.getId());

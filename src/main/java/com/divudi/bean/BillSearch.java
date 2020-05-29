@@ -1036,12 +1036,17 @@ public class BillSearch implements Serializable {
                 List<BillItem> items = getBillItemsNew();
                 for (BillItem bi : items) {
                     System.out.println("bi.isHandOvered() = " + bi.isHandOvered());
+                    System.out.println("bi.getBill().getInsId() = " + bi.getBill().getInsId());
+                    System.out.println("bi.getCreater().getWebUserPerson().getName() = " + bi.getCreater().getWebUserPerson().getName());
                     bi.setHandOvered(false);
                     bi.setHandOverAt(null);
                     bi.setBill(null);
                     bi.setReferenceBill(null);
                     getBillItemFacade().edit(bi);
                     if (bi.getReferanceBillItem() != null) {
+                        System.out.println("bi.getReferanceBillItem().isHandOvered() = " + bi.getReferanceBillItem().isHandOvered());
+                        System.out.println("bi.getReferanceBillItem().getBill().getInsId() = " + bi.getReferanceBillItem().getBill().getInsId());
+                        System.out.println("bi.getReferanceBillItem().getCreater().getWebUserPerson().getName() = " + bi.getReferanceBillItem().getCreater().getWebUserPerson().getName());
                         bi.getReferanceBillItem().setSettled(false);
                         bi.getReferanceBillItem().setSettler(null);
                         bi.getReferanceBillItem().setSettleAt(null);
@@ -1110,11 +1115,23 @@ public class BillSearch implements Serializable {
 
                 List<BillItem> items = getBillItemsNew();
                 for (BillItem bi : items) {
-                    System.out.println("bi.bi.getReferanceBillItem() = " + bi.getReferanceBillItem());
+                    System.out.println("bi.getReferanceBillItem() = " + bi.getReferanceBillItem());
                     if (bi.getReferanceBillItem() == null) {
+                        if (getBill().getBillType() == BillType.HandOver
+                                && getBill().getPaymentMethod() == PaymentMethod.Cash) {
+                            getCashTransactionBean().deductDepartmentHistory(bi, getBill().getFromDepartment());
+                        }
                         continue;
+                    } 
+                    System.out.println("getBill().getBackwardReferenceBill() = " + getBill().getBackwardReferenceBill());
+                    System.out.println("getBill().getBillType() = " + getBill().getBillType());
+                    System.out.println("getBill().getPaymentMethod() = " + getBill().getPaymentMethod());
+                    if (getBill().getBackwardReferenceBill() != null) {
+                        System.out.println("getBill().getBackwardReferenceBill().getBillType() = " + getBill().getBackwardReferenceBill().getBillType());
                     }
-                    if (getBill().getBackwardReferenceBill() != null && getBill().getBackwardReferenceBill().getBillType() != BillType.HandOver) {
+//                    if (getBill().getBackwardReferenceBill() != null && getBill().getBackwardReferenceBill().getBillType() != BillType.HandOver 
+                    if (getBill().getBillType() == BillType.HandOver
+                            && getBill().getPaymentMethod() != PaymentMethod.IOU) {
                         getCashTransactionBean().deductDepartmentHistory(bi, getBill().getFromDepartment());
                     }
                     bi.getReferanceBillItem().setSettled(false);

@@ -354,12 +354,12 @@ public class CommonFunctions {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         System.out.println("calendar.getTime() = " + calendar.getTime());
-        calendar.set(Calendar.MONTH, d);
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) + d);
         System.out.println("calendar.getTime() = " + calendar.getTime());
         if (start) {
-            calendar.set(Calendar.YEAR, Calendar.MONTH, Calendar.DATE, 0, 0, 0);
+            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), 0, 0, 0);
         } else {
-            calendar.set(Calendar.YEAR, Calendar.MONTH, Calendar.DATE, 23, 59, 59);
+            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), 23, 59, 59);
         }
         System.out.println("calendar.getTime() = " + calendar.getTime());
         return calendar.getTime();
@@ -418,5 +418,22 @@ public class CommonFunctions {
         double mul = Math.pow(10, decimalPlaces);
         double roundOff = (double) Math.round(num * mul) / mul;
         return roundOff;
+    }
+
+    public void timeDeffrenceCalculate(Date date, String text) {
+        String s = "";
+
+        Date nowDate = new Date();
+        long timeDiff = nowDate.getTime() - date.getTime();
+//        System.out.println("timeDiff = " + timeDiff);
+        timeDiff /= 1000;
+//        System.out.println("timeDiff = " + timeDiff);
+        if (timeDiff <= 60) {
+            s = "Time = " + timeDiff + " Seconds";
+        } else {
+            s = "Time = " + (timeDiff / 60) + " Miniuts, " + (timeDiff % 60) + " Seconds";
+        }
+
+        System.err.println(text + s);
     }
 }

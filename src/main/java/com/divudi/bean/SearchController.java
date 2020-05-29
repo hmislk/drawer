@@ -4123,7 +4123,7 @@ public class SearchController implements Serializable {
 
     private double fetchOpenningBalnceModified(String dep) {
         double d = 0.0;
-
+        System.out.println("dep = " + dep);
         String sql;
         Map m = new HashMap();
 
@@ -4153,6 +4153,7 @@ public class SearchController implements Serializable {
         CashTransactionHistory cth = getCashTransactionHistoryFacade().findFirstBySQL(sql, m, TemporalType.TIMESTAMP);
 //        System.out.println("---bi = " + cth);
         if (cth == null) {
+//            System.err.println("cth null");
             m = new HashMap();
             sql = " Select cth From BillItem bi "
                     + " join bi.bill b "
@@ -4181,22 +4182,37 @@ public class SearchController implements Serializable {
             cth = getCashTransactionHistoryFacade().findFirstBySQL(sql, m, TemporalType.TIMESTAMP);
 //            System.out.println("+++cth = " + cth);
             if (cth == null) {
+//                System.err.println("cth null 2");
                 d = 0;
             } else {
+//                System.err.println("cth not null 2");
 //                System.out.println("+++bi.getCashTransactionHistory().getBeforeBalance() = " + cth.getBeforeBalance());
 //                System.out.println("+++bi.getCashTransactionHistory().getTransactionValue() = " + cth.getTransactionValue());
                 if (cth != null) {
+//                    System.out.println("cth.getId() = " + cth.getId());
+//                    System.out.println("cth.getCreatedAt() = " + cth.getCreatedAt());
+//                    if (cth.getCreater() != null) {
+//                        System.out.println("cth.getCreater().getWebUserPerson().getName() = " + cth.getCreater().getWebUserPerson().getName());
+//                    }
+//                    System.out.println("cth.getTransactionValue() = " + cth.getTransactionValue());
                     d = cth.getBeforeBalance() + cth.getTransactionValue();
                 }
             }
         } else {
+//            System.err.println("cth Not null");
 //            System.out.println("******cth = " + cth);
             if (cth != null) {
 //                System.out.println("******cth.getBeforeBalance() = " + cth.getBeforeBalance());
+//                System.out.println("cth.getId() = " + cth.getId());
+//                System.out.println("cth.getCreatedAt() = " + cth.getCreatedAt());
+//                if (cth.getCreater() != null) {
+//                    System.out.println("cth.getCreater().getWebUserPerson().getName() = " + cth.getCreater().getWebUserPerson().getName());
+//                }
+//                System.out.println("cth.getTransactionValue() = " + cth.getTransactionValue());
                 d = cth.getBeforeBalance();
             }
         }
-        System.out.println("d = " + d);
+//        System.out.println("d = " + d);
 
         return d;
     }
