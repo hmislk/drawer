@@ -105,7 +105,7 @@
                                     </p:selectOneMenu>
                                 </p:column>
                                 <p:column headerText="Discription">
-                                    <p:outputLabel value="#{bi.descreption}" />
+                                    <p:inputText value="#{bi.descreption}" />
                                 </p:column>
                                 <p:column headerText="Date">
                                     <p:outputLabel value="#{bi.fromTime}" >
@@ -118,13 +118,12 @@
                                     </p:outputLabel>
                                 </p:column>
                                 <p:column headerText="Amount">
-                                    <p:outputLabel value="#{bi.netValue}" >
-                                        <f:convertNumber pattern="#,##0.00" />
-                                    </p:outputLabel>
+                                    <p:inputText  value="#{bi.netValue}" />
                                 </p:column>
                                 <p:column headerText="Update">
                                     <p:commandButton value="update" action="#{drawerAdjustmentController.updateBillItem(bi)}" ajax="false"
-                                                     onclick="if (!confirm('Are you sure you want to Update?')) return false;" />
+                                                     onclick="if (!confirm('Are you sure you want to Update?'))
+                                                                 return false;" />
                                 </p:column>
                             </p:dataTable>
                         </p:panel>
