@@ -5,6 +5,7 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
       xmlns:bi="http://java.sun.com/jsf/composite/cashTransaction">
 
     <body>
@@ -17,13 +18,15 @@
                             <hr/>
 
                             <p:commandButton ajax="false" value="Back" action="search_hand_over_bill_to_approve"  />
-                                
+
                             <p:commandButton ajax="false" value="Approve" action="#{billSearch.approve}" rendered="#{billSearch.bill.approveUser eq null}" 
-                                             onclick="if (!confirm('Are you sure you want to Approve?')) return false;"
+                                             onclick="if (!confirm('Are you sure you want to Approve?'))
+                                                         return false;"
                                              disabled="#{billSearch.bill.cancelled}" >                           
                             </p:commandButton>
                             <p:commandButton ajax="false" value="Cancel Approve" action="#{billSearch.approveCancel()}" rendered="#{billSearch.bill.approveUser ne null}"
-                                             onclick="if (!confirm('Are you sure you want to Approve Cancel?')) return false;"
+                                             onclick="if (!confirm('Are you sure you want to Approve Cancel?'))
+                                                         return false;"
                                              disabled="#{billSearch.bill.cancelled}"  >                           
                             </p:commandButton>
 
@@ -55,7 +58,10 @@
                                 </p:panel>
                             </p:panelGrid>
                             <p:panel header="Bill Items">
-                                <p:dataTable value="#{billSearch.bill.billItems}" var="bi" >
+                                <p:commandButton value="Excel" ajax="false">
+                                    <pe:exporter type="xlsx" target="tblBills" fileName="Cash Book" />
+                                </p:commandButton>
+                                <p:dataTable id="tblBills" value="#{billSearch.bill.billItems}" var="bi" >
                                     <p:column>
                                         <f:facet name="header" >
                                             <p:outputLabel value="Name" />

@@ -80,7 +80,14 @@
                                     <h:outputLabel  value="(#{c.cashTransaction.bill.billedBill.insId})" rendered="#{c.cashTransaction.bill.billedBill ne null}"/>
                                     <h:outputLabel  value="#{c.cashTransaction.referanceBill.insId}" />
                                     <h:outputLabel  value="(#{c.cashTransaction.referanceBill.billedBill.insId})" rendered="#{c.cashTransaction.referanceBill.billedBill ne null}"/>
-                                </p:column>                            
+                                </p:column>         
+                                <p:column >                                
+                                    <f:facet name="header">
+                                        <p:outputLabel value="Ref. Bill No" />
+                                    </f:facet>
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.backwardReferenceBill.insId}" />
+                                    
+                                </p:column>
                                 <p:column >                                
                                     <f:facet name="header">
                                         <p:outputLabel value="From" />
