@@ -332,6 +332,11 @@ public class SessionController implements Serializable, HttpSessionListener {
         temSQL = "SELECT u FROM WebUser u WHERE u.retired = false";
         List<WebUser> allUsers = getFacede().findBySQL(temSQL);
         for (WebUser u : allUsers) {
+            System.out.println("u = " + u);
+            System.out.println("u.getId() = " + u.getId());
+            System.out.println("u.getId() = " + u.getCode());
+            System.out.println("u.getName() = " + u.getName());
+            System.out.println("userName = " + userName);
             if (getSecurityController().decrypt(u.getName()).equalsIgnoreCase(userName)) {
                 if (getSecurityController().matchPassword(passord, u.getWebUserPassword())) {
                     if (!canLogToDept(u, department)) {

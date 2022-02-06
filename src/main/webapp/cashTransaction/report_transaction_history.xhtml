@@ -51,6 +51,7 @@
                                         <p:column headerText="No" rowspan="2"></p:column>
                                         <p:column headerText="Transaction Type" rowspan="2"></p:column>
                                         <p:column headerText="Bill No" rowspan="2"></p:column>
+                                        <p:column headerText="Ref Bill No" rowspan="2"></p:column>
                                         <p:column headerText="From" rowspan="2"></p:column>
                                         <p:column headerText="To" rowspan="2"></p:column>
                                         <p:column headerText="Created At" rowspan="2"></p:column>
@@ -99,6 +100,9 @@
                                     <h:outputLabel  value="(#{c.cashTransaction.bill.billedBill.insId})" rendered="#{c.cashTransaction.bill.billedBill ne null}"/>
                                     <h:outputLabel  value="#{c.cashTransaction.referanceBill.insId}" />
                                     <h:outputLabel  value="(#{c.cashTransaction.referanceBill.billedBill.insId})" rendered="#{c.cashTransaction.referanceBill.billedBill ne null}"/>
+                                </p:column>                            
+                                <p:column >                                
+                                    <h:outputLabel  value="#{c.cashTransaction.bill.backwardReferenceBill.insId}" />
                                 </p:column>                            
                                 <p:column >                                
                                     <h:outputLabel  value="#{c.cashTransaction.bill.fromWebUser.webUserPerson.name}" />

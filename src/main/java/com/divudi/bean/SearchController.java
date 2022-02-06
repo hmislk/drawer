@@ -2972,8 +2972,25 @@ public class SearchController implements Serializable {
                     + " and b.cancelled=false ";
         }
 //        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
-        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s);
+        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s, 
+                getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSearchKeyword().getToWU());
     }
+
+    public void createTableHandOverApproveLoggedUser() {
+        String s = "";
+        if (getSearchKeyword().getString().equals("1")) {
+            s = " and b.approveUser is not null "
+                    + " and b.cancelled=false ";
+        }
+        if (getSearchKeyword().getString().equals("2")) {
+            s = " and b.approveUser is null "
+                    + " and b.cancelled=false ";
+        }
+//        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
+        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s, 
+                getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSessionController().getLoggedUser());
+    }
+
 
     public void createSearchAll() {
         bills = null;
@@ -4243,6 +4260,76 @@ public class SearchController implements Serializable {
         if (user != null) {
             sql += " and b.creater=:w ";
             m.put("w", user);
+        }
+
+        if (getSearchKeyword().getBillNo() != null && !getSearchKeyword().getBillNo().trim().equals("")) {
+            sql += " and  (upper(b.insId) like :billNo )";
+            m.put("billNo", "%" + getSearchKeyword().getBillNo().trim().toUpperCase() + "%");
+        }
+
+        if (getSearchKeyword().getNetTotal() != null && !getSearchKeyword().getNetTotal().trim().equals("")) {
+            sql += " and  (upper(b.netTotal) like :total )";
+            m.put("total", "%" + getSearchKeyword().getNetTotal().trim().toUpperCase() + "%");
+        }
+
+        sql += " order by b.createdAt desc  ";
+//    
+        m.put("toDate", getToDate());
+        m.put("fromDate", getFromDate());
+
+//        System.err.println("Sql " + sql);
+        list = getBillFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
+        System.out.println("bill list.size() = " + list.size());
+        return list;
+    }
+    
+    private List<Bill> createBillTable(Institution institution, BillType[] billTypes, WebUser user, String s, PaymentMethod pm,
+            Department toDep, WebUser fromWU, WebUser toWU) {
+        List<Bill> list = new ArrayList<>();
+        String sql;
+        Map m = new HashMap();
+
+        sql = "select b from BilledBill b where "
+                + " b.retired=false "
+                + " and b.createdAt between :fromDate and :toDate ";
+
+        if (s != null && !s.equals("")) {
+            sql += s;
+        }
+
+        if (institution != null) {
+            sql += " and b.institution=:ins ";
+            m.put("ins", institution);
+        }
+
+        if (billTypes != null) {
+            sql += " and b.billType in :bts ";
+            m.put("bts", Arrays.asList(billTypes));
+        }
+
+        if (user != null) {
+            sql += " and b.creater=:w ";
+            m.put("w", user);
+        }
+
+        if (toWU != null) {
+            sql += " and b.toWebUser=:tw ";
+            m.put("tw", toWU);
+        }
+
+        if (fromWU != null) {
+            sql += " and b.fromWebUser=:fw ";
+            m.put("fw", fromWU);
+        }
+
+        if (toDep != null) {
+            sql += " and b.fromDepartment=:fd ";
+            m.put("fd", toDep);
+        }
+
+        if (pm != null) {
+            sql += " and b.paymentMethod=:pm ";
+            m.put("pm", pm);
         }
 
         if (getSearchKeyword().getBillNo() != null && !getSearchKeyword().getBillNo().trim().equals("")) {

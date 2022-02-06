@@ -6,7 +6,6 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:p="http://primefaces.org/ui"
-                xmlns:pe="http://primefaces.org/ui/extensions"
                 xmlns:bi="http://java.sun.com/jsf/composite/cashTransaction">
 
     <ui:define name="content">
@@ -77,7 +76,7 @@
                                 <p:selectOneMenu value="#{drawerAdjustmentController.reportKeyWord.paymentMethod}"  >
                                     <f:selectItem itemLabel="Select Item" />
                                     <f:selectItems value="#{enumController.settleTypes}" var="i" itemLabel="#{i.label}" itemValue="#{i}" />
-                                    <f:ajax event="change" execute="@this" render=":#{p:component('settle')} panSettle" listener="#{drawerAdjustmentController.listnerPaymentMethordChange}" />
+                                    <f:ajax event="change" execute="@this" render=":#{p:component('settle')} panSettle" listener="#{drawerAdjustmentController.listnerPaymentMethordChangeTransfer}" />
                                 </p:selectOneMenu>
                             </h:panelGrid>
                         </p:panel>
@@ -87,86 +86,57 @@
                     <h:panelGrid columns="2" id="settle">
 
                         <p:panel>
-                            <p:commandButton value="Excel" ajax="false">
-                                <pe:exporter type="xlsx" target="tblBills" fileName="Items_#{drawerAdjustmentController.webUser.webUserPerson.name}_#{drawerAdjustmentController.reportKeyWord.paymentMethod}" />
-                            </p:commandButton>
                             <f:facet name="header">
                                 <h:outputLabel value="NOTE"/>
                             </f:facet>
-                            <p:dataTable id="tblBills" value="#{drawerAdjustmentController.billItems}" var="bi"
+                            <p:dataTable value="#{drawerAdjustmentController.billItems}" var="bi"
                                          rowIndexVar="i" scrollable="true" 
                                          scrollHeight="300" >
                                 <f:facet name="header">
                                     <p:outputLabel value="Cheque,Credit Card,Credit,Slip &amp; IOU Transations" />
                                 </f:facet>
-                                <p:column headerText="No">
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="No" />
-                                    </f:facet>
+                                <p:column headerText="NO">
                                     <p:outputLabel value="#{i+1}" />
-                                </p:column>                              
-                                <p:column headerText="Item" exportable="false">
+                                </p:column>
+                                <p:column headerText="Item">
                                     <!--<p:outputLabel value="#{bi.item.name}" />-->
                                     <p:selectOneMenu value="#{bi.item}"  >
                                         <f:selectItems value="#{summeryController.settleItems}" var="i" itemLabel="#{i.name}" itemValue="#{i}" />
                                     </p:selectOneMenu>
                                 </p:column>
-                                <p:column headerText="Discription" >
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Discription" />
-                                    </f:facet>
-                                    <p:inputText value="#{bi.descreption}" />
+                                <p:column headerText="Discription">
+                                    <p:outputLabel value="#{bi.descreption}" />
                                 </p:column>
                                 <p:column headerText="Date">
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Date" />
-                                    </f:facet>
                                     <p:outputLabel value="#{bi.fromTime}" >
                                         <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
                                     </p:outputLabel>
                                 </p:column>
                                 <p:column headerText="Created At">
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Created At" />
-                                    </f:facet>
                                     <p:outputLabel value="#{bi.createdAt}" >
                                         <f:convertDateTime pattern="yyyy MM dd hh:mm:ss a" />
                                     </p:outputLabel>
                                 </p:column>
                                 <p:column headerText="Amount">
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Amount" />
-                                    </f:facet>
-                                    <p:inputText  value="#{bi.netValue}" />
+                                    <p:outputLabel value="#{bi.netValue}" >
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </p:outputLabel>
                                 </p:column>
-                                <p:column headerText="Update" exportable="false">
-                                    <p:commandButton value="update" action="#{drawerAdjustmentController.updateBillItem(bi)}" ajax="false"
-                                                     onclick="if (!confirm('Are you sure you want to Update?'))
-                                                                 return false;" />
-                                </p:column>
-                                <p:column headerText="Item" >
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Item" />
-                                    </f:facet>
-                                    <p:outputLabel value="#{bi.item.name}" />
-                                </p:column>
-                                <p:column headerText="Current User">
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Current User" />
-                                    </f:facet>
+                                <p:column headerText="Current">
                                     <p:outputLabel value="#{bi.creater.webUserPerson.name}" />
                                 </p:column>
                                 <p:column headerText="Last User">
-                                    <f:facet name="header" >
-                                        <p:outputLabel value="Last User" />
-                                    </f:facet>
                                     <p:outputLabel value="#{bi.referanceBillItem.creater.webUserPerson.name}" />
                                 </p:column>
-                                <p:column headerText="Mark as HandOver" exportable="false">
-                                    <p:commandButton value="Mark as Hand Overed" action="#{drawerAdjustmentController.updateBillItemAsHandOver(bi)}" ajax="false"
+                                <p:column headerText="Bill">
+                                    <p:outputLabel value="#{bi.bill.insId}" />
+                                </p:column>
+                                <p:column headerText="Mark as HandOver">
+                                    <p:commandButton value="Transfer" action="#{drawerAdjustmentController.transferBillItemAsHandOver(bi)}" ajax="false"
                                                      onclick="if (!confirm('Are you sure you want to Mark as HandOver?'))
                                                                  return false;" />
                                 </p:column>
+
                             </p:dataTable>
                         </p:panel>
                     </h:panelGrid>
@@ -179,3 +149,4 @@
     </ui:define>
 
 </ui:composition>
+

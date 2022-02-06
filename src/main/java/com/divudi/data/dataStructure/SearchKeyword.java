@@ -5,6 +5,10 @@
  */
 package com.divudi.data.dataStructure;
 
+import com.divudi.data.PaymentMethod;
+import com.divudi.entity.Department;
+import com.divudi.entity.WebUser;
+
 /**
  *
  * @author safrin
@@ -38,6 +42,11 @@ public class SearchKeyword {
     private String insId;
     private String deptId;
     private String string = "0";
+    private PaymentMethod paymentMethodType;
+    private Department dep;
+    private WebUser fromWU;
+    private WebUser toWU;
+    
 
     public boolean checkKeyword() {
         if (billNo != null && !billNo.trim().equals("")) {
@@ -278,5 +287,37 @@ public class SearchKeyword {
 
     public void setString(String string) {
         this.string = string;
+    }
+
+    public PaymentMethod getPaymentMethodType() {
+        return paymentMethodType;
+    }
+
+    public void setPaymentMethodType(PaymentMethod paymentMethodType) {
+        this.paymentMethodType = paymentMethodType;
+    }
+
+    public Department getDep() {
+        return dep;
+    }
+
+    public void setDep(Department dep) {
+        this.dep = dep;
+    }
+
+    public WebUser getFromWU() {
+        return fromWU;
+    }
+
+    public void setFromWU(WebUser fromWU) {
+        this.fromWU = fromWU;
+    }
+
+    public WebUser getToWU() {
+        return toWU;
+    }
+
+    public void setToWU(WebUser toWU) {
+        this.toWU = toWU;
     }
 }

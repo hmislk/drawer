@@ -4,6 +4,7 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
       xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:pe="http://primefaces.org/ui/extensions"
       xmlns:f="http://java.sun.com/jsf/core">
 
     <body>
@@ -13,7 +14,7 @@
                     <p:panel>
                         <f:facet name="header" >
                             <h:outputLabel value="HAND OVER BILL SEARCH "/>                          
-                            <h:panelGrid columns="2" >
+                            <h:panelGrid columns="4" >
                                 <h:outputLabel value="From Date"/>
                                 <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.fromDate}" navigator="true" pattern="dd MMMM yyyy hh mm ss a" >      
                                 </p:calendar>
@@ -24,13 +25,68 @@
                                 <p:inputText  value="#{searchController.searchKeyword.billNo}" />
                                 <h:outputLabel value="Total"/>
                                 <p:inputText  value="#{searchController.searchKeyword.netTotal}" />
+                                <p:outputLabel value="From User" />
+                                <p:autoComplete converter="webUs" 
+                                                completeMethod="#{webUserController.completeUser}" 
+                                                forceSelection="true"
+                                                var="w" itemLabel="#{w.webUserPerson.name}" 
+                                                itemValue="#{w}" placeholder="Hand Over To"
+                                                value="#{searchController.searchKeyword.fromWU}" >
+                                    <p:column headerText="Name">
+                                        <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Code">
+                                        <h:outputLabel value="#{w.code}"/>
+                                    </p:column>
+                                </p:autoComplete>
+                                <p:outputLabel value="To User" />
+                                <p:autoComplete converter="webUs" 
+                                                completeMethod="#{webUserController.completeUser}" 
+                                                forceSelection="true"
+                                                var="w" itemLabel="#{w.webUserPerson.name}" 
+                                                itemValue="#{w}" placeholder="Hand Over To"
+                                                value="#{searchController.searchKeyword.toWU}" >
+                                    <p:column headerText="Name">
+                                        <h:outputLabel value="#{w.webUserPerson.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Code">
+                                        <h:outputLabel value="#{w.code}"/>
+                                    </p:column>
+                                </p:autoComplete>
+                                <p:outputLabel value="Department"/>
+                                <p:autoComplete value="#{searchController.searchKeyword.dep}"
+                                                completeMethod="#{departmentController.completeDept}"
+                                                var="dept" itemValue="#{dept}" itemLabel="#{dept.name}"
+                                                forceSelection="true" placeholder="Department"
+                                                converter="dep">
+                                    <p:column headerText="Department">
+                                        <h:outputLabel value="#{dept.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Institution">
+                                        <h:outputLabel value="#{dept.institution.name}"/>
+                                    </p:column>
+                                </p:autoComplete>
+                                <p:outputLabel value="Settle Type" />
+                                <p:selectOneMenu value="#{searchController.searchKeyword.paymentMethodType}"  >
+                                    <f:selectItem itemLabel="Select Item" />
+                                    <f:selectItem itemLabel="Cash" itemValue="Cash" />
+                                    <f:selectItems value="#{enumController.settleTypes}" var="i" itemLabel="#{i.label}" itemValue="#{i}" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+                            <h:panelGrid columns="2" >
                                 <h:outputLabel value="Select By"/>
                                 <p:selectOneRadio value="#{searchController.searchKeyword.string}" >
                                     <f:selectItem itemLabel="All" itemValue="0" />
                                     <f:selectItem itemLabel="Approved" itemValue="1" />
                                     <f:selectItem itemLabel="Not Approved" itemValue="2" />
                                 </p:selectOneRadio>
-                                <p:commandButton id="btnSearch" ajax="false" value="Search by Logged User" action="#{searchController.createTableHandOverApprove()}"/>
+                            </h:panelGrid>
+                            <h:panelGrid columns="3" >
+                                <p:commandButton id="btnSearch1" ajax="false" value="Search By Logged User" action="#{searchController.createTableHandOverApproveLoggedUser()}"/>
+                                <p:commandButton id="btnSearch2" ajax="false" value="Search All" action="#{searchController.createTableHandOverApprove()}"/>
+                                <p:commandButton value="Excel" ajax="false">
+                                    <pe:exporter type="xlsx" target="tblBills" fileName="Cash Book" />
+                                </p:commandButton>
                             </h:panelGrid>
                         </f:facet>
 
@@ -38,32 +94,59 @@
                                      value="#{searchController.bills}" var="bill" 
                                      style="min-width: 100%;"  paginator="true" paginatorAlwaysVisible="true"
                                      paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-                                     rowsPerPageTemplate="50"
-                                     rows="50">
-                            <p:column headerText="No" styleClass="alignTop">
+                                     rowsPerPageTemplate="100"
+                                     rows="100">
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="No"/>
+                                </f:facet>
                                 <h:outputLabel value="#{i+1}"/>
                             </p:column>
-                            <p:column headerText="View Bill">
+                            <p:column headerText="View Bill" exportable="false">
                                 <p:commandButton ajax="false"  value="View Bill" action="cash_hand_over_approve">
                                     <f:setPropertyActionListener value="#{bill}" target="#{billSearch.bill}"/>
                                 </p:commandButton>
                             </p:column>
-                            <p:column headerText="Bill No" >                                
+                            <p:column>   
+                                <f:facet name="header">
+                                    <h:outputLabel value="Bill No"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.insId}"></h:outputLabel>
                             </p:column>                            
-                            <p:column headerText="From Web User"  >                                
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="From Web User"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.fromWebUser.webUserPerson.nameWithTitle}"></h:outputLabel>                                
                             </p:column>
-                            <p:column headerText="To Web User"  >                                
+                            <p:column>  
+                                <f:facet name="header">
+                                    <h:outputLabel value="To Web User"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.toWebUser.webUserPerson.nameWithTitle}"></h:outputLabel>                                
                             </p:column>
-                            <p:column headerText="To Department"  >                                
+                            <p:column>          
+                                <f:facet name="header">
+                                    <h:outputLabel value="Department"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.fromDepartment.name}"></h:outputLabel>                                
                             </p:column>
-                            <p:column headerText="Bill Type"  >                                
+                            <p:column>  
+                                <f:facet name="header">
+                                    <h:outputLabel value="Bill Type"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.billType}"></h:outputLabel>                                
                             </p:column>
-                            <p:column headerText="Billed at"  >
+                            <p:column>      
+                                <f:facet name="header">
+                                    <h:outputLabel value="payment Method"/>
+                                </f:facet>
+                                <h:outputLabel  value="#{bill.paymentMethod}"></h:outputLabel>                                
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="Billed at"/>
+                                </f:facet>
                                 <h:outputLabel value="#{bill.createdAt}" >
                                     <f:convertDateTime pattern="dd MM yyyy hh mm ss a"/>
                                 </h:outputLabel>
@@ -76,30 +159,48 @@
                                 </h:panelGroup>
                             </p:column>  
 
-                            <p:column headerText="Value"  >                                
+                            <p:column>  
+                                <f:facet name="header">
+                                    <h:outputLabel value="Value"/>
+                                </f:facet>
                                 <h:outputLabel value="#{bill.netTotal}" >
                                     <f:convertNumber pattern="#,##0.00"/>
                                 </h:outputLabel>                                 
                             </p:column>                                                   
-                            <p:column headerText="Approved By" >
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="Approved By"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.approveUser.webUserPerson.name}" >
                                 </h:outputLabel>
                             </p:column>
-                            <p:column headerText="Approved At" >
+                            <p:column>
+                                .<f:facet name="header">
+                                    <h:outputLabel value="Approved At"/>
+                                </f:facet>
                                 <h:outputLabel value="#{bill.approveAt}" >
                                     <f:convertDateTime pattern="dd MM yyyy hh mm ss a"/>
                                 </h:outputLabel>
                             </p:column>
-                            <p:column headerText="Approve Cancel By(Last)" >
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="Approve Cancel By(Last)"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.editor.webUserPerson.name}" >
                                 </h:outputLabel>
                             </p:column>
-                            <p:column headerText="Approve Cancel At(Last)" >
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="Approve Cancel At(Last)"/>
+                                </f:facet>
                                 <h:outputLabel value="#{bill.editedAt}" >
                                     <f:convertDateTime pattern="dd MM yyyy hh mm ss a"/>
                                 </h:outputLabel>
                             </p:column>
-                            <p:column headerText="Comments" >
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="Comments"/>
+                                </f:facet>
                                 <h:outputLabel  value="#{bill.comments}" >
                                 </h:outputLabel>
                             </p:column>
@@ -116,3 +217,5 @@
 
     </body>
 </html>
+
+

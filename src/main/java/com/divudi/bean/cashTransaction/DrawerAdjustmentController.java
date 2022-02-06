@@ -64,9 +64,9 @@ public class DrawerAdjustmentController implements Serializable {
     String comment;
     String radioVal = "0";
     private boolean printPreview;
-    
+
     ReportKeyWord reportKeyWord;
-    
+
     List<BillItem> billItems;
 
     /**
@@ -106,7 +106,7 @@ public class DrawerAdjustmentController implements Serializable {
 
     private void saveAdjustmentBill() {
         getAdjustmentBill().setCreatedAt(Calendar.getInstance().getTime());
-        getAdjustmentBill().setCreater(getWebUser());
+        getAdjustmentBill().setCreater(getSessionController().getLoggedUser());
         getAdjustmentBill().setDeptId(getBillNumberBean().institutionBillNumberGenerator(getSessionController().getLoggedUser().getDepartment(), getAdjustmentBill(), getAdjustmentBill().getBillType(), BillNumberSuffix.DRADJ));
         getAdjustmentBill().setInsId(getBillNumberBean().institutionBillNumberGenerator(getSessionController().getLoggedUser().getDepartment().getInstitution(), getAdjustmentBill(), getAdjustmentBill().getBillType(), BillNumberSuffix.DRADJ));
         getAdjustmentBill().setDepartment(getSessionController().getLoggedUser().getDepartment());
@@ -117,7 +117,7 @@ public class DrawerAdjustmentController implements Serializable {
         getAdjustmentBill().setFromInstitution(getSessionController().getLoggedUser().getDepartment().getInstitution());
         getAdjustmentBill().setComments(comment);
         //creater link in to history of drawer approved user use as a creater
-        getAdjustmentBill().setApproveUser(getWebUser());
+        getAdjustmentBill().setApproveUser(getSessionController().getLoggedUser());
         getAdjustmentBill().setApproveAt(new Date());
         if (getAdjustmentBill().getId() == null) {
             getBillFacade().create(getAdjustmentBill());
@@ -317,31 +317,54 @@ public class DrawerAdjustmentController implements Serializable {
 
         printPreview = true;
     }
-    
+
     public void listnerPaymentMethordChange() {
         if (getReportKeyWord().getPaymentMethod() != null) {
             switch (getReportKeyWord().getPaymentMethod()) {
                 case Card:
-                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Card},webUser);
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Card}, webUser, true);
                     break;
                 case Cheque:
-                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Cheque},webUser);
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Cheque}, webUser, true);
                     break;
                 case Slip:
-                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Slip},webUser);
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Slip}, webUser, true);
                     break;
                 case Credit:
-                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Credit},webUser);
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Credit}, webUser, true);
                     break;
                 case IOU:
-                    createBillItemTable(new PaymentMethod[]{PaymentMethod.IOU},webUser);
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.IOU}, webUser, true);
                     break;
             }
         }
 
     }
-    
-    private void createBillItemTable(PaymentMethod[] pms,WebUser wu) {
+
+    public void listnerPaymentMethordChangeTransfer() {
+        if (getReportKeyWord().getPaymentMethod() != null) {
+            switch (getReportKeyWord().getPaymentMethod()) {
+                case Card:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Card}, webUser, false);
+                    break;
+                case Cheque:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Cheque}, webUser, false);
+                    break;
+                case Slip:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Slip}, webUser, false);
+                    break;
+                case Credit:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.Credit}, webUser, false);
+                    break;
+                case IOU:
+                    createBillItemTable(new PaymentMethod[]{PaymentMethod.IOU}, webUser, false);
+                    break;
+            }
+        }
+
+    }
+
+    private void createBillItemTable(PaymentMethod[] pms, WebUser wu, boolean flag) {
         String sql;
         Map m = new HashMap();
         billItems = new ArrayList<>();
@@ -350,11 +373,14 @@ public class DrawerAdjustmentController implements Serializable {
                 + " bi.retired=false "
                 + " and bi.creater=:user "
                 + " and bi.handOvered=false "
-                + " and bi.referanceBillItem is not null "
                 + " and bi.settled=false "
                 + " and bi.item.paymentMethod in :pm "
-                + " and type(bi.item)=:class "
-                + " order by bi.createdAt ";
+                + " and type(bi.item)=:class ";
+        if (flag) {
+            sql += " and bi.referanceBillItem is not null ";
+        }
+
+        sql += " order by bi.createdAt ";
 
         m.put("pm", Arrays.asList(pms));
         m.put("user", wu);
@@ -364,13 +390,63 @@ public class DrawerAdjustmentController implements Serializable {
 
         System.out.println("billItems.size() = " + billItems.size());
     }
-    
-    public void updateBillItem(BillItem bi){
+
+    public void updateBillItem(BillItem bi) {
         bi.setEditedAt(new Date());
         bi.setEditor(getSessionController().getLoggedUser());
         getBillItemFacade().edit(bi);
-        JsfUtil.addErrorMessage("Updated");
+        JsfUtil.addSuccessMessage("Updated");
         listnerPaymentMethordChange();
+    }
+
+    public void updateBillItemAsHandOver(BillItem bi) {
+        bi.setHandOvered(true);
+        bi.setHandOverAt(new Date());
+
+        bi.setEditedAt(new Date());
+        bi.setEditor(getSessionController().getLoggedUser());
+        getBillItemFacade().edit(bi);
+        JsfUtil.addSuccessMessage("Mark as Hand Overed");
+        listnerPaymentMethordChange();
+    }
+
+    public void transferBillItemAsHandOver(BillItem bi) {
+        bi.setHandOvered(true);
+        bi.setSettled(true);
+        getBillItemFacade().edit(bi);
+        Bill b = fetchReceiveBill(bi.getBill());
+        BillItem billItem = new BillItem();
+        billItem.setBill(b);
+        billItem.setReferanceBillItem(bi);
+        billItem.setItem(bi.getItem());
+        billItem.setDescreption(bi.getDescreption());
+        billItem.setFromTime(bi.getFromTime());
+        billItem.setToTime(bi.getToTime());
+        billItem.setNetValue(bi.getNetValue());
+        billItem.setCreatedAt(new Date());
+        billItem.setCreater(b.getCreater());
+
+//        System.out.println("billItem.getCreater().getWebUserPerson().getName() = " + billItem.getCreater().getWebUserPerson().getName());
+
+        System.out.println("billItem.getId() = " + billItem.getId());
+        getBillItemFacade().create(billItem);
+        System.out.println("billItem.getId() = " + billItem.getId());
+//        getBill().getBillItems().add(billItem);
+//        getBillFacade().edit(getBill());
+        JsfUtil.addSuccessMessage("Mark as Hand Overed");
+        listnerPaymentMethordChangeTransfer();
+    }
+
+    private Bill fetchReceiveBill(Bill brb) {
+        String sql = " select b from Bill b where "
+                + " b.backwardReferenceBill.id=" + brb.getId();
+
+        Bill b = getBillFacade().findFirstBySQL(sql);
+        System.out.println("b = " + b);
+        if (b != null) {
+            System.out.println("b.getInsId() = " + b.getInsId());
+        }
+        return b;
     }
 
     private double roundOff(double d) {
@@ -514,8 +590,8 @@ public class DrawerAdjustmentController implements Serializable {
     }
 
     public ReportKeyWord getReportKeyWord() {
-        if (reportKeyWord==null) {
-            reportKeyWord=new ReportKeyWord();
+        if (reportKeyWord == null) {
+            reportKeyWord = new ReportKeyWord();
         }
         return reportKeyWord;
     }

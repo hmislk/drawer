@@ -888,7 +888,7 @@ public class SummeryController implements Serializable {
             JsfUtil.addErrorMessage("Please Select Correct Slip Amount");
             return true;
         }
-        if (getBill().getPaymentMethod() == PaymentMethod.Credit && getBill().getCashTransaction().getCreditValue() <= 0) {
+        if (getBill().getPaymentMethod() == PaymentMethod.Credit && getBill().getCashTransaction().getCreditValue() == 0) {
             JsfUtil.addErrorMessage("Please Select Correct Credit Amount");
             return true;
         }
