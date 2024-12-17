@@ -21,7 +21,7 @@
                                 <p:calendar id="toDate" value="#{searchController.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm a" >                                                                              
                                 </p:calendar>
                                 <p:commandButton id="btnSearch" ajax="false" value="Search by Logged User" action="#{searchController.createTableCashIn()}"/>
-                                <h:outputLabel/>
+                                <p:commandButton id="btnSearchAll" ajax="false" value="Search All" action="#{searchController.createTableCashInAllNew()}" rendered="#{webUserController.hasPrivilege('CashTransactionAdministrationSearchAll')}"/>
                                 <p:spacer height="30"/><h:outputLabel/><h:outputLabel/><h:outputLabel/><h:outputLabel/><h:outputLabel/>
 
                                 <h:outputLabel value="Bill No"/>

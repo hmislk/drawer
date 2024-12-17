@@ -38,6 +38,7 @@ import javax.inject.Named;
 import javax.persistence.TemporalType;
 import com.divudi.entity.CancelledBill;
 import com.divudi.entity.Department;
+import com.divudi.entity.Item;
 import com.divudi.entity.Summery;
 import com.divudi.entity.WebUser;
 import com.divudi.entity.cashTransaction.CashTransaction;
@@ -69,6 +70,11 @@ public class SearchController implements Serializable {
     private List<String> headers;
     private List<ColumnModel> columnModels;
     private List<CashBookRow> cashBookRows;
+    private List<BillItem> billItemsSummery;
+    private List<BillItem> billItemsHandover;
+    
+    private double totSummary;
+    private double totHandOver;
     ////////////
     @EJB
     private CommonFunctions commonFunctions;
@@ -975,6 +981,49 @@ public class SearchController implements Serializable {
 //        commonController.printReportDetails(fromDate, toDate, startTime, "OPD Billitem with bill");
 
     }
+    
+    public void createCashBook3DErrorCheckDetails() {
+        billItems = new ArrayList<>();
+        billItemsHandover = new ArrayList<>();
+        billItemsSummery = new ArrayList<>();
+        totSummary = 0.0;
+        totHandOver = 0.0;
+
+        if (errorCheck()) {
+            return;
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(getReportKeyWord().getFromDate());
+
+        Date fd = getCommonFunctions().getStartOfDay(getReportKeyWord().getFromDate());
+        Date td = getCommonFunctions().getEndOfDay(getReportKeyWord().getFromDate());
+
+        billItems = fetchCashTransactionHistorys(getReportKeyWord().getItem(), fd, td, false);
+        System.out.println("billItems.size() 1= " + billItems.size());
+        billItems.addAll(fetchCashTransactionHistorys(getReportKeyWord().getItem(), fd, td, true));
+        System.out.println("billItems.size() 2= " + billItems.size());
+
+        for (BillItem bi : billItems) {
+            System.out.println("bi.getAgentRefNo() = " + bi.getAgentRefNo());
+            if (bi.getAgentRefNo() == null || bi.getAgentRefNo().equals("")) {
+                billItemsHandover.add(bi);
+                totHandOver += bi.getNetValue();
+            } else {
+                billItemsSummery.add(bi);
+                totSummary += bi.getNetValue();
+            }
+        }
+
+    }
+    
+    private boolean errorCheck() {
+        if (getReportKeyWord().getItem() == null) {
+            JsfUtil.addErrorMessage("Please Select a Department");
+            return true;
+        }
+        return false;
+    }
+
 
     public void createPharmacyBillItemTable() {
         //  searchBillItems = null;
@@ -2449,6 +2498,43 @@ public class SearchController implements Serializable {
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
 
     }
+    
+    public void createTableCashInAllNew() {
+        bills = null;
+        String sql;
+        Map temMap = new HashMap();
+
+        sql = "select b from BilledBill b where b.billType = :billType "
+                + " and b.institution=:ins "
+                + " and b.createdAt between :fromDate and :toDate "
+                + " and b.retired=false";
+
+        if (getSearchKeyword().getBillNo() != null && !getSearchKeyword().getBillNo().trim().equals("")) {
+            sql += " and  (upper(b.insId) like :billNo )";
+            temMap.put("billNo", "%" + getSearchKeyword().getBillNo().trim().toUpperCase() + "%");
+        }
+
+        if (getSearchKeyword().getPersonName() != null && !getSearchKeyword().getPersonName().trim().equals("")) {
+            sql += " and  (upper(b.fromWebUser.webUserPerson.name) like :patientName )";
+            temMap.put("patientName", "%" + getSearchKeyword().getPersonName().trim().toUpperCase() + "%");
+        }
+
+        if (getSearchKeyword().getNetTotal() != null && !getSearchKeyword().getNetTotal().trim().equals("")) {
+            sql += " and  (upper(b.netTotal) like :total )";
+            temMap.put("total", "%" + getSearchKeyword().getNetTotal().trim().toUpperCase() + "%");
+        }
+
+        sql += " order by b.createdAt desc  ";
+//    
+        temMap.put("billType", BillType.CashIn);
+        temMap.put("toDate", getToDate());
+        temMap.put("fromDate", getFromDate());
+        temMap.put("ins", getSessionController().getInstitution());
+
+        ////System.err.println("Sql " + sql);
+        bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
+
+    }
 
     List<Bill> billlist;
 
@@ -2990,7 +3076,36 @@ public class SearchController implements Serializable {
         bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s, 
                 getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSessionController().getLoggedUser());
     }
+    
+    public void createTableHandOverApproveBillItem() {
+        String s = "";
+        if (getSearchKeyword().getString().equals("1")) {
+            s = " and b.approveUser is not null "
+                    + " and b.cancelled=false ";
+        }
+        if (getSearchKeyword().getString().equals("2")) {
+            s = " and b.approveUser is null "
+                    + " and b.cancelled=false ";
+        }
+//        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
+        billItems = createBillItemTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s,
+                getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSearchKeyword().getToWU(), getSearchKeyword().getNetTotal());
+    }
 
+    public void createTableHandOverApproveLoggedUserBillItem() {
+        String s = "";
+        if (getSearchKeyword().getString().equals("1")) {
+            s = " and b.approveUser is not null "
+                    + " and b.cancelled=false ";
+        }
+        if (getSearchKeyword().getString().equals("2")) {
+            s = " and b.approveUser is null "
+                    + " and b.cancelled=false ";
+        }
+//        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
+        billItems = createBillItemTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s,
+                getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSessionController().getLoggedUser(), getSearchKeyword().getNetTotal());
+    }
 
     public void createSearchAll() {
         bills = null;
@@ -4233,6 +4348,45 @@ public class SearchController implements Serializable {
 
         return d;
     }
+    
+    private List<BillItem> fetchCashTransactionHistorys(Item i, Date fd, Date td, boolean handOver) {
+        double d = 0.0;
+        System.out.println("dep = " + i.getName());
+        String sql;
+        Map m = new HashMap();
+
+        sql = " Select bi From BillItem bi "
+                + " join bi.bill b "
+                + " join bi.cashTransactionHistory cth where "
+                + " b.retired=false "
+                + " and b.billType in :bts "
+                + " and bi.deptId=:dep ";
+
+        if (handOver) {
+            sql += " and b.cancelled!=true "
+                    + " and ((bi.createdAt between :fromDate and :toDate and b.toWebUser is null) "
+                    + " or (bi.fromTime between :fromDate and :toDate and b.toWebUser is not null)) ";
+        } else {
+            sql += " and bi.fromTime between :fromDate and :toDate";
+        }
+        sql += " order by cth.id ";
+
+        m.put("toDate", td);
+        m.put("fromDate", fd);
+        m.put("dep", i.getName());
+        if (handOver) {
+            m.put("bts", Arrays.asList(new BillType[]{BillType.HandOver}));
+        } else {
+            m.put("bts", Arrays.asList(new BillType[]{BillType.CashIn, BillType.DrawerAdjustment,}));
+        }
+
+        List<BillItem> billItems = getBillItemFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
+        System.out.println("m = " + m);
+        System.out.println("sql = " + sql);
+        System.out.println("cth = " + billItems.size());
+
+        return billItems;
+    }
 
     private List<Bill> createBillTable(Institution institution, BillType[] billTypes, WebUser user, String s) {
         List<Bill> list = new ArrayList<>();
@@ -4352,6 +4506,82 @@ public class SearchController implements Serializable {
         System.out.println("bill list.size() = " + list.size());
         return list;
     }
+    
+    private List<BillItem> createBillItemTable(Institution institution, BillType[] billTypes, WebUser user, String s, PaymentMethod pm,
+            Department toDep, WebUser fromWU, WebUser toWU, String netVal) {
+        List<BillItem> list = new ArrayList<>();
+        String sql;
+        Map m = new HashMap();
+
+        sql = "select bi from BillItem bi join bi.bill b where "
+                + " b.retired=false "
+                + " and b.createdAt between :fromDate and :toDate ";
+
+        if (s != null && !s.equals("")) {
+            sql += s;
+        }
+
+        if (!netVal.equals("") && netVal != null) {
+            sql += " and (bi.netValue=:netVal or bi.netValue=:netVal1)";
+            m.put("netVal", Double.parseDouble(netVal));
+            m.put("netVal1", 0 - Double.parseDouble(netVal));
+        }
+
+        if (institution != null) {
+            sql += " and b.institution=:ins ";
+            m.put("ins", institution);
+        }
+
+        if (billTypes != null) {
+            sql += " and b.billType in :bts ";
+            m.put("bts", Arrays.asList(billTypes));
+        }
+
+        if (user != null) {
+            sql += " and b.creater=:w ";
+            m.put("w", user);
+        }
+
+        if (toWU != null) {
+            sql += " and b.toWebUser=:tw ";
+            m.put("tw", toWU);
+        }
+
+        if (fromWU != null) {
+            sql += " and b.fromWebUser=:fw ";
+            m.put("fw", fromWU);
+        }
+
+        if (toDep != null) {
+            sql += " and b.fromDepartment=:fd ";
+            m.put("fd", toDep);
+        }
+
+        if (pm != null) {
+            sql += " and b.paymentMethod=:pm ";
+            m.put("pm", pm);
+        }
+
+        if (getSearchKeyword().getBillNo() != null && !getSearchKeyword().getBillNo().trim().equals("")) {
+            sql += " and  (upper(b.insId) like :billNo )";
+            m.put("billNo", "%" + getSearchKeyword().getBillNo().trim().toUpperCase() + "%");
+        }
+
+//        if (getSearchKeyword().getNetTotal() != null && !getSearchKeyword().getNetTotal().trim().equals("")) {
+//            sql += " and  (upper(b.netTotal) like :total )";
+//            m.put("total", "%" + getSearchKeyword().getNetTotal().trim().toUpperCase() + "%");
+//        }
+        sql += " order by b.createdAt desc  ";
+//    
+        m.put("toDate", getToDate());
+        m.put("fromDate", getFromDate());
+
+        System.err.println("Sql " + sql);
+        System.err.println("m " + m);
+        list = getBillItemFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
+        System.out.println("bill list.size() = " + list.size());
+        return list;
+    }
 
     private List<Double> openningBalanceRow() {
         List<Double> ls = new ArrayList<>();
@@ -4423,6 +4653,38 @@ public class SearchController implements Serializable {
 
     public void setWebUserController(WebUserController webUserController) {
         this.webUserController = webUserController;
+    }
+
+    public List<BillItem> getBillItemsSummery() {
+        return billItemsSummery;
+    }
+
+    public void setBillItemsSummery(List<BillItem> billItemsSummery) {
+        this.billItemsSummery = billItemsSummery;
+    }
+
+    public List<BillItem> getBillItemsHandover() {
+        return billItemsHandover;
+    }
+
+    public void setBillItemsHandover(List<BillItem> billItemsHandover) {
+        this.billItemsHandover = billItemsHandover;
+    }
+
+    public double getTotSummary() {
+        return totSummary;
+    }
+
+    public void setTotSummary(double totSummary) {
+        this.totSummary = totSummary;
+    }
+
+    public double getTotHandOver() {
+        return totHandOver;
+    }
+
+    public void setTotHandOver(double totHandOver) {
+        this.totHandOver = totHandOver;
     }
 
 //     public List<Bill> getInstitutionPaymentBills() {

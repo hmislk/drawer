@@ -1,0 +1,208 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ui:define name="content">
+        <h:form>
+            <p:panel >
+                <f:facet name="header">
+                    <h:panelGrid columns="1" >
+                        <h:panelGrid columns="2" >
+                            <h:outputLabel value="From Date"/>
+                            <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" 
+                                        navigator="false" pattern="dd MMMM yyyy hh mm ss a" />
+                            <h:outputLabel value="Book"/>
+                            <p:autoComplete id="lstSelect1"  size="10" value="#{searchController.reportKeyWord.item}" 
+                                            forceSelection="true"
+                                            style="min-width: 223px"
+                                            completeMethod="#{summeryController.completeSummery}" 
+                                            var="myItem" itemValue="#{myItem}" itemLabel="#{myItem.name}" >
+                                <p:column headerText="Item">
+                                    <h:outputLabel value="#{myItem.name}" ></h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Department">
+                                    <h:outputLabel value="#{myItem.department.name}" ></h:outputLabel>
+                                </p:column>
+                                <p:column headerText="Institution">
+                                    <h:outputLabel value="#{myItem.institution.name}" ></h:outputLabel>
+                                </p:column>
+                            </p:autoComplete>
+                        </h:panelGrid>
+                        <h:panelGrid columns="3" >
+                            <p:commandButton id="btnSearch" ajax="false" value="Search" action="#{searchController.createCashBook3DErrorCheckDetails()}"/>
+                            <p:commandButton value="Print" ajax="false" >
+                                <p:printer target="gpBillPreview" ></p:printer>
+                            </p:commandButton>
+                            <p:commandButton value="Excel" ajax="false">
+                                <pe:exporter type="xlsx" target="tbl1,tbl12" fileName="Cash Book Details" />
+                            </p:commandButton>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </f:facet>
+
+                <p:panel id="gpBillPreview" styleClass="noBorder summeryBorder" >
+                    <p:dataTable id="tbl1" value="#{searchController.billItemsSummery}" var="bi" rowIndexVar="i">
+                        <f:facet name="header">
+                            <h:outputText value="Cash Book"/><br></br>
+                            <h:outputText value="Date - "/>
+                            <h:outputText value="#{searchController.reportKeyWord.fromDate}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </f:facet>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="No"/>
+                            </f:facet>
+                            <h:outputText value="#{i+1}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Bill No"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.insId}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="From"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.fromWebUser.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="To"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.toWebUser.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Created At"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.createdAt}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="From Time"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.fromTime}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="To Time"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.toTime}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Summery No"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.agentRefNo}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Value"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.netValue}"  style="float: right;" >
+                                <f:convertNumber pattern="#,##0.00" />
+                            </h:outputText>
+                            <f:facet name="footer">
+                                <h:outputText value="#{searchController.totSummary}" style="float: right;" >
+                                    <f:convertNumber pattern="#,##0.00" />
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:dataTable id="tbl12" value="#{searchController.billItemsHandover}" var="bi" rowIndexVar="i">
+                        <f:facet name="header">
+                            <h:outputText value="Cash Book"/><br></br>
+                            <h:outputText value="Date - "/>
+                            <h:outputText value="#{searchController.reportKeyWord.fromDate}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </f:facet>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="No"/>
+                            </f:facet>
+                            <h:outputText value="#{i+1}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Bill No"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.insId}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="From"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.fromWebUser.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="To"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.toWebUser.webUserPerson.name}" />
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Created At"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.bill.createdAt}" >
+                                <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column >
+                            <f:facet name="header">
+                                <h:outputText value="Date"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.fromTime}" >
+                                <f:convertDateTime pattern="yyyy MM dd" />
+                            </h:outputText>
+                        </p:column>
+                        <!--                        <p:column >
+                                                    <f:facet name="header">
+                                                        <h:outputText value="To Time"/>
+                                                    </f:facet>
+                                                    <h:outputText value="#{bi.toTime}" />
+                                                </p:column>-->
+                        <!--                        <p:column >
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Summery No"/>
+                                                    </f:facet>
+                                                    <h:outputText value="#{bi.agentRefNo}" />
+                                                </p:column>-->
+                        <p:column style="text-align: left;" >
+                            <f:facet name="header">
+                                <h:outputText value="Value"/>
+                            </f:facet>
+                            <h:outputText value="#{bi.netValue}" style="float: right;" >
+                                <f:convertNumber pattern="#,##0.00" />
+                            </h:outputText>
+                            <f:facet name="footer">
+                                <h:outputText value="#{searchController.totHandOver}" style="float: right;" >
+                                    <f:convertNumber pattern="#,##0.00" />
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+
+
+            </p:panel>
+        </h:form>
+    </ui:define>  
+
+</ui:composition>
+

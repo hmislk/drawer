@@ -64,6 +64,18 @@
                                 <p:dataTable id="tblBills" value="#{billSearch.bill.billItems}" var="bi" >
                                     <p:column>
                                         <f:facet name="header" >
+                                            <p:outputLabel value="ID" />
+                                        </f:facet>
+                                        <p:outputLabel value="#{bi.id}" />
+                                    </p:column>
+                                    <p:column>
+                                        <f:facet name="header" >
+                                            <p:outputLabel value="Ref. BillItem ID" />
+                                        </f:facet>
+                                        <p:outputLabel value="#{bi.referanceBillItem.id}" />
+                                    </p:column>
+                                    <p:column>
+                                        <f:facet name="header" >
                                             <p:outputLabel value="Name" />
                                         </f:facet>
                                         <p:outputLabel value="#{bi.item.name}" />

@@ -51,7 +51,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.joda.time.LocalDateTime;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.model.LazyDataModel;
 
@@ -373,18 +372,18 @@ public class PharmacyBillSearch implements Serializable {
         String subject;
         subject = " An Order From " + bill.getReferenceBill().getDepartment().getName();
 
-        boolean ok = emailController.sendEmail(bill.getToInstitution().getEmail(),
-                bill.getReferenceBill().getDepartment().getEmail(),
-                subject,
-                html,
-                bill.getReferenceBill().getDepartment().getGmailUserName(),
-                bill.getReferenceBill().getDepartment().getGmailPassword());
+//        boolean ok = emailController.sendEmail(bill.getToInstitution().getEmail(),
+//                bill.getReferenceBill().getDepartment().getEmail(),
+//                subject,
+//                html,
+//                bill.getReferenceBill().getDepartment().getGmailUserName(),
+//                bill.getReferenceBill().getDepartment().getGmailPassword());
 
-        if (ok) {
-            JsfUtil.addSuccessMessage("Email Sent");
-        } else {
-            JsfUtil.addErrorMessage("EMail NOT Sent");
-        }
+//        if (ok) {
+//            JsfUtil.addSuccessMessage("Email Sent");
+//        } else {
+//            JsfUtil.addErrorMessage("EMail NOT Sent");
+//        }
 
     }
 

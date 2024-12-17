@@ -14,10 +14,10 @@
                     <h:panelGrid columns="1" >
                         <h:panelGrid columns="2" >
                             <h:outputLabel value="From Date"/>
-                            <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a" >      
+                            <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="true" pattern="dd MMMM yyyy hh mm ss a" >      
                             </p:calendar>
                             <h:outputLabel value="To Date"/>
-                            <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a" >                                                                              
+                            <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="true" pattern="dd MMMM yyyy hh mm ss a" >                                                                              
                             </p:calendar>
                             <h:outputLabel value="Detail"/>
                             <p:selectBooleanCheckbox value="#{searchController.onlyRealized}" />

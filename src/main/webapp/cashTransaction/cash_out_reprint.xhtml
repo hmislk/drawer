@@ -5,6 +5,7 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
       xmlns:bi="http://java.sun.com/jsf/composite/cashTransaction">
 
     <body>
@@ -43,24 +44,15 @@
                                 </p:panel>
                             </p:panelGrid>
                             <p:panel header="Bill Items">
-                                <p:dataTable value="#{billSearch.bill.billItems}" var="bi" >
+                                <p:commandButton value="Excel" ajax="false">
+                                    <pe:exporter type="xlsx" target="tbl1" fileName="Cash Book" />
+                                </p:commandButton>
+                                <p:dataTable id="tbl1" value="#{billSearch.bill.billItems}" var="bi" >
                                     <p:column>
                                         <f:facet name="header" >
                                             <p:outputLabel value="ID" />
                                         </f:facet>
                                         <p:outputLabel value="#{bi.id}" />
-                                    </p:column>
-                                    <p:column>
-                                        <f:facet name="header" >
-                                            <p:outputLabel value="referanceBillItem ID" />
-                                        </f:facet>
-                                        <p:outputLabel value="#{bi.referanceBillItem.id}" />
-                                    </p:column>
-                                    <p:column>
-                                        <f:facet name="header" >
-                                            <p:outputLabel value="cancelled" />
-                                        </f:facet>
-                                        <p:outputLabel value="#{bi.bill.cancelled}" />
                                     </p:column>
                                     <p:column>
                                         <f:facet name="header" >
@@ -74,6 +66,31 @@
                                         </f:facet>
                                         <p:outputLabel value="#{bi.settled}" />
                                     </p:column>
+                                    <p:column>
+                                        <f:facet name="header" >
+                                            <p:outputLabel value="referanceBillItem ID" />
+                                        </f:facet>
+                                        <p:outputLabel value="#{bi.referanceBillItem.id}" />
+                                    </p:column>
+                                    <p:column>
+                                        <f:facet name="header" >
+                                            <p:outputLabel value="Hand Overed" />
+                                        </f:facet>
+                                        <p:outputLabel value="#{bi.referanceBillItem.handOvered}" />
+                                    </p:column>
+                                    <p:column>
+                                        <f:facet name="header" >
+                                            <p:outputLabel value="Settled" />
+                                        </f:facet>
+                                        <p:outputLabel value="#{bi.referanceBillItem.settled}" />
+                                    </p:column>
+                                    <p:column>
+                                        <f:facet name="header" >
+                                            <p:outputLabel value="Bill Cancelled" />
+                                        </f:facet>
+                                        <p:outputLabel value="#{bi.bill.cancelled}" />
+                                    </p:column>
+                                    
                                     <p:column>
                                         <f:facet name="header" >
                                             <p:outputLabel value="Name" />
