@@ -1035,18 +1035,12 @@ public class BillSearch implements Serializable {
 
                 List<BillItem> items = getBillItemsNew();
                 for (BillItem bi : items) {
-                    System.out.println("bi.isHandOvered() = " + bi.isHandOvered());
-                    System.out.println("bi.getBill().getInsId() = " + bi.getBill().getInsId());
-                    System.out.println("bi.getCreater().getWebUserPerson().getName() = " + bi.getCreater().getWebUserPerson().getName());
                     bi.setHandOvered(false);
                     bi.setHandOverAt(null);
                     bi.setBill(null);
                     bi.setReferenceBill(null);
                     getBillItemFacade().edit(bi);
                     if (bi.getReferanceBillItem() != null) {
-                        System.out.println("bi.getReferanceBillItem().isHandOvered() = " + bi.getReferanceBillItem().isHandOvered());
-                        System.out.println("bi.getReferanceBillItem().getBill().getInsId() = " + bi.getReferanceBillItem().getBill().getInsId());
-                        System.out.println("bi.getReferanceBillItem().getCreater().getWebUserPerson().getName() = " + bi.getReferanceBillItem().getCreater().getWebUserPerson().getName());
                         bi.getReferanceBillItem().setSettled(false);
                         bi.getReferanceBillItem().setSettler(null);
                         bi.getReferanceBillItem().setSettleAt(null);
@@ -1054,7 +1048,6 @@ public class BillSearch implements Serializable {
                         bi.getReferanceBillItem().setHandOverAt(null);
                         getBillItemFacade().edit(bi.getReferanceBillItem());
                     }
-                    System.out.println("bi.isHandOvered() = " + bi.isHandOvered());
                     getBill().getBillItems().remove(bi);
                     getBillFacade().edit(getBill());
                 }
@@ -1115,7 +1108,6 @@ public class BillSearch implements Serializable {
 
                 List<BillItem> items = getBillItemsNew();
                 for (BillItem bi : items) {
-                    System.out.println("bi.getReferanceBillItem() = " + bi.getReferanceBillItem());
                     if (bi.getReferanceBillItem() == null) {
                         if (getBill().getBillType() == BillType.HandOver
                                 && getBill().getPaymentMethod() == PaymentMethod.Cash) {
@@ -1123,11 +1115,7 @@ public class BillSearch implements Serializable {
                         }
                         continue;
                     } 
-                    System.out.println("getBill().getBackwardReferenceBill() = " + getBill().getBackwardReferenceBill());
-                    System.out.println("getBill().getBillType() = " + getBill().getBillType());
-                    System.out.println("getBill().getPaymentMethod() = " + getBill().getPaymentMethod());
                     if (getBill().getBackwardReferenceBill() != null) {
-                        System.out.println("getBill().getBackwardReferenceBill().getBillType() = " + getBill().getBackwardReferenceBill().getBillType());
                     }
 //                    if (getBill().getBackwardReferenceBill() != null && getBill().getBackwardReferenceBill().getBillType() != BillType.HandOver 
                     if (getBill().getBillType() == BillType.HandOver
@@ -1383,9 +1371,7 @@ public class BillSearch implements Serializable {
     private void cancelBillItems(Bill can) {
         List<BillItem> items = getBillItemsNew();
         for (BillItem nB : items) {
-            System.out.println("nB.getItem().getnam = " + nB.getItem());
             if (nB.getItem() != null) {
-                System.out.println("nB.getItem().getnam = " + nB.getItem().getName());
             }
             BillItem b = new BillItem();
             b.setBill(can);
@@ -1631,10 +1617,6 @@ public class BillSearch implements Serializable {
         if (getBill() == null) {
             return new ArrayList<>();
         }
-        System.out.println("getBill().getBillType() = " + getBill().getBillType());
-        System.out.println("getBill().getCreater().getWebUserPerson().getName() = " + getBill().getCreater().getWebUserPerson().getName());
-        System.out.println("getBill().getCreater().getFromWebUser().getName() = " + getBill().getFromWebUser().getWebUserPerson().getName());
-        System.out.println("getBill().getCreater().getToWebUser().getName() = " + getBill().getToWebUser().getWebUserPerson().getName());
 
         List<Bill> items = new ArrayList<>();
         String sql;
@@ -1651,7 +1633,6 @@ public class BillSearch implements Serializable {
         m.put("w", getBill().getCreater());
 
         Bill b = getBillFacade().findFirstBySQL(sql, m, TemporalType.TIMESTAMP);
-        System.out.println("b = " + b);
         m = new HashMap();
         sql = "select b from BilledBill b where (b.billType = :billType or b.billType = :billType2) "
                 + " and b.creater=:w "
@@ -1659,7 +1640,6 @@ public class BillSearch implements Serializable {
                 + " and b.cancelled=false ";
 
         if (b != null) {
-            System.out.println("b.getCreatedAt() = " + b.getCreatedAt());
             sql += " and b.createdAt between :fd and :td ";
             m.put("fd", b.getCreatedAt());
             m.put("td", getBill().getCreatedAt());
@@ -1676,7 +1656,6 @@ public class BillSearch implements Serializable {
         m.put("w", getBill().getCreater());
 
         items = getBillFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
-        System.out.println("items.size() = " + items.size());
         total = 0.0;
         if (getBill().getBillItemsSummery() != null && !getBill().getBillItemsSummery().isEmpty()) {
             for (BillItem bi : getBill().getBillItemsSummery()) {
@@ -1688,7 +1667,6 @@ public class BillSearch implements Serializable {
                 total += bb.getNetTotal();
             }
         }
-        System.out.println("total = " + total);
 
         return items;
     }
@@ -1697,10 +1675,6 @@ public class BillSearch implements Serializable {
         if (getBill() == null) {
             return new ArrayList<>();
         }
-        System.out.println("getBill().getBillType() = " + getBill().getBillType());
-        System.out.println("getBill().getCreater().getWebUserPerson().getName() = " + getBill().getCreater().getWebUserPerson().getName());
-        System.out.println("getBill().getCreater().getFromWebUser().getName() = " + getBill().getFromWebUser().getWebUserPerson().getName());
-        System.out.println("getBill().getCreater().getToWebUser().getName() = " + getBill().getToWebUser().getWebUserPerson().getName());
 
         List<Bill> items = new ArrayList<>();
         String sql;
@@ -1717,14 +1691,12 @@ public class BillSearch implements Serializable {
         m.put("w", getBill().getBackwardReferenceBill().getCreater());
 
         Bill b = getBillFacade().findFirstBySQL(sql, m, TemporalType.TIMESTAMP);
-        System.out.println("b = " + b);
         m = new HashMap();
         sql = "select b from BilledBill b where (b.billType = :billType or b.billType = :billType2 or b.billType = :billType3) "
                 + " and b.creater=:w "
                 + " and b.retired=false ";
 
         if (b != null) {
-            System.out.println("b.getCreatedAt() = " + b.getCreatedAt());
             sql += " and b.createdAt between :fd and :td ";
             m.put("fd", b.getCreatedAt());
             m.put("td", getBill().getBackwardReferenceBill().getCreatedAt());
@@ -1740,7 +1712,6 @@ public class BillSearch implements Serializable {
         m.put("w", getBill().getBackwardReferenceBill().getCreater());
 
         items = getBillFacade().findBySQL(sql, m, TemporalType.TIMESTAMP);
-        System.out.println("items.size() = " + items.size());
         total = 0.0;
         if (getBill().getBackwardReferenceBill().getBillItemsSummery() != null && !getBill().getBackwardReferenceBill().getBillItemsSummery().isEmpty()) {
             for (BillItem bi : getBill().getBackwardReferenceBill().getBillItemsSummery()) {
@@ -1752,7 +1723,6 @@ public class BillSearch implements Serializable {
                 total += bb.getNetTotal();
             }
         }
-        System.out.println("total = " + total);
 
         return items;
     }
@@ -1768,7 +1738,6 @@ public class BillSearch implements Serializable {
 
             billItems = getBillItemFacede().findBySQL(sql);
             // //////System.out.println("sql for bill item search is " + sql);
-            System.out.println("results for bill item search is " + billItems.size());
             if (billItems == null) {
                 billItems = new ArrayList<>();
             }
@@ -1789,7 +1758,6 @@ public class BillSearch implements Serializable {
 
             items = getBillItemFacede().findBySQL(sql);
             // //////System.out.println("sql for bill item search is " + sql);
-            System.out.println("results for bill item search is " + items.size());
         }
 
         return items;

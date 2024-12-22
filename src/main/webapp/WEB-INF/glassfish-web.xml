@@ -3,7 +3,6 @@
 <glassfish-web-app error-url="">
   <context-root>/drawer</context-root>
   <class-loader delegate="true"/>
-  <parameter-encoding default-charset="UTF-8"/>
   <jsp-config>
     <property name="keepgenerated" value="true">
       <description>Keep a copy of the generated servlet class' java code.</description>
