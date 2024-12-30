@@ -88,7 +88,7 @@
 
                         <p:panel>
                             <p:commandButton value="Excel" ajax="false">
-                                <pe:exporter type="xlsx" target="tblBills" fileName="Items_#{drawerAdjustmentController.webUser.webUserPerson.name}_#{drawerAdjustmentController.reportKeyWord.paymentMethod}" />
+                                <p:dataExporter type="xlsx" target="tblBills" fileName="Items_#{drawerAdjustmentController.webUser.webUserPerson.name}_#{drawerAdjustmentController.reportKeyWord.paymentMethod}" />
                             </p:commandButton>
                             <f:facet name="header">
                                 <h:outputLabel value="NOTE"/>
