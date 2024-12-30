@@ -34,7 +34,7 @@
                                 <p:commandButton id="btnSearch" ajax="false" value="login Department Search" action="#{searchController.createGrnChequePayment}"/>
                                 <h:panelGroup >
                                     <p:commandButton actionListener="#{searchController.createGrnChequePayment}" ajax="false" value="Excel" >
-                                        <p:dataExporter type="xlsx" target="tblBills" fileName="report_grn_detail"  />
+                                        <p:dataExporter type="xls" target="tblBills" fileName="report_grn_detail"  />
                                     </p:commandButton>
 
                                     <p:commandButton ajax="false" value="Print" >
