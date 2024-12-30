@@ -41,7 +41,7 @@
                                      action="#{commonReportSession.listPurchaseAndGrnBills()}"></p:commandButton>
 
                     <p:commandButton ajax="false" value="Excel" styleClass="noPrintButton" style="float: right;" >
-                        <p:dataExporter type="xlsx" target="tblBills" fileName="Purchase/GRN Bill List - #{commonReportSession.department.name} - #{commonReportSession.dealer.name}"  ></p:dataExporter>
+                        <p:dataExporter type="xls" target="tblBills" fileName="Purchase/GRN Bill List - #{commonReportSession.department.name} - #{commonReportSession.dealer.name}"  ></p:dataExporter>
                     </p:commandButton>
 
                     <p:commandButton ajax="false" value="Print" styleClass="noPrintButton" >

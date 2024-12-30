@@ -38,7 +38,7 @@
                             </p:commandButton>
                             <p:commandButton ajax="false" value="Excel" styleClass="noPrintButton" style="float: right;"
                                              disabled="#{reportsStockVariant.recordedBill.id eq null}">
-                                <p:dataExporter type="xlsx" target="tbl" fileName="Category_report"  />
+                                <p:dataExporter type="xls" target="tbl" fileName="Category_report"  />
                             </p:commandButton>  
                             <p:commandButton ajax="false" value="Save Records"
                                              action="#{reportsStockVariant.saveRecord()}"

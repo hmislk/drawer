@@ -45,7 +45,7 @@
                             </p:panelGrid>
                             <p:panel header="Bill Items">
                                 <p:commandButton value="Excel" ajax="false">
-                                    <p:dataExporter type="xlsx" target="tbl1" fileName="Cash Book" />
+                                    <p:dataExporter type="xls" target="tbl1" fileName="Cash Book" />
                                 </p:commandButton>
                                 <p:dataTable id="tbl1" value="#{billSearch.bill.billItems}" var="bi" >
                                     <p:column>
