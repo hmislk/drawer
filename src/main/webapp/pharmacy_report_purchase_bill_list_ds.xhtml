@@ -46,7 +46,7 @@
                                      action="#{commonReportSession.listPurchaseAndGrnBillsDailySummery()}"/>  
 
                     <p:commandButton ajax="false" value="Excel" styleClass="noPrintButton" style="float: right;" >
-                        <p:dataExporter type="xlsx" target="tblBills" fileName="Approximate Bill-vice Gross Profit Report #{commonReportSession.department.name}"  />
+                        <p:dataExporter type="xls" target="tblBills" fileName="Approximate Bill-vice Gross Profit Report #{commonReportSession.department.name}"  />
                     </p:commandButton>
 
                     <p:commandButton ajax="false" value="Print" styleClass="noPrintButton" >
