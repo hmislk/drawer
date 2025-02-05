@@ -85,7 +85,7 @@
                                 <p:commandButton id="btnSearch1" ajax="false" value="Search By Logged User" action="#{searchController.createTableHandOverApproveLoggedUser()}"/>
                                 <p:commandButton id="btnSearch2" ajax="false" value="Search All" action="#{searchController.createTableHandOverApprove()}"/>
                                 <p:commandButton value="Excel" ajax="false">
-                                    <p:dataExporter type="xlsx" target="tblBills" fileName="Cash Book" />
+                                    <p:dataExporter type="xls" target="tblBills" fileName="Cash Book" />
                                 </p:commandButton>
                                 <p:commandButton id="btnSearch3" ajax="false" value="Search By Item" action="search_hand_over_bill_to_approve_1" style="color: red"/>
                             </h:panelGrid>

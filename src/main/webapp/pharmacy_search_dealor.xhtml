@@ -25,7 +25,7 @@
                                         completeMethod="#{dealerController.completeDealor}" var="vt" itemLabel="#{vt.name}" itemValue="#{vt}" />
                         <p:commandButton value="Process" action="#{dealorDueController.fillSingleDealerTransactions()}" ajax="false"  />
                         <p:commandButton value="Excel" action="#{dealorDueController.fillSingleDealerTransactions()}" ajax="false">
-                            <p:dataExporter type="xlsx" target="tbl" fileName="Detailed_Dealer_Listing"  />
+                            <p:dataExporter type="xls" target="tbl" fileName="Detailed_Dealer_Listing"  />
                         </p:commandButton>
                     </h:panelGrid>
 
