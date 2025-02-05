@@ -573,16 +573,17 @@ public class SessionController implements Serializable, HttpSessionListener {
     }
 
     public String getPrimeTheme() {
-        if (primeTheme == null || primeTheme.equals("")) {
-            primeTheme = "bootstrap-light-outlined";
-        }
-        if (getLoggedUser() != null) {
-            if (getLoggedUser().getPrimeTheme() != null) {
-                if (!getLoggedUser().getPrimeTheme().equals("")) {
-                    return getLoggedUser().getPrimeTheme();
-                }
-            }
-        }
+//        if (primeTheme == null || primeTheme.equals("")) {
+//            primeTheme = "bootstrap-light-outlined";
+//        }
+//        if (getLoggedUser() != null) {
+//            if (getLoggedUser().getPrimeTheme() != null) {
+//                if (!getLoggedUser().getPrimeTheme().equals("")) {
+//                    return getLoggedUser().getPrimeTheme();
+//                }
+//            }
+//        }
+        primeTheme = "bootstrap-light-outlined";
         return primeTheme;
     }
 
