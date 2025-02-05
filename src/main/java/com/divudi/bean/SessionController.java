@@ -573,7 +573,6 @@ public class SessionController implements Serializable, HttpSessionListener {
     }
 
     public String getPrimeTheme() {
-        return "bootstrap-light-outlined";
 //        if (primeTheme == null || primeTheme.equals("")) {
 //            primeTheme = "bootstrap-light-outlined";
 //        }
@@ -584,7 +583,8 @@ public class SessionController implements Serializable, HttpSessionListener {
 //                }
 //            }
 //        }
-//        return primeTheme;
+        primeTheme = "bootstrap-light-outlined";
+        return primeTheme;
     }
 
     public void setPrimeTheme(String primeTheme) {
