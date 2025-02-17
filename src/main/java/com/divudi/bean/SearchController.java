@@ -1006,7 +1006,12 @@ public class SearchController implements Serializable {
     }
 
     public void startCashBookGeneration() {
-        Executors.newSingleThreadExecutor().submit(this::generateCashBook3DAccountant);
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+            @Override
+            public void run() {
+                generateCashBook3DAccountant();
+            }
+        });
     }
 
     private void generateCashBook3DAccountant() {
@@ -1070,7 +1075,7 @@ public class SearchController implements Serializable {
             columnIndex++;
         }
     }
-    
+
     private void generateColumnModels(CashBookRowBundle bundle) {
         Long columnIndex = 0L;
         for (String header : headers) {
