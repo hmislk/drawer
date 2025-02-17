@@ -14,20 +14,24 @@
                     <h:panelGrid columns="1">
                         <h:panelGrid columns="2">
                             <h:outputLabel value="From Date"/>
-                            <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a"/>      
+                            <h:outputLabel id="fromDate" value="#{searchController.bundle.fromDate}" >
+                                <f:convertDateTime pattern="dd MMMM yyyy hh mm ss a" ></f:convertDateTime>
+                            </h:outputLabel>
                             <h:outputLabel value="To Date"/>
-                            <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a"/>                                                                              
+                            <h:outputLabel id="toDate" value="#{searchController.bundle.toDate}" >
+                                <f:convertDateTime pattern="dd MMMM yyyy hh mm ss a" ></f:convertDateTime>
+                            </h:outputLabel>
                             <h:outputLabel value="Detail"/>
-                            <p:selectBooleanCheckbox value="#{searchController.onlyRealized}" />
-                            <h:outputLabel value="Detail"/>
+                            <h:outputLabel value="#{searchController.bundle.onlyRealized?'Yes':'No'}" />
+<!--                            <h:outputLabel value="Detail"/>
                             <p:selectOneRadio value="#{searchController.reportKeyWord.string}">
                                 <f:selectItem itemValue="0" itemLabel="All"/>
                                 <f:selectItem itemValue="1" itemLabel="Cashier"/>
                                 <f:selectItem itemValue="2" itemLabel="Cashier RPS"/>
-                            </p:selectOneRadio>
+                            </p:selectOneRadio>-->
                         </h:panelGrid>
                         <h:panelGrid columns="3">
-                            <p:commandButton id="btnSearch" ajax="false" value="Search" action="#{searchController.createCashBook3DAccountant()}"/>
+                            <!--<p:commandButton id="btnSearch" ajax="false" value="Search" action="#{searchController.createCashBook3DAccountant()}"/>-->
                             <p:commandButton value="Print" ajax="false">
                                 <p:printer target="gpBillPreview"/>
                             </p:commandButton>
@@ -39,15 +43,15 @@
                 </f:facet>
 
                 <p:panel id="gpBillPreview" styleClass="noBorder summeryBorder">
-                    <p:dataTable id="tbl1" value="#{searchController.cashBookRows}" var="r" rowIndexVar="i">
+                    <p:dataTable id="tbl1" value="#{searchController.bundle.cashBookRows}" var="r" rowIndexVar="i">
                         <f:facet name="header">
                             <h:outputText value="Cash Book"/><br/>
                             <h:outputText value="From - "/>
-                            <h:outputText value="#{searchController.reportKeyWord.fromDate}">
+                            <h:outputText value="#{searchController.bundle.fromDate}">
                                 <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a"/>
                             </h:outputText>
                             <h:outputText value=" - To - "/>
-                            <h:outputText value="#{searchController.reportKeyWord.toDate}">
+                            <h:outputText value="#{searchController.bundle.toDate}">
                                 <f:convertDateTime pattern="yyyy MM dd  hh:mm:ss a"/>
                             </h:outputText>
                         </f:facet>
@@ -81,25 +85,25 @@
                             </f:facet>
                             <h:outputText value="#{r.string4}"/>
                         </p:column>
-                        <p:column rendered="#{searchController.onlyRealized}">
+                        <p:column rendered="#{searchController.bundle.onlyRealized}">
                             <f:facet name="header">
                                 <h:outputText value="From Time"/>
                             </f:facet>
                             <h:outputText value="#{r.string5}"/>
                         </p:column>
-                        <p:column rendered="#{searchController.onlyRealized}">
+                        <p:column rendered="#{searchController.bundle.onlyRealized}">
                             <f:facet name="header">
                                 <h:outputText value="To Time"/>
                             </f:facet>
                             <h:outputText value="#{r.string6}"/>
                         </p:column>
-                        <p:column rendered="#{searchController.onlyRealized}">
+                        <p:column rendered="#{searchController.bundle.onlyRealized}">
                             <f:facet name="header">
                                 <h:outputText value="Summery No"/>
                             </f:facet>
                             <h:outputText value="#{r.string7}"/>
                         </p:column>
-                        <p:columns value="#{searchController.columnModels}" var="column" styleClass="numberCol">
+                        <p:columns value="#{searchController.bundle.columnModels}" var="column" styleClass="numberCol">
                             <f:facet name="header">
                                 <h:outputText value="#{column.header}"/>
                             </f:facet>

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="content">
+        <h:form>
+            <p:panel header="Generate">
+                <p:panelGrid columns="2">
+                    <h:outputLabel value="From Date"/>
+                    <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a"/>      
+                    <h:outputLabel value="To Date"/>
+                    <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a"/>                                                                              
+                    <h:outputLabel value="Detail"/>
+                    <p:selectBooleanCheckbox value="#{searchController.onlyRealized}" />
+                    <h:outputLabel value="Detail"/>
+                    <p:selectOneRadio value="#{searchController.reportKeyWord.string}">
+                        <f:selectItem itemValue="0" itemLabel="All"/>
+                        <f:selectItem itemValue="1" itemLabel="Cashier"/>
+                        <f:selectItem itemValue="2" itemLabel="Cashier RPS"/>
+                    </p:selectOneRadio>
+                    <p:spacer></p:spacer>
+                    <p:commandButton id="btnSearch" value="Generate" action="#{searchController.startCashBookGeneration()}"
+                                     ajax="true" update="messages" />
+
+                </p:panelGrid>
+                <f:facet name="footer" >
+                    <p:messages id="messages" showDetail="true" autoUpdate="true"/>
+                </f:facet>
+            </p:panel>
+        </h:form>
+    </ui:define>  
+</ui:composition>
