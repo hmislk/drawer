@@ -53,7 +53,14 @@ import com.divudi.facade.util.JsfUtil;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import org.primefaces.context.PrimeFacesContext;
+import org.primefaces.context.PrimeFacesContextFactory;
+import org.primefaces.extensions.application.PrimeFacesExtensionsResource;
 
 /**
  *
@@ -80,6 +87,8 @@ public class SearchController implements Serializable {
     private List<CashBookRow> cashBookRows;
     private List<BillItem> billItemsSummery;
     private List<BillItem> billItemsHandover;
+    private List<CashBookRowBundle> bundles;
+    private CashBookRowBundle bundle;
 
     private double totSummary;
     private double totHandOver;
@@ -1005,16 +1014,41 @@ public class SearchController implements Serializable {
         processCompleted = true; // Mark process as completed
     }
 
-    public void startCashBookGeneration() {
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                generateCashBook3DAccountant();
-            }
-        });
+    public void listGeneratedCashbooks() {
+        System.out.println("listGeneratedCashbooks");
+
+        String jpql = "SELECT b FROM CashBookRowBundle b "
+                + "WHERE COALESCE(b.retired, false) <> :ret "
+                + "AND b.fromDate >= :fromDate "
+                + "AND b.toDate <= :toDate";
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("ret", true);  // Exclude records where retired is true
+        parameters.put("fromDate", fromDate);
+        parameters.put("toDate", toDate);
+
+        bundles = cashBookRowBundleFacade.findBySQL(jpql, parameters, TemporalType.TIMESTAMP);
+        System.out.println("bundles = " + bundles);
     }
 
-    private void generateCashBook3DAccountant() {
+    public String viewGenerateCashbook() {
+        if (bundle == null) {
+            JsfUtil.addErrorMessage("Nothing selected");
+        }
+        return "view_cash_book_summery_accountant";
+    }
+
+    public void startCashBookGeneration() {
+        System.out.println("startCashBookGeneration");
+        // Display success message using JsfUtil
+        JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
+        // Start asynchronous process
+        generateCashBook3DAccountant();
+    }
+
+    @Asynchronous
+    public Future<String> generateCashBook3DAccountant() {
+        System.out.println("generateCashBook3DAccountant started at " + new Date());
 
         CashBookRowBundle bundle = new CashBookRowBundle();
         bundle.setFromDate(reportKeyWord.getFromDate());
@@ -1026,16 +1060,13 @@ public class SearchController implements Serializable {
 
         columnModels = new ArrayList<>();
         fetchHeadersAccountant();
-//        fetchCashBook3D();
         generateCashBook3D(bundle);
 
         CashBookRow closingBalanceRow = new CashBookRow();
-
         closingBalanceRow.setString1("Closing Balance");
 
         int rowCount = bundle.getCashBookRows().size();
         int columnCount = headers.size();
-
         List<CashBookTotal> totalsList = new ArrayList<>();
 
         for (int colIndex = 0; colIndex < columnCount; colIndex++) {
@@ -1053,15 +1084,15 @@ public class SearchController implements Serializable {
         }
 
         closingBalanceRow.setTotals(totalsList);
-//        cashBookRows.add(closingBalanceRow);
         bundle.getCashBookRows().add(closingBalanceRow);
-
-//        createColumnModels();
         generateColumnModels(bundle);
+
         bundle.setCompletedAt(new Date());
         cashBookRowBundleFacade.edit(bundle);
 
-        System.out.println("End = " + new Date());
+        System.out.println("generateCashBook3DAccountant completed at " + new Date());
+
+        return new AsyncResult<>("Completed");
     }
 
     private void createColumnModels() {
@@ -5195,6 +5226,22 @@ public class SearchController implements Serializable {
 
     public void setReportKeyWord(ReportKeyWord reportKeyWord) {
         this.reportKeyWord = reportKeyWord;
+    }
+
+    public List<CashBookRowBundle> getBundles() {
+        return bundles;
+    }
+
+    public void setBundles(List<CashBookRowBundle> bundles) {
+        this.bundles = bundles;
+    }
+
+    public CashBookRowBundle getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(CashBookRowBundle bundle) {
+        this.bundle = bundle;
     }
 
 }
