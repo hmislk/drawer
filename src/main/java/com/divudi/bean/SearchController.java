@@ -37,6 +37,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.TemporalType;
 import com.divudi.entity.CancelledBill;
+import com.divudi.entity.CashBookRow;
+import com.divudi.entity.CashBookTotal;
 import com.divudi.entity.Department;
 import com.divudi.entity.Item;
 import com.divudi.entity.Summery;
@@ -47,6 +49,8 @@ import com.divudi.facade.CashTransactionHistoryFacade;
 import com.divudi.facade.util.JsfUtil;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
+import javax.ejb.Asynchronous;
 
 /**
  *
@@ -61,6 +65,7 @@ public class SearchController implements Serializable {
     Date toDate;
     private int maxResult = 50;
     private BillType billType;
+    private volatile boolean processCompleted = false;
     ////////////
     private List<Bill> bills;
     private List<Bill> selectedBills;
@@ -72,7 +77,7 @@ public class SearchController implements Serializable {
     private List<CashBookRow> cashBookRows;
     private List<BillItem> billItemsSummery;
     private List<BillItem> billItemsHandover;
-    
+
     private double totSummary;
     private double totHandOver;
     ////////////
@@ -915,73 +920,141 @@ public class SearchController implements Serializable {
         fetchHeaders();
         fetchCashBook3D();
 
-        CashBookRow row = new CashBookRow();
-        row.setString1("Closing Balance");
-        int i = cashBookRows.size();
-        int j = headers.size();
-        System.out.println("j = " + j);
-//        row.setCategoryName("Total");
-        List<Double> list = new ArrayList<>();
-//        System.out.println("Time 1 = " + new Date());
-        for (int k = 0; k < j; k++) {
+        CashBookRow closingBalanceRow = new CashBookRow();
+        closingBalanceRow.setString1("Closing Balance");
+
+        int rowCount = cashBookRows.size();
+        int columnCount = headers.size();
+        System.out.println("columnCount = " + columnCount);
+
+        List<CashBookTotal> totalsList = new ArrayList<>();
+
+        for (int colIndex = 0; colIndex < columnCount; colIndex++) {
             double total = 0.0;
-            for (int l = 0; l < i; l++) {
-                total += cashBookRows.get(l).getTotals().get(k);
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
             }
-            list.add((double) total);
-        }
-        row.setTotals(list);
-//        System.out.println("Time 2 = " + new Date());
-        cashBookRows.add(row);
 
-        Long l = 0l;
-        for (String h : headers) {
-            ColumnModel c = new ColumnModel();
-            c.setHeader(h);
-            c.setProperty(l.toString());
-            columnModels.add(c);
-            l++;
+            CashBookTotal totalEntity = new CashBookTotal();
+            totalEntity.setValue(total);
+            totalEntity.setCashBookRow(closingBalanceRow);
+            totalsList.add(totalEntity);
         }
-//        commonController.printReportDetails(fromDate, toDate, startTime, "OPD Billitem with bill");
 
+        closingBalanceRow.setTotals(totalsList);
+        cashBookRows.add(closingBalanceRow);
+
+        Long columnIndex = 0L;
+        for (String header : headers) {
+            ColumnModel column = new ColumnModel();
+            column.setHeader(header);
+            column.setProperty(columnIndex.toString());
+            columnModels.add(column);
+            columnIndex++;
+        }
     }
 
+    public boolean isProcessCompleted() {
+        return processCompleted;
+    }
+
+//    @Asynchronous
     public void createCashBook3DAccountant() {
+        System.out.println("createCashBook3DAccountant");
+        System.out.println("Start = " + new Date());
+
+        processCompleted = false; // Reset process status
         columnModels = new ArrayList<>();
         fetchHeadersAccountant();
         fetchCashBook3D();
 
-        CashBookRow row = new CashBookRow();
-        row.setString1("Closing Balance");
-        int i = cashBookRows.size();
-        int j = headers.size();
-        System.out.println("j = " + j);
-//        row.setCategoryName("Total");
-        List<Double> list = new ArrayList<>();
-//        System.out.println("Time 1 = " + new Date());
-        for (int k = 0; k < j; k++) {
+        CashBookRow closingBalanceRow = new CashBookRow();
+        closingBalanceRow.setString1("Closing Balance");
+
+        int rowCount = cashBookRows.size();
+        int columnCount = headers.size();
+
+        List<CashBookTotal> totalsList = new ArrayList<>();
+
+        for (int colIndex = 0; colIndex < columnCount; colIndex++) {
+            System.out.println("colIndex = " + colIndex);
             double total = 0.0;
-            for (int l = 0; l < i; l++) {
-                total += cashBookRows.get(l).getTotals().get(k);
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
             }
-            list.add((double) total);
-        }
-        row.setTotals(list);
-//        System.out.println("Time 2 = " + new Date());
-        cashBookRows.add(row);
 
-        Long l = 0l;
-        for (String h : headers) {
-            ColumnModel c = new ColumnModel();
-            c.setHeader(h);
-            c.setProperty(l.toString());
-            columnModels.add(c);
-            l++;
+            CashBookTotal totalEntity = new CashBookTotal();
+            totalEntity.setValue(total);
+            totalEntity.setCashBookRow(closingBalanceRow);
+            totalsList.add(totalEntity);
         }
-//        commonController.printReportDetails(fromDate, toDate, startTime, "OPD Billitem with bill");
 
+        closingBalanceRow.setTotals(totalsList);
+        cashBookRows.add(closingBalanceRow);
+
+        createColumnModels();
+
+        System.out.println("End = " + new Date());
+        processCompleted = true; // Mark process as completed
     }
-    
+
+    public void startCashBookGeneration() {
+        Executors.newSingleThreadExecutor().submit(this::generateCashBook3DAccountant);
+    }
+
+    private void generateCashBook3DAccountant() {
+        columnModels = new ArrayList<>();
+        fetchHeadersAccountant();
+        fetchCashBook3D();
+
+        CashBookRow closingBalanceRow = new CashBookRow();
+        closingBalanceRow.setFromDate(reportKeyWord.getFromDate());
+        closingBalanceRow.setToDate(reportKeyWord.getToDate());
+        closingBalanceRow.setOnlyRealized(onlyRealized);
+        
+        closingBalanceRow.setString1("Closing Balance");
+
+        int rowCount = cashBookRows.size();
+        int columnCount = headers.size();
+
+        List<CashBookTotal> totalsList = new ArrayList<>();
+
+        for (int colIndex = 0; colIndex < columnCount; colIndex++) {
+            System.out.println("colIndex = " + colIndex);
+            double total = 0.0;
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
+            }
+
+            CashBookTotal totalEntity = new CashBookTotal();
+            totalEntity.setValue(total);
+            totalEntity.setCashBookRow(closingBalanceRow);
+            totalsList.add(totalEntity);
+        }
+
+        closingBalanceRow.setTotals(totalsList);
+        cashBookRows.add(closingBalanceRow);
+
+        createColumnModels();
+
+        System.out.println("End = " + new Date());
+    }
+
+    private void createColumnModels() {
+        Long columnIndex = 0L;
+        for (String header : headers) {
+            System.out.println("header = " + header);
+            ColumnModel column = new ColumnModel();
+            column.setHeader(header);
+            column.setProperty(columnIndex.toString());
+            columnModels.add(column);
+            columnIndex++;
+        }
+    }
+
     public void createCashBook3DErrorCheckDetails() {
         billItems = new ArrayList<>();
         billItemsHandover = new ArrayList<>();
@@ -1015,7 +1088,7 @@ public class SearchController implements Serializable {
         }
 
     }
-    
+
     private boolean errorCheck() {
         if (getReportKeyWord().getItem() == null) {
             JsfUtil.addErrorMessage("Please Select a Department");
@@ -1023,7 +1096,6 @@ public class SearchController implements Serializable {
         }
         return false;
     }
-
 
     public void createPharmacyBillItemTable() {
         //  searchBillItems = null;
@@ -2254,7 +2326,7 @@ public class SearchController implements Serializable {
         temMap.put("insTp", InstitutionType.Dealer);
         temMap.put("toDate", getToDate());
         temMap.put("fromDate", getFromDate());
-      //  temMap.put("ins", getSessionController().getInstitution());
+        //  temMap.put("ins", getSessionController().getInstitution());
 
         ////System.err.println("Sql " + sql);
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
@@ -2329,7 +2401,7 @@ public class SearchController implements Serializable {
         temMap.put("insTp", InstitutionType.Dealer);
         temMap.put("toDate", getToDate());
         temMap.put("fromDate", getFromDate());
-      //  temMap.put("ins", getSessionController().getInstitution());
+        //  temMap.put("ins", getSessionController().getInstitution());
 
         ////System.err.println("Sql " + sql);
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
@@ -2408,7 +2480,7 @@ public class SearchController implements Serializable {
         temMap.put("insTp", InstitutionType.StoreDealor);
         temMap.put("toDate", getToDate());
         temMap.put("fromDate", getFromDate());
-      //  temMap.put("ins", getSessionController().getInstitution());
+        //  temMap.put("ins", getSessionController().getInstitution());
 
         ////System.err.println("Sql " + sql);
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP, 50);
@@ -2498,7 +2570,7 @@ public class SearchController implements Serializable {
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
 
     }
-    
+
     public void createTableCashInAllNew() {
         bills = null;
         String sql;
@@ -3058,7 +3130,7 @@ public class SearchController implements Serializable {
                     + " and b.cancelled=false ";
         }
 //        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
-        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s, 
+        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s,
                 getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSearchKeyword().getToWU());
     }
 
@@ -3073,10 +3145,10 @@ public class SearchController implements Serializable {
                     + " and b.cancelled=false ";
         }
 //        bills = createBillTable(getSessionController().getInstitution(), enumController.getBulkSettleTypes(), null, s);
-        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s, 
+        bills = createBillTable(getSessionController().getInstitution(), new BillType[]{BillType.HandOver}, null, s,
                 getSearchKeyword().getPaymentMethodType(), getSearchKeyword().getDep(), getSearchKeyword().getFromWU(), getSessionController().getLoggedUser());
     }
-    
+
     public void createTableHandOverApproveBillItem() {
         String s = "";
         if (getSearchKeyword().getString().equals("1")) {
@@ -3893,90 +3965,85 @@ public class SearchController implements Serializable {
     }
 
     private void fetchCashBook3D() {
+        System.out.println("fetchCashBook3D");
         cashBookRows = new ArrayList<>();
+        SimpleDateFormat format = new SimpleDateFormat("YYYY MM dd hh:mm:ss a");
+
+        // Create and add opening balance row
         CashBookRow rowOpen = new CashBookRow();
         rowOpen.setString1("Opening Balance");
         rowOpen.setTotals(openningBalanceRow());
         cashBookRows.add(rowOpen);
+
         for (Object[] obs : fetchBillDetais()) {
+            System.out.println("obs = " + obs);
             long id = (long) obs[0];
-            String dep = (String) obs[1];
-            CashBookRow row = new CashBookRow();
-            Bill b = getBillFacade().find(id);
-            SimpleDateFormat format = new SimpleDateFormat("YYYY MM dd hh:mm:ss a");
+
+            Bill bill = getBillFacade().find(id);
+            if (bill == null) {
+                continue;
+            }
+
             if (onlyRealized) {
                 for (BillItem bi : billItemsForBill(id)) {
                     if (bi.getDeptId() == null) {
                         continue;
                     }
-                    row = new CashBookRow();
-                    row.setString1(b.getInsId());
-                    if (b.getFromWebUser() != null) {
-                        row.setString2(b.getFromWebUser().getWebUserPerson().getName());
-                    }
-                    if (b.getToWebUser() != null) {
-                        row.setString3(b.getToWebUser().getWebUserPerson().getName());
-                    }
-                    if (b.getToInstitution() != null) {
-                        if (row.getString3() != null && row.getString3().length() > 0) {
-                            row.setString3(row.getString3() + " / " + b.getToInstitution().getName());
-                        } else {
-                            row.setString3(b.getToInstitution().getName());
-                        }
-                    }
-                    if (b.getFromDepartment() != null) {
-                        if (row.getString3() != null && row.getString3().length() > 0) {
-                            row.setString3(row.getString3() + " / " + b.getFromDepartment().getName());
-                        } else {
-                            row.setString3(b.getFromDepartment().getName());
-                        }
-                    }
-                    if (b.getCreatedAt() != null) {
-                        row.setString4(format.format(b.getCreatedAt()));
-                    }
-                    if (bi.getFromTime() != null) {
-                        row.setString5(format.format(bi.getFromTime()));
-                    }
-                    if (bi.getToTime() != null) {
-                        row.setString6(format.format(bi.getToTime()));
-                    }
-                    if (bi.getAgentRefNo() != null) {
-                        row.setString7(bi.getAgentRefNo());
-                    }
+
+                    CashBookRow row = createCashBookRowFromBill(bill, bi, format);
                     row.setTotals(fetchTotalsDetail(bi));
                     cashBookRows.add(row);
                 }
             } else {
-                System.err.println("**********else**********");
-                row.setString1(b.getInsId());
-                if (b.getFromWebUser() != null) {
-                    row.setString2(b.getFromWebUser().getWebUserPerson().getName());
-                }
-                if (b.getToWebUser() != null) {
-                    row.setString3(b.getToWebUser().getWebUserPerson().getName());
-                }
-                if (b.getToInstitution() != null) {
-                    if (row.getString3() != null && row.getString3().length() > 0) {
-                        row.setString3(row.getString3() + " / " + b.getToInstitution().getName());
-                    } else {
-                        row.setString3(b.getToInstitution().getName());
-                    }
-                }
-                if (b.getFromDepartment() != null) {
-                    if (row.getString3() != null && row.getString3().length() > 0) {
-                        row.setString3(row.getString3() + " / " + b.getFromDepartment().getName());
-                    } else {
-                        row.setString3(b.getFromDepartment().getName());
-                    }
-                }
-                if (b.getCreatedAt() != null) {
-                    row.setString4(format.format(b.getCreatedAt()));
-                }
-                row.setTotals(fetchTotals(id));
+                CashBookRow row = createCashBookRowFromBill(bill, null, format);
+                row.setTotals(fetchTotals(id, row));
                 cashBookRows.add(row);
             }
         }
+
         System.out.println("cashBookRows.size() = " + cashBookRows.size());
+    }
+
+    private CashBookRow createCashBookRowFromBill(Bill bill, BillItem bi, SimpleDateFormat format) {
+        CashBookRow row = new CashBookRow();
+        row.setString1(bill.getInsId());
+
+        if (bill.getFromWebUser() != null) {
+            row.setString2(bill.getFromWebUser().getWebUserPerson().getName());
+        }
+        if (bill.getToWebUser() != null) {
+            row.setString3(bill.getToWebUser().getWebUserPerson().getName());
+        }
+        if (bill.getToInstitution() != null) {
+            appendToString3(row, bill.getToInstitution().getName());
+        }
+        if (bill.getFromDepartment() != null) {
+            appendToString3(row, bill.getFromDepartment().getName());
+        }
+        if (bill.getCreatedAt() != null) {
+            row.setString4(format.format(bill.getCreatedAt()));
+        }
+        if (bi != null) {
+            if (bi.getFromTime() != null) {
+                row.setString5(format.format(bi.getFromTime()));
+            }
+            if (bi.getToTime() != null) {
+                row.setString6(format.format(bi.getToTime()));
+            }
+            if (bi.getAgentRefNo() != null) {
+                row.setString7(bi.getAgentRefNo());
+            }
+        }
+
+        return row;
+    }
+
+    private void appendToString3(CashBookRow row, String value) {
+        if (row.getString3() != null && !row.getString3().isEmpty()) {
+            row.setString3(row.getString3() + " / " + value);
+        } else {
+            row.setString3(value);
+        }
     }
 
     private List<Object[]> fetchBillDetais() {
@@ -4024,51 +4091,64 @@ public class SearchController implements Serializable {
         return objects;
     }
 
-    private List<Double> fetchTotals(long id) {
-        List<Double> ls = new ArrayList<>();
-        double tot = 0l;
-        for (String s : headers) {
-            if (s.equals("Bulk")) {
+    private List<CashBookTotal> fetchTotals(long id, CashBookRow cashBookRow) {
+        List<CashBookTotal> cashBookTotals = new ArrayList<>();
+        double total = 0.0;
+
+        for (String header : headers) {
+            if ("Bulk".equals(header)) {
                 continue;
             }
-            double d;
-            d = calTotal(id, s);
-            tot += d;
-            ls.add(d);
+
+            double value = calTotal(id, header);
+            total += value;
+
+            CashBookTotal cashBookTotal = new CashBookTotal();
+            cashBookTotal.setValue(value);
+            cashBookTotal.setCashBookRow(cashBookRow);
+            cashBookTotals.add(cashBookTotal);
         }
-        ls.add(tot);
-        System.out.println("ls = " + ls);
-        return ls;
+
+        CashBookTotal totalEntry = new CashBookTotal();
+        totalEntry.setValue(total);
+        totalEntry.setCashBookRow(cashBookRow);
+        cashBookTotals.add(totalEntry);
+
+        System.out.println("cashBookTotals = " + cashBookTotals);
+        return cashBookTotals;
     }
 
-    private List<Double> fetchTotalsDetail(BillItem bi) {
-        List<Double> ls = new ArrayList<>();
-        double tot = 0l;
-        for (String s : headers) {
-            if (s.equals("Bulk")) {
+    private List<CashBookTotal> fetchTotalsDetail(BillItem bi) {
+        List<CashBookTotal> cashBookTotals = new ArrayList<>();
+        double total = 0.0;
+
+        for (String header : headers) {
+            if ("Bulk".equals(header)) {
                 continue;
             }
-            double d = 0.0;
-            System.out.println("s = " + s);
+
+            double value = 0.0;
+            System.out.println("header = " + header);
             System.out.println("bi.getDeptId() = " + bi.getDeptId());
             System.out.println("bi.getBill().getInsId() = " + bi.getBill().getInsId());
-//            if (bi.getDeptId() == null) {
-//                if (bi.getItem() != null && bi.getItem().getDepartment() != null) {
-//                    System.out.println("bi.getItem().getDepartment().getName() = " + bi.getItem().getDepartment().getName());
-//                }
-//                tot += d;
-//                ls.add(d);
-//                continue;
-//            }
-            if (bi.getDeptId().equals(s)) {
-                d = bi.getNetValue();
+
+            if (bi.getDeptId() != null && bi.getDeptId().equals(header)) {
+                value = bi.getNetValue();
             }
-            tot += d;
-            ls.add(d);
+
+            total += value;
+
+            CashBookTotal cashBookTotal = new CashBookTotal();
+            cashBookTotal.setValue(value);
+            cashBookTotals.add(cashBookTotal);
         }
-        ls.add(tot);
-        System.out.println("ls = " + ls);
-        return ls;
+
+        CashBookTotal totalEntry = new CashBookTotal();
+        totalEntry.setValue(total);
+        cashBookTotals.add(totalEntry);
+
+        System.out.println("cashBookTotals = " + cashBookTotals);
+        return cashBookTotals;
     }
 
     private double calTotal(long id, String dep) {
@@ -4348,7 +4428,7 @@ public class SearchController implements Serializable {
 
         return d;
     }
-    
+
     private List<BillItem> fetchCashTransactionHistorys(Item i, Date fd, Date td, boolean handOver) {
         double d = 0.0;
         System.out.println("dep = " + i.getName());
@@ -4436,7 +4516,7 @@ public class SearchController implements Serializable {
         System.out.println("bill list.size() = " + list.size());
         return list;
     }
-    
+
     private List<Bill> createBillTable(Institution institution, BillType[] billTypes, WebUser user, String s, PaymentMethod pm,
             Department toDep, WebUser fromWU, WebUser toWU) {
         List<Bill> list = new ArrayList<>();
@@ -4506,7 +4586,7 @@ public class SearchController implements Serializable {
         System.out.println("bill list.size() = " + list.size());
         return list;
     }
-    
+
     private List<BillItem> createBillItemTable(Institution institution, BillType[] billTypes, WebUser user, String s, PaymentMethod pm,
             Department toDep, WebUser fromWU, WebUser toWU, String netVal) {
         List<BillItem> list = new ArrayList<>();
@@ -4583,22 +4663,27 @@ public class SearchController implements Serializable {
         return list;
     }
 
-    private List<Double> openningBalanceRow() {
-        List<Double> ls = new ArrayList<>();
-        double tot = 0l;
-        for (String s : headers) {
-            if (s.equals("Bulk")) {
-                continue;
+    private List<CashBookTotal> openningBalanceRow() {
+        List<CashBookTotal> cashBookTotals = new ArrayList<>();
+        double total = 0.0;
+
+        for (String header : headers) {
+            if (!"Bulk".equals(header)) {
+                double balance = fetchOpenningBalnceModified(header);
+                total += balance;
+
+                CashBookTotal cashBookTotal = new CashBookTotal();
+                cashBookTotal.setValue(balance);
+                cashBookTotals.add(cashBookTotal);
             }
-            double d;
-            d = fetchOpenningBalnceModified(s);
-//            d = fetchOpenningBalnce(s);
-            tot += d;
-            ls.add(d);
         }
-        ls.add(tot);
-        System.out.println("ls = " + ls);
-        return ls;
+
+        CashBookTotal totalEntry = new CashBookTotal();
+        totalEntry.setValue(total);
+        cashBookTotals.add(totalEntry);
+
+        System.out.println("cashBookTotals = " + cashBookTotals);
+        return cashBookTotals;
     }
 
     private List<BillItem> billItemsForBill(long id) {
@@ -4736,84 +4821,83 @@ public class SearchController implements Serializable {
         }
     }
 
-    public class CashBookRow {
-
-        String string1;
-        String string2;
-        String string3;
-        String string4;
-        String string5;
-        String string6;
-        String string7;
-
-        List<Double> totals;
-
-        public String getString7() {
-            return string7;
-        }
-
-        public void setString7(String string7) {
-            this.string7 = string7;
-        }
-
-        public String getString4() {
-            return string4;
-        }
-
-        public void setString4(String string4) {
-            this.string4 = string4;
-        }
-
-        public String getString5() {
-            return string5;
-        }
-
-        public void setString5(String string5) {
-            this.string5 = string5;
-        }
-
-        public String getString6() {
-            return string6;
-        }
-
-        public void setString6(String string6) {
-            this.string6 = string6;
-        }
-
-        public List<Double> getTotals() {
-            return totals;
-        }
-
-        public void setTotals(List<Double> totals) {
-            this.totals = totals;
-        }
-
-        public String getString1() {
-            return string1;
-        }
-
-        public void setString1(String string1) {
-            this.string1 = string1;
-        }
-
-        public String getString2() {
-            return string2;
-        }
-
-        public void setString2(String string2) {
-            this.string2 = string2;
-        }
-
-        public String getString3() {
-            return string3;
-        }
-
-        public void setString3(String string3) {
-            this.string3 = string3;
-        }
-
-    }
-
+//    public class CashBookRow {
+//
+//        String string1;
+//        String string2;
+//        String string3;
+//        String string4;
+//        String string5;
+//        String string6;
+//        String string7;
+//
+//        List<Double> totals;
+//
+//        public String getString7() {
+//            return string7;
+//        }
+//
+//        public void setString7(String string7) {
+//            this.string7 = string7;
+//        }
+//
+//        public String getString4() {
+//            return string4;
+//        }
+//
+//        public void setString4(String string4) {
+//            this.string4 = string4;
+//        }
+//
+//        public String getString5() {
+//            return string5;
+//        }
+//
+//        public void setString5(String string5) {
+//            this.string5 = string5;
+//        }
+//
+//        public String getString6() {
+//            return string6;
+//        }
+//
+//        public void setString6(String string6) {
+//            this.string6 = string6;
+//        }
+//
+//        public List<Double> getTotals() {
+//            return totals;
+//        }
+//
+//        public void setTotals(List<Double> totals) {
+//            this.totals = totals;
+//        }
+//
+//        public String getString1() {
+//            return string1;
+//        }
+//
+//        public void setString1(String string1) {
+//            this.string1 = string1;
+//        }
+//
+//        public String getString2() {
+//            return string2;
+//        }
+//
+//        public void setString2(String string2) {
+//            this.string2 = string2;
+//        }
+//
+//        public String getString3() {
+//            return string3;
+//        }
+//
+//        public void setString3(String string3) {
+//            this.string3 = string3;
+//        }
+//
+//    }
     public SearchController() {
     }
 
