@@ -87,7 +87,7 @@
                     <h:panelGrid columns="2" id="settle">
                         <p:panel>
                             <p:commandButton value="Excel" ajax="false">
-                                <p:dataExporter type="xlsx" target="tblBills" fileName="Items_#{drawerAdjustmentController.webUser.webUserPerson.name}_#{drawerAdjustmentController.reportKeyWord.paymentMethod}" />
+                                <p:dataExporter type="xls" target="tblBills" fileName="Items_#{drawerAdjustmentController.webUser.webUserPerson.name}_#{drawerAdjustmentController.reportKeyWord.paymentMethod}" />
                             </p:commandButton>
                             <f:facet name="header">
                                 <h:outputLabel value="NOTE"/>
