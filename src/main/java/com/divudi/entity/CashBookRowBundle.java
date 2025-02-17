@@ -28,6 +28,8 @@ public class CashBookRowBundle implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<CashBookRow> cashBookRows;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ColumnModel> columnModels;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date fromDate;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -172,6 +174,17 @@ public class CashBookRowBundle implements Serializable {
 
     public void setCashBookRows(List<CashBookRow> cashBookRows) {
         this.cashBookRows = cashBookRows;
+    }
+
+    public List<ColumnModel> getColumnModels() {
+        if (columnModels == null) {
+            columnModels = new ArrayList<>();
+        }
+        return columnModels;
+    }
+
+    public void setColumnModels(List<ColumnModel> columnModels) {
+        this.columnModels = columnModels;
     }
 
 }

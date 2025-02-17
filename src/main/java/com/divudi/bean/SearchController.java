@@ -38,13 +38,16 @@ import javax.inject.Named;
 import javax.persistence.TemporalType;
 import com.divudi.entity.CancelledBill;
 import com.divudi.entity.CashBookRow;
+import com.divudi.entity.CashBookRowBundle;
 import com.divudi.entity.CashBookTotal;
+import com.divudi.entity.ColumnModel;
 import com.divudi.entity.Department;
 import com.divudi.entity.Item;
 import com.divudi.entity.Summery;
 import com.divudi.entity.WebUser;
 import com.divudi.entity.cashTransaction.CashTransaction;
 import com.divudi.entity.cashTransaction.CashTransactionHistory;
+import com.divudi.facade.CashBookRowBundleFacade;
 import com.divudi.facade.CashTransactionHistoryFacade;
 import com.divudi.facade.util.JsfUtil;
 import java.text.SimpleDateFormat;
@@ -83,6 +86,8 @@ public class SearchController implements Serializable {
     ////////////
     @EJB
     private CommonFunctions commonFunctions;
+    @EJB
+    CashBookRowBundleFacade cashBookRowBundleFacade;
     @EJB
     private BillFacade billFacade;
     @EJB
@@ -1005,18 +1010,25 @@ public class SearchController implements Serializable {
     }
 
     private void generateCashBook3DAccountant() {
+
+        CashBookRowBundle bundle = new CashBookRowBundle();
+        bundle.setFromDate(reportKeyWord.getFromDate());
+        bundle.setToDate(reportKeyWord.getToDate());
+        bundle.setOnlyRealized(onlyRealized);
+        bundle.setCreatedAt(new Date());
+        bundle.setCreater(sessionController.getLoggedUser());
+        cashBookRowBundleFacade.create(bundle);
+
         columnModels = new ArrayList<>();
         fetchHeadersAccountant();
-        fetchCashBook3D();
+//        fetchCashBook3D();
+        generateCashBook3D(bundle);
 
         CashBookRow closingBalanceRow = new CashBookRow();
-        closingBalanceRow.setFromDate(reportKeyWord.getFromDate());
-        closingBalanceRow.setToDate(reportKeyWord.getToDate());
-        closingBalanceRow.setOnlyRealized(onlyRealized);
-        
+
         closingBalanceRow.setString1("Closing Balance");
 
-        int rowCount = cashBookRows.size();
+        int rowCount = bundle.getCashBookRows().size();
         int columnCount = headers.size();
 
         List<CashBookTotal> totalsList = new ArrayList<>();
@@ -1026,7 +1038,7 @@ public class SearchController implements Serializable {
             double total = 0.0;
 
             for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
+                total += bundle.getCashBookRows().get(rowIndex).getTotals().get(colIndex).getValue();
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
@@ -1036,9 +1048,13 @@ public class SearchController implements Serializable {
         }
 
         closingBalanceRow.setTotals(totalsList);
-        cashBookRows.add(closingBalanceRow);
+//        cashBookRows.add(closingBalanceRow);
+        bundle.getCashBookRows().add(closingBalanceRow);
 
-        createColumnModels();
+//        createColumnModels();
+        generateColumnModels(bundle);
+        bundle.setCompletedAt(new Date());
+        cashBookRowBundleFacade.edit(bundle);
 
         System.out.println("End = " + new Date());
     }
@@ -1051,6 +1067,20 @@ public class SearchController implements Serializable {
             column.setHeader(header);
             column.setProperty(columnIndex.toString());
             columnModels.add(column);
+            columnIndex++;
+        }
+    }
+    
+    private void generateColumnModels(CashBookRowBundle bundle) {
+        Long columnIndex = 0L;
+        for (String header : headers) {
+            System.out.println("header = " + header);
+            ColumnModel column = new ColumnModel();
+            column.setHeader(header);
+            column.setCashBookRowBundle(bundle);
+            column.setProperty(columnIndex.toString());
+            bundle.getColumnModels().add(column);
+//            columnModels.add(column);
             columnIndex++;
         }
     }
@@ -4004,6 +4034,52 @@ public class SearchController implements Serializable {
         System.out.println("cashBookRows.size() = " + cashBookRows.size());
     }
 
+    private void generateCashBook3D(CashBookRowBundle bundle) {
+        System.out.println("generateCashBook3D");
+//        cashBookRows = new ArrayList<>();
+        SimpleDateFormat format = new SimpleDateFormat("YYYY MM dd hh:mm:ss a");
+
+        // Create and add opening balance row
+        CashBookRow rowOpen = new CashBookRow();
+        rowOpen.setCashBookRowBundle(bundle);
+        rowOpen.setString1("Opening Balance");
+        rowOpen.setTotals(openningBalanceRow());
+        bundle.getCashBookRows().add(rowOpen);
+//        cashBookRows.add(rowOpen);
+
+        for (Object[] obs : fetchBillDetais()) {
+            System.out.println("obs = " + obs);
+            long id = (long) obs[0];
+
+            Bill bill = getBillFacade().find(id);
+            if (bill == null) {
+                continue;
+            }
+
+            if (onlyRealized) {
+                for (BillItem bi : billItemsForBill(id)) {
+                    if (bi.getDeptId() == null) {
+                        continue;
+                    }
+
+                    CashBookRow row = createCashBookRowFromBill(bill, bi, format);
+                    row.setCashBookRowBundle(bundle);
+                    row.setTotals(fetchTotalsDetail(bi));
+//                    cashBookRows.add(row);
+                    bundle.getCashBookRows().add(row);
+                }
+            } else {
+                CashBookRow row = createCashBookRowFromBill(bill, null, format);
+                row.setCashBookRowBundle(bundle);
+                row.setTotals(fetchTotals(id, row));
+//                cashBookRows.add(row);
+                bundle.getCashBookRows().add(row);
+            }
+        }
+
+        System.out.println("cashBookRows.size() = " + bundle.getCashBookRows().size());
+    }
+
     private CashBookRow createCashBookRowFromBill(Bill bill, BillItem bi, SimpleDateFormat format) {
         CashBookRow row = new CashBookRow();
         row.setString1(bill.getInsId());
@@ -4799,28 +4875,27 @@ public class SearchController implements Serializable {
 //        return bills;
 //
 //    }
-    public class ColumnModel {
-
-        private String header;
-        private String property;
-
-        public String getHeader() {
-            return header;
-        }
-
-        public void setHeader(String header) {
-            this.header = header;
-        }
-
-        public String getProperty() {
-            return property;
-        }
-
-        public void setProperty(String property) {
-            this.property = property;
-        }
-    }
-
+//    public class ColumnModel {
+//
+//        private String header;
+//        private String property;
+//
+//        public String getHeader() {
+//            return header;
+//        }
+//
+//        public void setHeader(String header) {
+//            this.header = header;
+//        }
+//
+//        public String getProperty() {
+//            return property;
+//        }
+//
+//        public void setProperty(String property) {
+//            this.property = property;
+//        }
+//    }
 //    public class CashBookRow {
 //
 //        String string1;
