@@ -1,14 +1,15 @@
 package com.divudi.entity;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import javax.persistence.*;
 
 /**
  *
- * @author Dr M H B Ariyaratne <buddhika.ari@gmail.com>
+ * @author Dr M H B Ariyaratne
  */
 @Entity
-public class CashBookTotal implements Serializable {
+public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
 
     private static final long serialVersionUID = 1L;
     
@@ -20,6 +21,8 @@ public class CashBookTotal implements Serializable {
 
     @ManyToOne
     private CashBookRow cashBookRow;
+
+    private double orderNumber;
 
     public Long getId() {
         return id;
@@ -45,11 +48,22 @@ public class CashBookTotal implements Serializable {
         this.cashBookRow = cashBookRow;
     }
 
+    public double getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(double orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    @Override
+    public int compareTo(CashBookTotal other) {
+        return Double.compare(this.orderNumber, other.orderNumber);
+    }
+
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
+        return (id != null ? id.hashCode() : 0);
     }
 
     @Override
@@ -63,6 +77,6 @@ public class CashBookTotal implements Serializable {
 
     @Override
     public String toString() {
-        return "com.divudi.entity.CashBookTotal[ id=" + id + ", value=" + value + " ]";
+        return "com.divudi.entity.CashBookTotal[ id=" + id + ", value=" + value + ", orderNumber=" + orderNumber + " ]";
     }
 }

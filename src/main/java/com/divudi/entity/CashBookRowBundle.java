@@ -2,6 +2,7 @@ package com.divudi.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -169,6 +170,12 @@ public class CashBookRowBundle implements Serializable {
         if (cashBookRows == null) {
             cashBookRows = new ArrayList<>();
         }
+        java.util.Collections.sort(cashBookRows, new Comparator<CashBookRow>() {
+            @Override
+            public int compare(CashBookRow r1, CashBookRow r2) {
+                return Double.compare(r1.getOrderNumber(), r2.getOrderNumber());
+            }
+        });
         return cashBookRows;
     }
 
@@ -180,6 +187,12 @@ public class CashBookRowBundle implements Serializable {
         if (columnModels == null) {
             columnModels = new ArrayList<>();
         }
+        java.util.Collections.sort(columnModels, new Comparator<ColumnModel>() {
+            @Override
+            public int compare(ColumnModel c1, ColumnModel c2) {
+                return Double.compare(c1.getOrderNumber(), c2.getOrderNumber());
+            }
+        });
         return columnModels;
     }
 

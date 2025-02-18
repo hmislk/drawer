@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/template/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="content">
+        <h:form>
+
+            <h:panelGroup rendered="#{searchController.processCompleted}" >
+                <h:outputLabel value="Please allow some time to generate report. You can check under list reports later to view the report." ></h:outputLabel>
+                <p:commandButton 
+                    id="btnBackAgain" 
+                    value="Back"
+                    ajax="false"
+                    action="list_to_cash_book_summery"
+                    update="@all" />
+            </h:panelGroup>
+            <h:panelGroup rendered="#{not searchController.processCompleted}" >
+                <p:panel header="Generate">
+                    <p:panelGrid columns="2">
+                        <h:outputLabel value="From Date"/>
+                        <p:calendar styleClass="dateTimePicker" id="fromDate" value="#{searchController.reportKeyWord.fromDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a"/>      
+                        <h:outputLabel value="To Date"/>
+                        <p:calendar styleClass="dateTimePicker" id="toDate" value="#{searchController.reportKeyWord.toDate}" navigator="false" pattern="dd MMMM yyyy hh mm ss a"/>                                                                              
+                        <h:outputLabel value="Detail"/>
+                        <p:selectBooleanCheckbox id="chkRealized" value="#{searchController.onlyRealized}" />
+                        <h:outputLabel value="Detail"/>
+                        <p:selectOneRadio id="cmbType" value="#{searchController.reportKeyWord.string}">
+                            <f:selectItem itemValue="0" itemLabel="All"/>
+                            <f:selectItem itemValue="1" itemLabel="Cashier"/>
+                            <f:selectItem itemValue="2" itemLabel="Cashier RPS"/>
+                        </p:selectOneRadio>
+                        <p:spacer></p:spacer>
+                        <h:panelGroup >
+                            <p:commandButton 
+                                id="btnSearch" 
+                                value="Generate"
+                                process="cmbType fromDate toDate chkRealized btnSearch"
+                                action="#{searchController.startCashBookGeneration()}"
+                                update="@all" />
+                            <p:commandButton 
+                                id="btnBack" 
+                                value="Back"
+                                ajax="false"
+                                action="list_to_cash_book_summery"
+                                update="@all" />
+                        </h:panelGroup>
+                    </p:panelGrid>
+                    <f:facet id="footer" name="footer" >
+                        <p:messages id="messages" showDetail="true" autoUpdate="true"/>
+                    </f:facet>
+                </p:panel>
+            </h:panelGroup>
+
+
+        </h:form>
+    </ui:define>  
+</ui:composition>

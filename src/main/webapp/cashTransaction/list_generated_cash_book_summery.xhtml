@@ -47,8 +47,22 @@
                             <f:convertDateTime pattern="dd MMMM yyyy hh mm ss a" ></f:convertDateTime>
                         </h:outputLabel>
                     </p:column>
+                    <p:column headerText="Completed At" >
+                        <h:outputLabel value="#{b.completedAt}" >
+                            <f:convertDateTime pattern="dd MMMM yyyy hh mm ss a" ></f:convertDateTime>
+                        </h:outputLabel>
+                    </p:column>
                     <p:column headerText="Actions" >
-                        <p:commandButton value="View" action="#{searchController.viewGenerateCashbook()}" ajax="false" >
+                        <p:commandButton 
+                            value="View Accountant"
+                            disabled="#{b.completedAt eq null}"
+                            action="#{searchController.viewGenerateCashbookAccountant}" ajax="false" >
+                            <f:setPropertyActionListener value="#{b}" target="#{searchController.bundle}" ></f:setPropertyActionListener>
+                        </p:commandButton>
+                        <p:commandButton 
+                            value="View"
+                            disabled="#{b.completedAt eq null}"
+                            action="#{searchController.viewGenerateCashbook()}" ajax="false" >
                             <f:setPropertyActionListener value="#{b}" target="#{searchController.bundle}" ></f:setPropertyActionListener>
                         </p:commandButton>
                     </p:column>

@@ -143,10 +143,10 @@ public class SessionController implements Serializable, HttpSessionListener {
     private String displayName;
     WebUserRole role;
 
-    public Date getSystemTime(){
+    public Date getSystemTime() {
         return new Date();
     }
-    
+
     public WebUserRole getRole() {
         return role;
     }
@@ -343,11 +343,11 @@ public class SessionController implements Serializable, HttpSessionListener {
             System.out.println("u.getName() = " + u.getName());
             System.out.println("userName = " + userName);
             if (getSecurityController().decrypt(u.getName()).equalsIgnoreCase(userName)) {
-                
+
                 boolean passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
-                
-                boolean usedForTesting = true;
-                
+
+                boolean usedForTesting = false;
+
                 if (passwordMatch || usedForTesting) {
                     if (!canLogToDept(u, department)) {
                         UtilityController.addErrorMessage("No privilage to Login This Department");
@@ -583,9 +583,6 @@ public class SessionController implements Serializable, HttpSessionListener {
     }
 
     public String getPrimeTheme() {
-//        if (primeTheme == null || primeTheme.equals("")) {
-//            primeTheme = "bootstrap-light-outlined";
-//        }
 //        if (getLoggedUser() != null) {
 //            if (getLoggedUser().getPrimeTheme() != null) {
 //                if (!getLoggedUser().getPrimeTheme().equals("")) {
@@ -593,8 +590,13 @@ public class SessionController implements Serializable, HttpSessionListener {
 //                }
 //            }
 //        }
+//        if (primeTheme == null || primeTheme.equals("")) {
+//            primeTheme = "bootstrap-light-outlined";
+//        }
         primeTheme = "bootstrap-light-outlined";
         return primeTheme;
+        
+        
     }
 
     public void setPrimeTheme(String primeTheme) {

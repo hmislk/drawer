@@ -5,13 +5,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
  *
  * @author Dr M H B Ariyaratne <buddhika.ari@gmail.com>
  */
 @Entity
-public class ColumnModel implements Serializable {
+public class ColumnModel implements Serializable, Comparable<ColumnModel> {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -19,9 +20,10 @@ public class ColumnModel implements Serializable {
     private Long id;
     private String header;
     private String property;
+    @ManyToOne
     private CashBookRowBundle cashBookRowBundle;
-    
-    
+    private double orderNumber;
+
     public Long getId() {
         return id;
     }
@@ -29,8 +31,6 @@ public class ColumnModel implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-    
-    
 
     @Override
     public int hashCode() {
@@ -79,6 +79,19 @@ public class ColumnModel implements Serializable {
 
     public void setProperty(String property) {
         this.property = property;
+    }
+
+    public double getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(double orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    @Override
+    public int compareTo(ColumnModel other) {
+        return Double.compare(this.orderNumber, other.orderNumber);
     }
 
 }
