@@ -1038,12 +1038,22 @@ public class SearchController implements Serializable {
         return "view_cash_book_summery_accountant";
     }
 
-    public void startCashBookGeneration() {
+    public String navigateToGenerateCashBook(){
+        processCompleted=false;
+        return "generate_list_to_cash_book_summery_accountant";
+    }
+    
+    public String startCashBookGeneration() {
+        processCompleted=true;
         System.out.println("startCashBookGeneration");
         // Display success message using JsfUtil
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
         // Start asynchronous process
         generateCashBook3DAccountant();
+        fromDate= reportKeyWord.getFromDate();
+        toDate= reportKeyWord.getToDate();
+        listGeneratedCashbooks();
+        return "list_generated_cash_book_summery_accountant";
     }
 
     @Asynchronous
