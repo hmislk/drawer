@@ -9,7 +9,23 @@
 
     <ui:define name="content">
         <h:form>
-            <p:panel >
+            <p:panelGrid columns="1"  >
+                <p:commandButton value="Go To Generate Cash Book 3D" 
+                                 action="#{searchController.navigateToGenerateCashBook()}"  
+                                 ajax="false" 
+                                 rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}"
+                                 styleClass="ui-button-success"/>
+
+                <p:commandButton value="Go To List Generated Cash Book 3D" 
+                                 action="list_generated_cash_book_summery?faces-redirect=true"  
+                                 ajax="false" 
+                                 rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}"
+                                 styleClass="ui-button-info"/>
+
+            </p:panelGrid>
+
+
+            <p:panel rendered="false">
                 <f:facet name="header">
                     <h:panelGrid columns="1" >
                         <h:panelGrid columns="2" >
@@ -99,9 +115,9 @@
                             <f:facet name="header">
                                 <h:outputText value="#{column.header}" />
                             </f:facet>
-                            <h:outputText value="-" rendered="#{r.totals[column.property] eq 0}" >
+                            <h:outputText value="-" rendered="#{r.totals[column.property].value eq 0}" >
                             </h:outputText>
-                            <h:outputText value="#{r.totals[column.property]}" rendered="#{r.totals[column.property] ne 0}" >
+                            <h:outputText value="#{r.totals[column.property].value}" rendered="#{r.totals[column.property].value ne 0}" >
                                 <f:convertNumber pattern="#,##0.00" />
                             </h:outputText>
                         </p:columns>
@@ -112,6 +128,8 @@
 
 
             </p:panel>
+        
+        
         </h:form>
     </ui:define>  
 

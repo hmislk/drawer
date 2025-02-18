@@ -63,7 +63,7 @@
                                 <p:menuitem ajax="false" action="/cashTransaction/report"  value="Reports" rendered="#{webUserController.hasPrivilege('CashTransactionReport')}" /> 
                                 <p:menuitem ajax="false" action="/cashTransaction/administration"  value="Administration" rendered="#{webUserController.hasPrivilege('CashTransactionAdministration')}" />   
                             </p:submenu>
-                            <p:menuitem  ajax="false"  value="Report" action="/cashTransaction/report" rendered="#{webUserController.hasPrivilege('CashTransactionReport')}" ></p:menuitem>
+                            <p:menuitem  ajax="false"  value="Report" action="/cashTransaction/report?faces-redirect=true" rendered="#{webUserController.hasPrivilege('CashTransactionReport')}" ></p:menuitem>
                             <p:submenu label="User"  >
                                 <p:menuitem  ajax="false"  action="/user_change_password" value="Change Password"  ></p:menuitem>
                                 <p:menuitem  ajax="false"  action="/user_preferances" value="Change Preferances"  ></p:menuitem>

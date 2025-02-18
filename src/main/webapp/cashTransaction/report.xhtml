@@ -24,23 +24,10 @@
                         </p:panel> 
                         <p:panel header="Summery" >
                             <h:panelGrid columns="1">
-                                <p:commandButton value="Generate Cash Book 3D" 
-                                                 action="#{searchController.navigateToGenerateCashBook()}"  
-                                                 ajax="false" 
-                                                 rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}"
-                                                 styleClass="ui-button-success"
-                                                 icon="pi pi-file"/>
-
-                                <p:commandButton value="View Generated Cash Book 3D" 
-                                                 action="list_generated_cash_book_summery_accountant"  
-                                                 ajax="false" 
-                                                 rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}"
-                                                 styleClass="ui-button-info"
-                                                 icon="pi pi-eye"/>
-
-                                <p:commandButton value="Cash Book 3D"   action="list_to_cash_book_summery_accountant"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
-                                <p:commandButton value="Shif End Summery Report"   action="report_summery_check_and_approve"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
-                                <p:commandButton value="Cashbook Check"   action="list_to_cash_book_details"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                                
+                                <p:commandButton value="Cash Book 3D"   action="list_to_cash_book_summery_accountant?faces-redirect=true"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                                <p:commandButton value="Shif End Summery Report"   action="report_summery_check_and_approve?faces-redirect=true"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
+                                <p:commandButton value="Cashbook Check"   action="list_to_cash_book_details?faces-redirect=true"  ajax="false" rendered="#{webUserController.hasPrivilege('CashTransactionReportCashBook')}" />
                             </h:panelGrid>
                         </p:panel>
                     </h:panelGrid>  

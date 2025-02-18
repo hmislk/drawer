@@ -2,23 +2,17 @@ package com.divudi.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
 
-/**
- *
- * @author Dr M H B Ariyaratne <buddhika.ari@gmail.com>
- */
 @Entity
-public class CashBookRow implements Serializable {
+public class CashBookRow implements Serializable, Comparable<CashBookRow> {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -26,7 +20,7 @@ public class CashBookRow implements Serializable {
     private Long id;
 
     private CashBookRowBundle cashBookRowBundle;
-    
+
     private String string1;
     private String string2;
     private String string3;
@@ -35,7 +29,7 @@ public class CashBookRow implements Serializable {
     private String string6;
     private String string7;
 
-    
+    private double orderNumber;
 
     @OneToMany(mappedBy = "cashBookRow", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CashBookTotal> totals;
@@ -47,27 +41,19 @@ public class CashBookRow implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-    
-    
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
+        return (id != null ? id.hashCode() : 0);
     }
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof CashBookRow)) {
             return false;
         }
         CashBookRow other = (CashBookRow) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
@@ -135,6 +121,12 @@ public class CashBookRow implements Serializable {
         if (totals == null) {
             totals = new ArrayList<>();
         }
+        java.util.Collections.sort(totals, new Comparator<CashBookTotal>() {
+            @Override
+            public int compare(CashBookTotal t1, CashBookTotal t2) {
+                return Double.compare(t1.getOrderNumber(), t2.getOrderNumber());
+            }
+        });
         return totals;
     }
 
@@ -150,6 +142,17 @@ public class CashBookRow implements Serializable {
         this.cashBookRowBundle = cashBookRowBundle;
     }
 
-    
+    public double getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(double orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    @Override
+    public int compareTo(CashBookRow other) {
+        return Double.compare(this.orderNumber, other.orderNumber);
+    }
 
 }
