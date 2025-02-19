@@ -4815,12 +4815,17 @@ public class SearchController implements Serializable {
         double total = 0.0;
 
         for (String header : headers) {
+            System.out.println("header = " + header);
             if (!"Bulk".equals(header)) {
                 double balance = fetchOpenningBalnceModified(header);
                 total += balance;
-
+                System.out.println("balance = " + balance);
                 CashBookTotal cashBookTotal = new CashBookTotal();
                 cashBookTotal.setValue(balance);
+                cashBookTotals.add(cashBookTotal);
+            }else{
+                CashBookTotal cashBookTotal = new CashBookTotal();
+                cashBookTotal.setValue(null);
                 cashBookTotals.add(cashBookTotal);
             }
         }
