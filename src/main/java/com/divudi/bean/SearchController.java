@@ -146,7 +146,7 @@ public class SearchController implements Serializable {
             return t;
         }
     });
-    
+
     boolean withoutCancell = false;
     boolean onlyRealized = false;
 
@@ -1070,15 +1070,14 @@ public class SearchController implements Serializable {
         processCompleted = false;
         return "generate_list_to_cash_book_summery?faces-redirect=true";
     }
-    
-    
 
+    private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
+
+    
     public void startCashBookGeneration() {
         processCompleted = true;
         System.out.println("startCashBookGeneration");
-        // Display success message using JsfUtil
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
-        // Start asynchronous process
         fromDate = reportKeyWord.getFromDate();
         System.out.println("fromDate = " + fromDate);
         toDate = reportKeyWord.getToDate();
@@ -1086,68 +1085,71 @@ public class SearchController implements Serializable {
         generateCashBook3D();
     }
 
-    @Asynchronous
     public Future<String> generateCashBook3D() {
-        System.out.println("generateCashBook3D started at " + new Date());
+        return highPriorityExecutor.submit(() -> {
+            System.out.println("generateCashBook3D started at " + new Date());
 
-        CashBookRowBundle newBundle = new CashBookRowBundle();
-        newBundle.setFromDate(reportKeyWord.getFromDate());
-        newBundle.setToDate(reportKeyWord.getToDate());
-        newBundle.setOnlyRealized(onlyRealized);
-        newBundle.setCreatedAt(new Date());
-        newBundle.setCreater(sessionController.getLoggedUser());
-        saveBundle(newBundle);
+            CashBookRowBundle newBundle = new CashBookRowBundle();
 
-        columnModels = new ArrayList<>();
-        fetchHeaders();
-        System.out.println("to start generate cashbook 3d");
-        generateCashBook3D(newBundle);
-        System.out.println("Ended generating generate cashbook 3d");
+            // These lines should NOT be removed. They are essential.
+            newBundle.setFromDate(reportKeyWord.getFromDate());
+            newBundle.setToDate(reportKeyWord.getToDate());
+            newBundle.setOnlyRealized(onlyRealized);
 
-        CashBookRow closingBalanceRow = new CashBookRow();
-        closingBalanceRow.setOrderNumber(Double.MAX_VALUE - 1000);
-        closingBalanceRow.setString1("Closing Balance");
+            newBundle.setCreatedAt(new Date());
+            newBundle.setCreater(sessionController.getLoggedUser());
+            saveBundle(newBundle);
 
-        int rowCount = newBundle.getCashBookRows() != null ? newBundle.getCashBookRows().size() : 0;
-        int columnCount = headers != null ? headers.size() : 0;
-        List<CashBookTotal> totalsList = new ArrayList<>();
-        double orderNumber = 0.0;
+            columnModels = new ArrayList<>();
+            fetchHeaders();
+            System.out.println("to start generate cashbook 3d");
+            generateCashBook3D(newBundle);
+            System.out.println("Ended generating generate cashbook 3d");
 
-        for (int colIndex = 0; colIndex < columnCount; colIndex++) {
-            System.out.println("colIndex = " + colIndex);
-            double total = 0.0;
+            CashBookRow closingBalanceRow = new CashBookRow();
+            closingBalanceRow.setOrderNumber(Double.MAX_VALUE - 1000);
+            closingBalanceRow.setString1("Closing Balance");
 
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                CashBookRow row = newBundle.getCashBookRows().get(rowIndex);
-                if (row == null || row.getTotals() == null || row.getTotals().size() <= colIndex) {
-                    continue;
+            int rowCount = newBundle.getCashBookRows() != null ? newBundle.getCashBookRows().size() : 0;
+            int columnCount = headers != null ? headers.size() : 0;
+            List<CashBookTotal> totalsList = new ArrayList<>();
+            double orderNumber = 0.0;
+
+            for (int colIndex = 0; colIndex < columnCount; colIndex++) {
+                System.out.println("colIndex = " + colIndex);
+                double total = 0.0;
+
+                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                    CashBookRow row = newBundle.getCashBookRows().get(rowIndex);
+                    if (row == null || row.getTotals() == null || row.getTotals().size() <= colIndex) {
+                        continue;
+                    }
+
+                    CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
+                    if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
+                        total += cashBookTotal.getTotalValue();
+                        cashBookTotal.setCashBookRow(row);
+                    }
                 }
 
-                CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
-                if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
-                    total += cashBookTotal.getTotalValue();
-                }
+                CashBookTotal totalEntity = new CashBookTotal();
+                totalEntity.setOrderNumber(orderNumber++);
+                totalEntity.setTotalValue(total);
+                totalEntity.setCashBookRow(closingBalanceRow);
+                totalsList.add(totalEntity);
             }
 
-            CashBookTotal totalEntity = new CashBookTotal();
-            totalEntity.setOrderNumber(orderNumber++);
-            totalEntity.setTotalValue(total);
-            totalEntity.setCashBookRow(closingBalanceRow);
-            totalsList.add(totalEntity);
-        }
+            closingBalanceRow.setTotals(totalsList);
+            newBundle.getCashBookRows().add(closingBalanceRow);
+            saveBundle(newBundle);
+            generateColumnModels(newBundle);
+            saveBundle(newBundle);
+            newBundle.setCompletedAt(new Date());
+            saveBundle(newBundle);
 
-        closingBalanceRow.setTotals(totalsList);
-
-        newBundle.getCashBookRows().add(closingBalanceRow);
-        saveBundle(newBundle);
-        generateColumnModels(newBundle);
-        saveBundle(newBundle);
-        newBundle.setCompletedAt(new Date());
-        saveBundle(newBundle);
-
-        System.out.println("generateCashBook3DAccountant completed at " + new Date());
-
-        return new AsyncResult<>("Completed");
+            System.out.println("generateCashBook3DAccountant completed at " + new Date());
+            return "Completed";
+        });
     }
 
     private void createColumnModels() {
