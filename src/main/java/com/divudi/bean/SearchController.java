@@ -1080,35 +1080,39 @@ public class SearchController implements Serializable {
 
     public void startCashBookGeneration() {
         processCompleted = true;
-        LOGGER.log(Level.INFO, "startCashBookGeneration");
+        System.out.println("startCashBookGeneration");
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
+
         fromDate = reportKeyWord.getFromDate();
-        LOGGER.log(Level.INFO, "fromDate = {0}", fromDate);
         toDate = reportKeyWord.getToDate();
-        LOGGER.log(Level.INFO, "toDate = {0}", toDate);
-        generateCashBook3D();
+
+        // Fetch the logged user from session before going async
+        WebUser loggedUser = sessionController.getLoggedUser();
+
+        generateCashBook3D(fromDate, toDate, loggedUser);
     }
 
-    public Future<String> generateCashBook3D() {
+    public Future<String> generateCashBook3D(Date fromDate, Date toDate, WebUser loggedUser) {
         return highPriorityExecutor.submit(() -> {
-            LOGGER.log(Level.INFO, "generateCashBook3D started at {0}", new Date());
+            System.out.println("generateCashBook3D started at " + new Date());
+
             try {
                 CashBookRowBundle newBundle = new CashBookRowBundle();
-
-                newBundle.setFromDate(reportKeyWord.getFromDate());
-                newBundle.setToDate(reportKeyWord.getToDate());
+                newBundle.setFromDate(fromDate);
+                newBundle.setToDate(toDate);
                 newBundle.setOnlyRealized(onlyRealized);
                 newBundle.setCreatedAt(new Date());
-                newBundle.setCreater(sessionController.getLoggedUser());
+
+                // Use the captured user instead of accessing SessionController
+                newBundle.setCreater(loggedUser);
 
                 saveBundle(newBundle);
 
                 columnModels = new ArrayList<>();
                 fetchHeaders();
-                LOGGER.log(Level.INFO, "Fetching headers completed. Proceeding to generate cashbook.");
-
+                System.out.println("to start generate cashbook 3d");
                 generateCashBook3D(newBundle);
-                LOGGER.log(Level.INFO, "Finished main cashbook generation.");
+                System.out.println("Ended generating generate cashbook 3d");
 
                 CashBookRow closingBalanceRow = new CashBookRow();
                 closingBalanceRow.setOrderNumber(Double.MAX_VALUE - 1000);
@@ -1119,10 +1123,8 @@ public class SearchController implements Serializable {
                 List<CashBookTotal> totalsList = new ArrayList<>();
                 double orderNumber = 0.0;
 
-                LOGGER.log(Level.INFO, "Processing totals: {0} columns, {1} rows.", new Object[]{columnCount, rowCount});
-
                 for (int colIndex = 0; colIndex < columnCount; colIndex++) {
-                    LOGGER.log(Level.INFO, "Processing column index: {0}", colIndex);
+                    System.out.println("colIndex = " + colIndex);
                     double total = 0.0;
 
                     for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
@@ -1134,6 +1136,8 @@ public class SearchController implements Serializable {
                         CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
                         if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
                             total += cashBookTotal.getTotalValue();
+                            cashBookTotal.setCashBookRow(row);
+                            row.getTotals().add(cashBookTotal);
                         }
                     }
 
@@ -1152,10 +1156,10 @@ public class SearchController implements Serializable {
                 newBundle.setCompletedAt(new Date());
                 saveBundle(newBundle);
 
-                LOGGER.log(Level.INFO, "generateCashBook3DAccountant completed at {0}", new Date());
+                System.out.println("generateCashBook3DAccountant completed at " + new Date());
                 return "Completed";
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error during generateCashBook3D execution: ", e);
+                System.err.println("Error during generateCashBook3D execution: " + e.getMessage());
                 return "Failed";
             }
         });
