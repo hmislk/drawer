@@ -66,6 +66,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -138,14 +141,16 @@ public class SearchController implements Serializable {
     double cashTranVal;
 
     private volatile boolean processCompleted = false;
-    private final ExecutorService highPriorityExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
+    private transient ExecutorService highPriorityExecutor;
+
+    @PostConstruct
+    public void init() {
+        highPriorityExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r);
             t.setPriority(Thread.MAX_PRIORITY);
             return t;
-        }
-    });
+        });
+    }
 
     boolean withoutCancell = false;
     boolean onlyRealized = false;
@@ -1073,82 +1078,86 @@ public class SearchController implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
 
-    
     public void startCashBookGeneration() {
         processCompleted = true;
-        System.out.println("startCashBookGeneration");
+        LOGGER.log(Level.INFO, "startCashBookGeneration");
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
         fromDate = reportKeyWord.getFromDate();
-        System.out.println("fromDate = " + fromDate);
+        LOGGER.log(Level.INFO, "fromDate = {0}", fromDate);
         toDate = reportKeyWord.getToDate();
-        System.out.println("toDate = " + toDate);
+        LOGGER.log(Level.INFO, "toDate = {0}", toDate);
         generateCashBook3D();
     }
 
     public Future<String> generateCashBook3D() {
         return highPriorityExecutor.submit(() -> {
-            System.out.println("generateCashBook3D started at " + new Date());
+            LOGGER.log(Level.INFO, "generateCashBook3D started at {0}", new Date());
+            try {
+                CashBookRowBundle newBundle = new CashBookRowBundle();
 
-            CashBookRowBundle newBundle = new CashBookRowBundle();
+                newBundle.setFromDate(reportKeyWord.getFromDate());
+                newBundle.setToDate(reportKeyWord.getToDate());
+                newBundle.setOnlyRealized(onlyRealized);
+                newBundle.setCreatedAt(new Date());
+                newBundle.setCreater(sessionController.getLoggedUser());
 
-            // These lines should NOT be removed. They are essential.
-            newBundle.setFromDate(reportKeyWord.getFromDate());
-            newBundle.setToDate(reportKeyWord.getToDate());
-            newBundle.setOnlyRealized(onlyRealized);
+                saveBundle(newBundle);
 
-            newBundle.setCreatedAt(new Date());
-            newBundle.setCreater(sessionController.getLoggedUser());
-            saveBundle(newBundle);
+                columnModels = new ArrayList<>();
+                fetchHeaders();
+                LOGGER.log(Level.INFO, "Fetching headers completed. Proceeding to generate cashbook.");
 
-            columnModels = new ArrayList<>();
-            fetchHeaders();
-            System.out.println("to start generate cashbook 3d");
-            generateCashBook3D(newBundle);
-            System.out.println("Ended generating generate cashbook 3d");
+                generateCashBook3D(newBundle);
+                LOGGER.log(Level.INFO, "Finished main cashbook generation.");
 
-            CashBookRow closingBalanceRow = new CashBookRow();
-            closingBalanceRow.setOrderNumber(Double.MAX_VALUE - 1000);
-            closingBalanceRow.setString1("Closing Balance");
+                CashBookRow closingBalanceRow = new CashBookRow();
+                closingBalanceRow.setOrderNumber(Double.MAX_VALUE - 1000);
+                closingBalanceRow.setString1("Closing Balance");
 
-            int rowCount = newBundle.getCashBookRows() != null ? newBundle.getCashBookRows().size() : 0;
-            int columnCount = headers != null ? headers.size() : 0;
-            List<CashBookTotal> totalsList = new ArrayList<>();
-            double orderNumber = 0.0;
+                int rowCount = newBundle.getCashBookRows() != null ? newBundle.getCashBookRows().size() : 0;
+                int columnCount = headers != null ? headers.size() : 0;
+                List<CashBookTotal> totalsList = new ArrayList<>();
+                double orderNumber = 0.0;
 
-            for (int colIndex = 0; colIndex < columnCount; colIndex++) {
-                System.out.println("colIndex = " + colIndex);
-                double total = 0.0;
+                LOGGER.log(Level.INFO, "Processing totals: {0} columns, {1} rows.", new Object[]{columnCount, rowCount});
 
-                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                    CashBookRow row = newBundle.getCashBookRows().get(rowIndex);
-                    if (row == null || row.getTotals() == null || row.getTotals().size() <= colIndex) {
-                        continue;
+                for (int colIndex = 0; colIndex < columnCount; colIndex++) {
+                    LOGGER.log(Level.INFO, "Processing column index: {0}", colIndex);
+                    double total = 0.0;
+
+                    for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                        CashBookRow row = newBundle.getCashBookRows().get(rowIndex);
+                        if (row == null || row.getTotals() == null || row.getTotals().size() <= colIndex) {
+                            continue;
+                        }
+
+                        CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
+                        if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
+                            total += cashBookTotal.getTotalValue();
+                        }
                     }
 
-                    CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
-                    if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
-                        total += cashBookTotal.getTotalValue();
-                        cashBookTotal.setCashBookRow(row);
-                    }
+                    CashBookTotal totalEntity = new CashBookTotal();
+                    totalEntity.setOrderNumber(orderNumber++);
+                    totalEntity.setTotalValue(total);
+                    totalEntity.setCashBookRow(closingBalanceRow);
+                    totalsList.add(totalEntity);
                 }
 
-                CashBookTotal totalEntity = new CashBookTotal();
-                totalEntity.setOrderNumber(orderNumber++);
-                totalEntity.setTotalValue(total);
-                totalEntity.setCashBookRow(closingBalanceRow);
-                totalsList.add(totalEntity);
+                closingBalanceRow.setTotals(totalsList);
+                newBundle.getCashBookRows().add(closingBalanceRow);
+                saveBundle(newBundle);
+                generateColumnModels(newBundle);
+                saveBundle(newBundle);
+                newBundle.setCompletedAt(new Date());
+                saveBundle(newBundle);
+
+                LOGGER.log(Level.INFO, "generateCashBook3DAccountant completed at {0}", new Date());
+                return "Completed";
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error during generateCashBook3D execution: ", e);
+                return "Failed";
             }
-
-            closingBalanceRow.setTotals(totalsList);
-            newBundle.getCashBookRows().add(closingBalanceRow);
-            saveBundle(newBundle);
-            generateColumnModels(newBundle);
-            saveBundle(newBundle);
-            newBundle.setCompletedAt(new Date());
-            saveBundle(newBundle);
-
-            System.out.println("generateCashBook3DAccountant completed at " + new Date());
-            return "Completed";
         });
     }
 
