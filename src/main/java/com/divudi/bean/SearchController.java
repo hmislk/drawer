@@ -62,6 +62,10 @@ import javax.faces.context.FacesContext;
 import org.primefaces.context.PrimeFacesContext;
 import org.primefaces.context.PrimeFacesContextFactory;
 import org.primefaces.extensions.application.PrimeFacesExtensionsResource;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 /**
  *
@@ -76,7 +80,7 @@ public class SearchController implements Serializable {
     Date toDate;
     private int maxResult = 50;
     private BillType billType;
-    private volatile boolean processCompleted = false;
+//    private volatile boolean processCompleted = false;
     ////////////
     private List<Bill> bills;
     private List<Bill> selectedBills;
@@ -133,6 +137,16 @@ public class SearchController implements Serializable {
     double cashInOutVal;
     double cashTranVal;
 
+    private volatile boolean processCompleted = false;
+    private final ExecutorService highPriorityExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setPriority(Thread.MAX_PRIORITY);
+            return t;
+        }
+    });
+    
     boolean withoutCancell = false;
     boolean onlyRealized = false;
 
@@ -1056,8 +1070,10 @@ public class SearchController implements Serializable {
         processCompleted = false;
         return "generate_list_to_cash_book_summery?faces-redirect=true";
     }
+    
+    
 
-    public String startCashBookGeneration() {
+    public void startCashBookGeneration() {
         processCompleted = true;
         System.out.println("startCashBookGeneration");
         // Display success message using JsfUtil
@@ -1068,8 +1084,6 @@ public class SearchController implements Serializable {
         toDate = reportKeyWord.getToDate();
         System.out.println("toDate = " + toDate);
         generateCashBook3D();
-        listGeneratedCashbooks();
-        return "list_generated_cash_book_summery?faces-redirect=true";
     }
 
     @Asynchronous
