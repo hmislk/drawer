@@ -24,6 +24,9 @@ public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CashBookRow cashBookRow;
+    
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private CashBookRowBundle cashBookRowBundle;
 
     private double orderNumber;
     
@@ -92,5 +95,13 @@ public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
     public void setValue(Double value) {
         this.totalValue = value;
         this.value = value;
+    }
+
+    public CashBookRowBundle getCashBookRowBundle() {
+        return cashBookRowBundle;
+    }
+
+    public void setCashBookRowBundle(CashBookRowBundle cashBookRowBundle) {
+        this.cashBookRowBundle = cashBookRowBundle;
     }
 }
