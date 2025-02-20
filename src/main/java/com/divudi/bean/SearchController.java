@@ -48,6 +48,7 @@ import com.divudi.entity.WebUser;
 import com.divudi.entity.cashTransaction.CashTransaction;
 import com.divudi.entity.cashTransaction.CashTransactionHistory;
 import com.divudi.facade.CashBookRowBundleFacade;
+import com.divudi.facade.CashBookTotalFacade;
 import com.divudi.facade.CashTransactionHistoryFacade;
 import com.divudi.facade.util.JsfUtil;
 import java.text.SimpleDateFormat;
@@ -105,6 +106,8 @@ public class SearchController implements Serializable {
     private BillItemFacade billItemFacade;
     @EJB
     private CashTransactionHistoryFacade cashTransactionHistoryFacade;
+    @EJB
+    CashBookTotalFacade cashBookTotalFacade;
 
     @EJB
     private BillBean billBean;
@@ -951,11 +954,11 @@ public class SearchController implements Serializable {
             double total = 0.0;
 
             for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getTotalValue();
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
-            totalEntity.setValue(total);
+            totalEntity.setTotalValue(total);
             totalEntity.setCashBookRow(closingBalanceRow);
             totalsList.add(totalEntity);
         }
@@ -1000,11 +1003,11 @@ public class SearchController implements Serializable {
             double total = 0.0;
 
             for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getTotalValue();
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
-            totalEntity.setValue(total);
+            totalEntity.setTotalValue(total);
             totalEntity.setCashBookRow(closingBalanceRow);
             totalsList.add(totalEntity);
         }
@@ -1071,54 +1074,62 @@ public class SearchController implements Serializable {
 
     @Asynchronous
     public Future<String> generateCashBook3D() {
-        System.out.println("generateCashBook3DAccountant started at " + new Date());
+        System.out.println("generateCashBook3D started at " + new Date());
 
         CashBookRowBundle newBundle = new CashBookRowBundle();
         newBundle.setFromDate(reportKeyWord.getFromDate());
-        
         newBundle.setToDate(reportKeyWord.getToDate());
         newBundle.setOnlyRealized(onlyRealized);
-        
-        System.out.println("newBundle.getFromDate() = " + newBundle.getFromDate());
-        System.out.println("newBundle.getToDate() = " + newBundle.getToDate());
-        
         newBundle.setCreatedAt(new Date());
         newBundle.setCreater(sessionController.getLoggedUser());
-        cashBookRowBundleFacade.create(newBundle);
+        saveBundle(newBundle);
 
         columnModels = new ArrayList<>();
         fetchHeaders();
+        System.out.println("to start generate cashbook 3d");
         generateCashBook3D(newBundle);
+        System.out.println("Ended generating generate cashbook 3d");
 
         CashBookRow closingBalanceRow = new CashBookRow();
         closingBalanceRow.setOrderNumber(Double.MAX_VALUE - 1000);
         closingBalanceRow.setString1("Closing Balance");
 
-        int rowCount = newBundle.getCashBookRows().size();
-        int columnCount = headers.size();
+        int rowCount = newBundle.getCashBookRows() != null ? newBundle.getCashBookRows().size() : 0;
+        int columnCount = headers != null ? headers.size() : 0;
         List<CashBookTotal> totalsList = new ArrayList<>();
-        double orderNumber=0.0;
+        double orderNumber = 0.0;
+
         for (int colIndex = 0; colIndex < columnCount; colIndex++) {
             System.out.println("colIndex = " + colIndex);
             double total = 0.0;
 
             for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                total += newBundle.getCashBookRows().get(rowIndex).getTotals().get(colIndex).getValue();
+                CashBookRow row = newBundle.getCashBookRows().get(rowIndex);
+                if (row == null || row.getTotals() == null || row.getTotals().size() <= colIndex) {
+                    continue;
+                }
+
+                CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
+                if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
+                    total += cashBookTotal.getTotalValue();
+                }
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
             totalEntity.setOrderNumber(orderNumber++);
-            totalEntity.setValue(total);
+            totalEntity.setTotalValue(total);
             totalEntity.setCashBookRow(closingBalanceRow);
             totalsList.add(totalEntity);
         }
 
         closingBalanceRow.setTotals(totalsList);
-        newBundle.getCashBookRows().add(closingBalanceRow);
-        generateColumnModels(newBundle);
 
+        newBundle.getCashBookRows().add(closingBalanceRow);
+        saveBundle(newBundle);
+        generateColumnModels(newBundle);
+        saveBundle(newBundle);
         newBundle.setCompletedAt(new Date());
-        cashBookRowBundleFacade.edit(newBundle);
+        saveBundle(newBundle);
 
         System.out.println("generateCashBook3DAccountant completed at " + new Date());
 
@@ -4069,7 +4080,7 @@ public class SearchController implements Serializable {
         // Create and add opening balance row
         CashBookRow rowOpen = new CashBookRow();
         rowOpen.setString1("Opening Balance");
-        rowOpen.setTotals(openningBalanceRow());
+        rowOpen.setTotals(openningBalanceRow(rowOpen));
         cashBookRows.add(rowOpen);
 
         for (Object[] obs : fetchBillDetais()) {
@@ -4101,21 +4112,59 @@ public class SearchController implements Serializable {
         System.out.println("cashBookRows.size() = " + cashBookRows.size());
     }
 
-    private void generateCashBook3D(CashBookRowBundle bundle) {
+    public void saveBundle(CashBookRowBundle bundle) {
+        if (bundle == null) {
+            JsfUtil.addErrorMessage("No bundle");
+            return;
+        }
+        if (bundle.getId() == null) {
+            cashBookRowBundleFacade.create(bundle);
+        } else {
+            cashBookRowBundleFacade.edit(bundle);
+        }
+    }
+
+    private void generateCashBook3D(CashBookRowBundle inputBundle) {
+        System.out.println("generateCashBook3D");
+        saveBundle(inputBundle);
         Double orderNumber = 0.0;
         System.out.println("generateCashBook3D");
 //        cashBookRows = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("YYYY MM dd hh:mm:ss a");
 
+        System.out.println("creating open balance row");
         // Create and add opening balance row
         CashBookRow rowOpen = new CashBookRow();
+        System.out.println("rowOpen = " + rowOpen);
         rowOpen.setOrderNumber(orderNumber++);
-        rowOpen.setCashBookRowBundle(bundle);
+        rowOpen.setCashBookRowBundle(inputBundle);
         rowOpen.setString1("Opening Balance");
-        rowOpen.setTotals(openningBalanceRow());
-        bundle.getCashBookRows().add(rowOpen);
-//        cashBookRows.add(rowOpen);
+        rowOpen.setTotals(openningBalanceRow(rowOpen));
 
+        System.out.println("1 rowOpen.getTotals() = " + rowOpen.getTotals());
+
+        for (CashBookTotal openingTotal : openningBalanceRow(rowOpen)) {
+            System.out.println("openingTotal = " + openingTotal);
+            System.out.println("1 openingTotal.getCashBookRow() = " + openingTotal.getCashBookRow());
+            openingTotal.setCashBookRow(rowOpen);
+            saveBundle(inputBundle);
+            System.out.println("2 openingTotal.getCashBookRow() = " + openingTotal.getCashBookRow());
+        }
+
+        saveBundle(inputBundle);
+
+        System.out.println("2 rowOpen.getTotals() = " + rowOpen.getTotals());
+        inputBundle.getCashBookRows().add(rowOpen);
+
+//        //TODO:TO Rmove below
+//        boolean skipingAddingDateToCheckOpeningBalance;
+//        skipingAddingDateToCheckOpeningBalance = true;
+//        if (skipingAddingDateToCheckOpeningBalance) {
+//            return;
+//        }
+//
+//        //TODO:TO Rmove below
+////        cashBookRows.add(rowOpen);
         for (Object[] obs : fetchBillDetais()) {
             System.out.println("obs = " + obs);
             long id = (long) obs[0];
@@ -4133,22 +4182,22 @@ public class SearchController implements Serializable {
 
                     CashBookRow row = createCashBookRowFromBill(bill, bi, format);
                     row.setOrderNumber(orderNumber++);
-                    row.setCashBookRowBundle(bundle);
+                    row.setCashBookRowBundle(inputBundle);
                     row.setTotals(fetchTotalsDetail(bi));
 //                    cashBookRows.add(row);
-                    bundle.getCashBookRows().add(row);
+                    inputBundle.getCashBookRows().add(row);
                 }
             } else {
                 CashBookRow row = createCashBookRowFromBill(bill, null, format);
                 row.setOrderNumber(orderNumber++);
-                row.setCashBookRowBundle(bundle);
+                row.setCashBookRowBundle(inputBundle);
                 row.setTotals(fetchTotals(id, row));
 //                cashBookRows.add(row);
-                bundle.getCashBookRows().add(row);
+                inputBundle.getCashBookRows().add(row);
             }
         }
-
-        System.out.println("cashBookRows.size() = " + bundle.getCashBookRows().size());
+        saveBundle(inputBundle);
+        System.out.println("cashBookRows.size() = " + inputBundle.getCashBookRows().size());
     }
 
     private CashBookRow createCashBookRowFromBill(Bill bill, BillItem bi, SimpleDateFormat format) {
@@ -4251,13 +4300,13 @@ public class SearchController implements Serializable {
             total += value;
 
             CashBookTotal cashBookTotal = new CashBookTotal();
-            cashBookTotal.setValue(value);
+            cashBookTotal.setTotalValue(value);
             cashBookTotal.setCashBookRow(cashBookRow);
             cashBookTotals.add(cashBookTotal);
         }
 
         CashBookTotal totalEntry = new CashBookTotal();
-        totalEntry.setValue(total);
+        totalEntry.setTotalValue(total);
         totalEntry.setCashBookRow(cashBookRow);
         cashBookTotals.add(totalEntry);
 
@@ -4286,12 +4335,12 @@ public class SearchController implements Serializable {
             total += value;
 
             CashBookTotal cashBookTotal = new CashBookTotal();
-            cashBookTotal.setValue(value);
+            cashBookTotal.setTotalValue(value);
             cashBookTotals.add(cashBookTotal);
         }
 
         CashBookTotal totalEntry = new CashBookTotal();
-        totalEntry.setValue(total);
+        totalEntry.setTotalValue(total);
         cashBookTotals.add(totalEntry);
 
         System.out.println("cashBookTotals = " + cashBookTotals);
@@ -4810,26 +4859,35 @@ public class SearchController implements Serializable {
         return list;
     }
 
-    private List<CashBookTotal> openningBalanceRow() {
+    private List<CashBookTotal> openningBalanceRow(CashBookRow inputCashbookRow) {
         List<CashBookTotal> cashBookTotals = new ArrayList<>();
         double total = 0.0;
 
         for (String header : headers) {
+            System.out.println("header = " + header);
             if (!"Bulk".equals(header)) {
                 double balance = fetchOpenningBalnceModified(header);
                 total += balance;
-
+                System.out.println("balance = " + balance);
                 CashBookTotal cashBookTotal = new CashBookTotal();
-                cashBookTotal.setValue(balance);
+                cashBookTotal.setTotalValue(balance);
                 cashBookTotals.add(cashBookTotal);
+                cashBookTotal.setCashBookRow(inputCashbookRow);
+//                cashBookTotalFacade.create(cashBookTotal);
+            } else {
+                CashBookTotal cashBookTotal = new CashBookTotal();
+                cashBookTotal.setTotalValue(null);
+                cashBookTotals.add(cashBookTotal);
+                cashBookTotal.setCashBookRow(inputCashbookRow);
+//                cashBookTotalFacade.create(cashBookTotal);
             }
         }
 
         CashBookTotal totalEntry = new CashBookTotal();
-        totalEntry.setValue(total);
+        totalEntry.setTotalValue(total);
         cashBookTotals.add(totalEntry);
 
-        System.out.println("cashBookTotals = " + cashBookTotals);
+        System.out.println("opening balance row cashBookTotals = " + cashBookTotals);
         return cashBookTotals;
     }
 
