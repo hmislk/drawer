@@ -17,12 +17,17 @@ public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     
+    private Double totalValue;
+    
+    @Transient
     private Double value;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CashBookRow cashBookRow;
 
     private double orderNumber;
+    
+    
 
     public Long getId() {
         return id;
@@ -32,12 +37,12 @@ public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
         this.id = id;
     }
 
-    public Double getValue() {
-        return value;
+    public Double getTotalValue() {
+        return totalValue;
     }
 
-    public void setValue(Double value) {
-        this.value = value;
+    public void setTotalValue(Double totalValue) {
+        this.totalValue = totalValue;
     }
 
     public CashBookRow getCashBookRow() {
@@ -77,6 +82,15 @@ public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
 
     @Override
     public String toString() {
-        return "com.divudi.entity.CashBookTotal[ id=" + id + ", value=" + value + ", orderNumber=" + orderNumber + " ]";
+        return "com.divudi.entity.CashBookTotal[ id=" + id + ", value=" + totalValue + ", orderNumber=" + orderNumber + " ]";
+    }
+
+    public Double getValue() {
+        return totalValue;
+    }
+
+    public void setValue(Double value) {
+        this.totalValue = value;
+        this.value = value;
     }
 }

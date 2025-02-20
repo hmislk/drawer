@@ -1,7 +1,9 @@
 package com.divudi.entity;
 
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,7 +22,7 @@ public class ColumnModel implements Serializable, Comparable<ColumnModel> {
     private Long id;
     private String header;
     private String property;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private CashBookRowBundle cashBookRowBundle;
     private double orderNumber;
 

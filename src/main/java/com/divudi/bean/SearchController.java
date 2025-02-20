@@ -951,11 +951,11 @@ public class SearchController implements Serializable {
             double total = 0.0;
 
             for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getTotalValue();
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
-            totalEntity.setValue(total);
+            totalEntity.setTotalValue(total);
             totalEntity.setCashBookRow(closingBalanceRow);
             totalsList.add(totalEntity);
         }
@@ -1000,11 +1000,11 @@ public class SearchController implements Serializable {
             double total = 0.0;
 
             for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getValue();
+                total += cashBookRows.get(rowIndex).getTotals().get(colIndex).getTotalValue();
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
-            totalEntity.setValue(total);
+            totalEntity.setTotalValue(total);
             totalEntity.setCashBookRow(closingBalanceRow);
             totalsList.add(totalEntity);
         }
@@ -1105,14 +1105,14 @@ public class SearchController implements Serializable {
                 }
 
                 CashBookTotal cashBookTotal = row.getTotals().get(colIndex);
-                if (cashBookTotal != null && cashBookTotal.getValue() != null) {
-                    total += cashBookTotal.getValue();
+                if (cashBookTotal != null && cashBookTotal.getTotalValue() != null) {
+                    total += cashBookTotal.getTotalValue();
                 }
             }
 
             CashBookTotal totalEntity = new CashBookTotal();
             totalEntity.setOrderNumber(orderNumber++);
-            totalEntity.setValue(total);
+            totalEntity.setTotalValue(total);
             totalEntity.setCashBookRow(closingBalanceRow);
             totalsList.add(totalEntity);
         }
@@ -4280,13 +4280,13 @@ public class SearchController implements Serializable {
             total += value;
 
             CashBookTotal cashBookTotal = new CashBookTotal();
-            cashBookTotal.setValue(value);
+            cashBookTotal.setTotalValue(value);
             cashBookTotal.setCashBookRow(cashBookRow);
             cashBookTotals.add(cashBookTotal);
         }
 
         CashBookTotal totalEntry = new CashBookTotal();
-        totalEntry.setValue(total);
+        totalEntry.setTotalValue(total);
         totalEntry.setCashBookRow(cashBookRow);
         cashBookTotals.add(totalEntry);
 
@@ -4315,12 +4315,12 @@ public class SearchController implements Serializable {
             total += value;
 
             CashBookTotal cashBookTotal = new CashBookTotal();
-            cashBookTotal.setValue(value);
+            cashBookTotal.setTotalValue(value);
             cashBookTotals.add(cashBookTotal);
         }
 
         CashBookTotal totalEntry = new CashBookTotal();
-        totalEntry.setValue(total);
+        totalEntry.setTotalValue(total);
         cashBookTotals.add(totalEntry);
 
         System.out.println("cashBookTotals = " + cashBookTotals);
@@ -4850,17 +4850,17 @@ public class SearchController implements Serializable {
                 total += balance;
                 System.out.println("balance = " + balance);
                 CashBookTotal cashBookTotal = new CashBookTotal();
-                cashBookTotal.setValue(balance);
+                cashBookTotal.setTotalValue(balance);
                 cashBookTotals.add(cashBookTotal);
             } else {
                 CashBookTotal cashBookTotal = new CashBookTotal();
-                cashBookTotal.setValue(null);
+                cashBookTotal.setTotalValue(null);
                 cashBookTotals.add(cashBookTotal);
             }
         }
 
         CashBookTotal totalEntry = new CashBookTotal();
-        totalEntry.setValue(total);
+        totalEntry.setTotalValue(total);
         cashBookTotals.add(totalEntry);
 
         System.out.println("opening balance row cashBookTotals = " + cashBookTotals);
