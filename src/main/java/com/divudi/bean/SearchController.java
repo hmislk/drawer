@@ -1064,6 +1064,7 @@ public class SearchController implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
 
     public void startCashBookGeneration() {
+        System.err.println("Starting startCashBookGeneration" );
         processCompleted = true;
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
 
@@ -1077,6 +1078,7 @@ public class SearchController implements Serializable {
     }
 
     public Future<String> generateCashBook3D(Date fromDate, Date toDate, WebUser loggedUser) {
+        System.err.println("Starting generateCashBook3D" );
         return highPriorityExecutor.submit(() -> {
 
             try {
@@ -1120,6 +1122,7 @@ public class SearchController implements Serializable {
                             cashBookTotal.setCashBookRow(row);
                             row.getTotals().add(cashBookTotal);
                         }
+                        System.err.println("row = " + row);
                     }
 
                     CashBookTotal totalEntity = new CashBookTotal();
@@ -1136,9 +1139,10 @@ public class SearchController implements Serializable {
                 saveBundle(newBundle);
                 newBundle.setCompletedAt(new Date());
                 saveBundle(newBundle);
-
+                System.err.println("Completed" );
                 return "Completed";
             } catch (Exception e) {
+                System.err.println("e = " + e);
                 return "Failed";
             }
         });
@@ -2158,7 +2162,6 @@ public class SearchController implements Serializable {
         temMap.put("ins", getSessionController().getInstitution());
         //    //// System.out.println("temMap = " + temMap);
 
-
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP, 50);
         getNetTotal(bills);
 
@@ -2241,7 +2244,6 @@ public class SearchController implements Serializable {
         temMap.put("fromDate", getFromDate());
         temMap.put("ins", getSessionController().getInstitution());
         //    //// System.out.println("temMap = " + temMap);
-
 
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP, 50);
         getNetTotal(bills);
@@ -2535,7 +2537,6 @@ public class SearchController implements Serializable {
         temMap.put("insTp", InstitutionType.Dealer);
         temMap.put("class", CancelledBill.class);
         //    //// System.out.println("temMap = " + temMap);
-
 
         bills = getBillFacade().findBySQL(sql, temMap, TemporalType.TIMESTAMP);
 
@@ -4129,9 +4130,8 @@ public class SearchController implements Serializable {
         rowOpen.setTotals(openningBalanceRow(rowOpen));
 
         // System.out.println("1 rowOpen.getTotals() = " + rowOpen.getTotals());
-
         for (CashBookTotal openingTotal : openningBalanceRow(rowOpen)) {
-            // System.out.println("openingTotal = " + openingTotal);
+            System.out.println("openingTotal = " + openingTotal);
             openingTotal.setCashBookRow(rowOpen);
             saveBundle(inputBundle);
         }

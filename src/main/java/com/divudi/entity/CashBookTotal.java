@@ -2,6 +2,7 @@ package com.divudi.entity;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Date;
 import javax.persistence.*;
 
 /**
@@ -12,23 +13,38 @@ import javax.persistence.*;
 public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
+
     private Double totalValue;
-    
+
     @Transient
     private Double value;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CashBookRow cashBookRow;
-    
+
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CashBookRowBundle cashBookRowBundle;
 
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date createdAt;
+
     private double orderNumber;
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public CashBookTotal() {
+        createdAt = new Date();
+    }
     
     
 
