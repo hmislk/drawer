@@ -4088,7 +4088,7 @@ public class SearchController implements Serializable {
                     }
 
                     CashBookRow row = createCashBookRowFromBill(bill, bi, format);
-                    row.setTotals(fetchTotalsDetail(bi));
+                    row.setTotals(fetchTotalsDetail(bi, row));
                     cashBookRows.add(row);
                 }
             } else {
@@ -4166,7 +4166,7 @@ public class SearchController implements Serializable {
                     CashBookRow row = createCashBookRowFromBill(bill, bi, format);
                     row.setOrderNumber(orderNumber++);
                     row.setCashBookRowBundle(inputBundle);
-                    row.setTotals(fetchTotalsDetail(bi));
+                    row.setTotals(fetchTotalsDetail(bi,row));
 //                    cashBookRows.add(row);
                     inputBundle.getCashBookRows().add(row);
                 }
@@ -4294,7 +4294,7 @@ public class SearchController implements Serializable {
         return cashBookTotals;
     }
 
-    private List<CashBookTotal> fetchTotalsDetail(BillItem bi) {
+    private List<CashBookTotal> fetchTotalsDetail(BillItem bi, CashBookRow inputRow) {
         List<CashBookTotal> cashBookTotals = new ArrayList<>();
         double total = 0.0;
 
@@ -4313,6 +4313,7 @@ public class SearchController implements Serializable {
             total += value;
 
             CashBookTotal cashBookTotal = new CashBookTotal();
+            cashBookTotal.setCashBookRow(inputRow);
             cashBookTotal.setTotalValue(value);
             cashBookTotals.add(cashBookTotal);
         }
