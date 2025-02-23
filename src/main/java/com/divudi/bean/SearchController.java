@@ -4187,10 +4187,10 @@ public class SearchController implements Serializable {
         row.setString1(bill.getInsId());
 
         if (bill.getFromWebUser() != null) {
-            row.setString2(bill.getFromWebUser().getWebUserPerson().getName());
+            row.setString2(bill.getFromWebUser().getWebUserPerson().getName().trim());
         }
         if (bill.getToWebUser() != null) {
-            row.setString3(bill.getToWebUser().getWebUserPerson().getName());
+            row.setString3(bill.getToWebUser().getWebUserPerson().getName().trim());
         }
         if (bill.getToInstitution() != null) {
             appendToString3(row, bill.getToInstitution().getName());
@@ -4843,6 +4843,7 @@ public class SearchController implements Serializable {
 
         CashBookTotal totalEntry = new CashBookTotal();
         totalEntry.setTotalValue(total);
+        totalEntry.setCashBookRow(inputCashbookRow);
         cashBookTotals.add(totalEntry);
 
         return cashBookTotals;
