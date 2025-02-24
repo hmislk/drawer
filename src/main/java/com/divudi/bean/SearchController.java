@@ -43,6 +43,7 @@ import com.divudi.entity.CashBookTotal;
 import com.divudi.entity.ColumnModel;
 import com.divudi.entity.Department;
 import com.divudi.entity.Item;
+import com.divudi.entity.OngoingProcess;
 import com.divudi.entity.Summery;
 import com.divudi.entity.WebUser;
 import com.divudi.entity.cashTransaction.CashTransaction;
@@ -50,9 +51,11 @@ import com.divudi.entity.cashTransaction.CashTransactionHistory;
 import com.divudi.facade.CashBookRowBundleFacade;
 import com.divudi.facade.CashBookTotalFacade;
 import com.divudi.facade.CashTransactionHistoryFacade;
+import com.divudi.facade.OngoingProcessFacade;
 import com.divudi.facade.util.JsfUtil;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.ejb.AsyncResult;
@@ -83,7 +86,7 @@ public class SearchController implements Serializable {
     Date toDate;
     private int maxResult = 50;
     private BillType billType;
-//    private volatile boolean processCompleted = false;
+//    private volatile boolean processOngoing = false;
     ////////////
     private List<Bill> bills;
     private List<Bill> selectedBills;
@@ -140,7 +143,7 @@ public class SearchController implements Serializable {
     double cashInOutVal;
     double cashTranVal;
 
-    private volatile boolean processCompleted = false;
+    private volatile boolean processOngoing = false;
     private transient ExecutorService highPriorityExecutor;
 
     @PostConstruct
@@ -946,7 +949,7 @@ public class SearchController implements Serializable {
     public void createCashBook3D() {
         // System.out.println("createCashBook3DAccountant");
 
-        processCompleted = false; // Reset process status
+        processOngoing = false; // Reset process status
         columnModels = new ArrayList<>();
         fetchHeaders();
         fetchCashBook3D();
@@ -985,15 +988,15 @@ public class SearchController implements Serializable {
         }
     }
 
-    public boolean isProcessCompleted() {
-        return processCompleted;
+    public boolean isProcessOngoing() {
+        return processOngoing;
     }
 
 //    @Asynchronous
     public void createCashBook3DAccountant() {
         // System.out.println("createCashBook3DAccountant");
 
-        processCompleted = false; // Reset process status
+        processOngoing = false; // Reset process status
         columnModels = new ArrayList<>();
         fetchHeadersAccountant();
         fetchCashBook3D();
@@ -1024,7 +1027,7 @@ public class SearchController implements Serializable {
 
         createColumnModels();
 
-        processCompleted = true; // Mark process as completed
+        processOngoing = true; // Mark process as completed
     }
 
     public void listGeneratedCashbooks() {
@@ -1057,15 +1060,15 @@ public class SearchController implements Serializable {
     }
 
     public String navigateToGenerateCashBook() {
-        processCompleted = false;
+        processOngoing = false;
         return "generate_list_to_cash_book_summery?faces-redirect=true";
     }
 
     private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
 
     public void startCashBookGeneration() {
-        System.err.println("Starting startCashBookGeneration" );
-        processCompleted = true;
+        System.err.println("Starting startCashBookGeneration");
+        processOngoing = true;
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
 
         fromDate = reportKeyWord.getFromDate();
@@ -1077,8 +1080,65 @@ public class SearchController implements Serializable {
         generateCashBook3D(fromDate, toDate, loggedUser);
     }
 
+    @EJB
+    OngoingProcessFacade ongoingProcessFacade;
+
+    public Boolean processIsOngoing(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return Boolean.FALSE; // Avoid returning null
+        }
+
+        String jpql = "select op from OngoingProcess op where processName = :name";
+        Map<String, Object> params = Collections.singletonMap("name", name);
+        OngoingProcess op = ongoingProcessFacade.findFirstByJpql(jpql, params, TemporalType.TIMESTAMP);
+
+        return op != null && op.isCurrentlyOngoing();
+    }
+
+    public void startProcess(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return;
+        }
+
+        OngoingProcess op = findOrCreateProcess(name);
+        if (!op.isCurrentlyOngoing()) { // Avoid unnecessary updates
+            op.setCurrentlyOngoing(true);
+            ongoingProcessFacade.update(op);
+        }
+    }
+
+    public void endProcess(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return;
+        }
+
+        OngoingProcess op = ongoingProcessFacade.findFirstByJpql(
+                "select op from OngoingProcess op where processName = :name",
+                Collections.singletonMap("name", name),
+                TemporalType.TIMESTAMP
+        );
+
+        if (op != null && op.isCurrentlyOngoing()) { // Avoid unnecessary updates
+            op.setCurrentlyOngoing(false);
+            ongoingProcessFacade.update(op);
+        }
+    }
+
+// **Helper method to reduce redundant code**
+    private OngoingProcess findOrCreateProcess(String name) {
+        String jpql = "select op from OngoingProcess op where processName = :name";
+        Map<String, Object> params = Collections.singletonMap("name", name);
+        OngoingProcess op = ongoingProcessFacade.findFirstByJpql(jpql, params, TemporalType.TIMESTAMP);
+        if (op == null) {
+            op = new OngoingProcess();
+            op.setProcessName(name);
+            ongoingProcessFacade.create(op);
+        }
+        return op;
+    }
+
     public Future<String> generateCashBook3D(Date fromDate, Date toDate, WebUser loggedUser) {
-        System.err.println("Starting generateCashBook3D" );
+        System.err.println("Starting generateCashBook3D");
         return highPriorityExecutor.submit(() -> {
 
             try {
@@ -1139,7 +1199,7 @@ public class SearchController implements Serializable {
                 saveBundle(newBundle);
                 newBundle.setCompletedAt(new Date());
                 saveBundle(newBundle);
-                System.err.println("Completed" );
+                System.err.println("Completed");
                 return "Completed";
             } catch (Exception e) {
                 System.err.println("e = " + e);
@@ -4166,7 +4226,7 @@ public class SearchController implements Serializable {
                     CashBookRow row = createCashBookRowFromBill(bill, bi, format);
                     row.setOrderNumber(orderNumber++);
                     row.setCashBookRowBundle(inputBundle);
-                    row.setTotals(fetchTotalsDetail(bi,row));
+                    row.setTotals(fetchTotalsDetail(bi, row));
 //                    cashBookRows.add(row);
                     inputBundle.getCashBookRows().add(row);
                 }
@@ -4320,6 +4380,7 @@ public class SearchController implements Serializable {
 
         CashBookTotal totalEntry = new CashBookTotal();
         totalEntry.setTotalValue(total);
+        totalEntry.setCashBookRow(inputRow);
         cashBookTotals.add(totalEntry);
 
         return cashBookTotals;
@@ -4846,6 +4907,7 @@ public class SearchController implements Serializable {
         totalEntry.setCashBookRow(inputCashbookRow);
         cashBookTotals.add(totalEntry);
 
+        saveBundle(inputCashbookRow.getCashBookRowBundle());
         return cashBookTotals;
     }
 

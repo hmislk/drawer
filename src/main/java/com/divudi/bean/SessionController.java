@@ -595,8 +595,7 @@ public class SessionController implements Serializable, HttpSessionListener {
 //        }
         primeTheme = "bootstrap-light-outlined";
         return primeTheme;
-        
-        
+
     }
 
     public void setPrimeTheme(String primeTheme) {
@@ -706,10 +705,11 @@ public class SessionController implements Serializable, HttpSessionListener {
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 
-        String ip = httpServletRequest.getRemoteAddr();
+        String ipAddr = httpServletRequest.getHeader("X-FORWARDED-FOR");
+        String ipAddress = (ipAddr == null) ? httpServletRequest.getRemoteAddr() : ipAddr;
         String host = httpServletRequest.getRemoteHost();
 
-        thisLogin.setIpaddress(ip);
+        thisLogin.setIpaddress(ipAddress);
         thisLogin.setComputerName(host);
 
         getLoginsFacade().create(thisLogin);

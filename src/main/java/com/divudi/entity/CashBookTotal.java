@@ -23,7 +23,7 @@ public class CashBookTotal implements Serializable, Comparable<CashBookTotal> {
     @Transient
     private Double value;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER,optional = false)
     private CashBookRow cashBookRow;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
