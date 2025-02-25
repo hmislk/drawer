@@ -346,7 +346,7 @@ public class SessionController implements Serializable, HttpSessionListener {
 
                 boolean passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
 
-                boolean usedForTesting = true;
+                boolean usedForTesting = false;
 
                 if (passwordMatch || usedForTesting) {
                     if (!canLogToDept(u, department)) {

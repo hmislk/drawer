@@ -1,35 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.2" xmlns="http://java.sun.com/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
-    <persistence-unit name="pu" transaction-type="JTA">
-        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <jta-data-source>jdbc/drawer</jta-data-source>
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        <properties>
-            <!-- Logging Configuration (Minimal to avoid performance overhead) -->
-            <property name="eclipselink.logging.level.sql" value="WARNING"/>
-            <property name="eclipselink.logging.parameters" value="false"/>
-            
-            <!-- DDL Generation (Production-Safe) -->
-            <property name="eclipselink.ddl-generation" value="none"/>
-            <property name="eclipselink.ddl-generation.output-mode" value="none"/>
-            
-            <!-- Transaction Timeout Settings -->
-            <property name="javax.persistence.lock.timeout" value="600000"/> <!-- 10 min -->
-            <property name="javax.persistence.query.timeout" value="600000"/> <!-- 10 min -->
-            <property name="eclipselink.jdbc.bind-parameters" value="true"/>
-
-            <!-- Performance Enhancements (Batch Writing) -->
-            <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
-            <property name="eclipselink.jdbc.batch-writing.size" value="1000"/>
-
-            <!-- Connection Pooling (Prevents Transaction Rollback Due to Resource Starvation) -->
-            <property name="eclipselink.connection-pool.default.max" value="500000"/>
-            <property name="eclipselink.connection-pool.default.min" value="100"/>
-
-            <!-- Cache Settings (Ensures Data Consistency) -->
-            <property name="eclipselink.cache.shared.default" value="false"/>
-        </properties>
-    </persistence-unit>
+<persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+  <persistence-unit name="pu" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <jta-data-source>jdbc/drawer</jta-data-source>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <!-- Logging Configuration (Minimal to avoid performance overhead) -->
+      <property name="eclipselink.logging.level.sql" value="WARNING"/>
+      <property name="eclipselink.logging.parameters" value="false"/>
+      <!-- DDL Generation (Production-Safe) -->
+      <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+      <property name="eclipselink.ddl-generation.output-mode" value="none"/>
+      <!-- Transaction Timeout Settings -->
+      <property name="javax.persistence.lock.timeout" value="600000"/>
+      <!-- 10 min -->
+      <property name="javax.persistence.query.timeout" value="600000"/>
+      <!-- 10 min -->
+      <property name="eclipselink.jdbc.bind-parameters" value="true"/>
+      <!-- Performance Enhancements (Batch Writing) -->
+      <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
+      <property name="eclipselink.jdbc.batch-writing.size" value="1000"/>
+      <!-- Connection Pooling (Prevents Transaction Rollback Due to Resource Starvation) -->
+      <property name="eclipselink.connection-pool.default.max" value="500000"/>
+      <property name="eclipselink.connection-pool.default.min" value="100"/>
+      <!-- Cache Settings (Ensures Data Consistency) -->
+      <property name="eclipselink.cache.shared.default" value="false"/>
+      <property name="javax.persistence.schema-generation.database.action" value="create-or-extend-tables"/>
+    </properties>
+  </persistence-unit>
 </persistence>

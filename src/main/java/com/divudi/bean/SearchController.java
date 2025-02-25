@@ -1068,7 +1068,15 @@ public class SearchController implements Serializable {
 
     public void startCashBookGeneration() {
         System.err.println("Starting startCashBookGeneration");
-        processOngoing = true;
+
+        String name = "cashbook_generation";
+
+        if (processIsOngoing(name)) {
+            JsfUtil.addErrorMessage("Cash Book Generation is already running. Please try later.");
+            return;
+        }
+
+        startProcess(name);
         JsfUtil.addSuccessMessage("Cash Book Generation Started in the Background.");
 
         fromDate = reportKeyWord.getFromDate();
@@ -1078,6 +1086,12 @@ public class SearchController implements Serializable {
         WebUser loggedUser = sessionController.getLoggedUser();
 
         generateCashBook3D(fromDate, toDate, loggedUser);
+
+    }
+
+    public void manuallyMarkProcessAsNotOngoing() {
+        String name = "cashbook_generation";
+        endProcess(name);
     }
 
     @EJB
@@ -1088,7 +1102,7 @@ public class SearchController implements Serializable {
             return Boolean.FALSE; // Avoid returning null
         }
 
-        String jpql = "select op from OngoingProcess op where processName = :name";
+        String jpql = "select op from OngoingProcess op where op.processName = :name";
         Map<String, Object> params = Collections.singletonMap("name", name);
         OngoingProcess op = ongoingProcessFacade.findFirstByJpql(jpql, params, TemporalType.TIMESTAMP);
 
@@ -1113,7 +1127,7 @@ public class SearchController implements Serializable {
         }
 
         OngoingProcess op = ongoingProcessFacade.findFirstByJpql(
-                "select op from OngoingProcess op where processName = :name",
+                "select op from OngoingProcess op where op.processName = :name",
                 Collections.singletonMap("name", name),
                 TemporalType.TIMESTAMP
         );
@@ -1126,7 +1140,7 @@ public class SearchController implements Serializable {
 
 // **Helper method to reduce redundant code**
     private OngoingProcess findOrCreateProcess(String name) {
-        String jpql = "select op from OngoingProcess op where processName = :name";
+        String jpql = "select op from OngoingProcess op where op.processName = :name";
         Map<String, Object> params = Collections.singletonMap("name", name);
         OngoingProcess op = ongoingProcessFacade.findFirstByJpql(jpql, params, TemporalType.TIMESTAMP);
         if (op == null) {
@@ -1200,10 +1214,17 @@ public class SearchController implements Serializable {
                 newBundle.setCompletedAt(new Date());
                 saveBundle(newBundle);
                 System.err.println("Completed");
+                String name = "cashbook_generation";
+                endProcess(name);
                 return "Completed";
             } catch (Exception e) {
                 System.err.println("e = " + e);
+                String name = "cashbook_generation";
+                endProcess(name);
                 return "Failed";
+            } finally {
+                String name = "cashbook_generation";
+                endProcess(name);
             }
         });
     }
