@@ -4911,15 +4911,16 @@ public class SearchController implements Serializable {
                 total += balance;
                 CashBookTotal cashBookTotal = new CashBookTotal();
                 cashBookTotal.setTotalValue(balance);
-                cashBookTotals.add(cashBookTotal);
                 cashBookTotal.setCashBookRow(inputCashbookRow);
+                cashBookTotals.add(cashBookTotal);
+                
 //                cashBookTotalFacade.create(cashBookTotal);
             } else {
-                CashBookTotal cashBookTotal = new CashBookTotal();
-                cashBookTotal.setTotalValue(null);
-                cashBookTotals.add(cashBookTotal);
-                cashBookTotal.setCashBookRow(inputCashbookRow);
-//                cashBookTotalFacade.create(cashBookTotal);
+//                CashBookTotal cashBookTotal = new CashBookTotal();
+//                cashBookTotal.setTotalValue(null);
+//                cashBookTotals.add(cashBookTotal);
+//                cashBookTotal.setCashBookRow(inputCashbookRow);
+////                cashBookTotalFacade.create(cashBookTotal);
             }
         }
 
