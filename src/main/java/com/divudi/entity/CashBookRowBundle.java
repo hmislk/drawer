@@ -53,6 +53,12 @@ public class CashBookRowBundle implements Serializable {
     private Date retiredAt;
     private String retireComments;
 
+    public CashBookRowBundle() {
+        createdAt = new Date();
+    }
+
+    
+    
     public Long getId() {
         return id;
     }

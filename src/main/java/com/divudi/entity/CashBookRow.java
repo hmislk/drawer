@@ -3,6 +3,7 @@ package com.divudi.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -12,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
 
 @Entity
 public class CashBookRow implements Serializable, Comparable<CashBookRow> {
@@ -33,10 +35,19 @@ public class CashBookRow implements Serializable, Comparable<CashBookRow> {
     private String string7;
 
     private double orderNumber;
+    
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     @OneToMany(mappedBy = "cashBookRow", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<CashBookTotal> totals;
 
+    public CashBookRow() {
+        createdAt = new Date();
+    }
+
+    
+    
     public Long getId() {
         return id;
     }
@@ -156,6 +167,14 @@ public class CashBookRow implements Serializable, Comparable<CashBookRow> {
     @Override
     public int compareTo(CashBookRow other) {
         return Double.compare(this.orderNumber, other.orderNumber);
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
 }

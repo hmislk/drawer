@@ -9,7 +9,7 @@
     <ui:define name="content">
         <h:form>
 
-            <h:panelGroup rendered="#{searchController.processCompleted}" >
+            <h:panelGroup rendered="#{searchController.processOngoing}" >
                 <h:outputLabel value="Please allow some time to generate report. You can check under list reports later to view the report." ></h:outputLabel>
                 <p:commandButton 
                     id="btnBackAgain" 
@@ -18,7 +18,7 @@
                     action="list_to_cash_book_summery"
                     update="@all" />
             </h:panelGroup>
-            <h:panelGroup rendered="#{not searchController.processCompleted}" >
+            <h:panelGroup rendered="#{not searchController.processOngoing}" >
                 <p:panel header="Generate">
                     <p:panelGrid columns="2">
                         <h:outputLabel value="From Date"/>
@@ -47,6 +47,12 @@
                                 ajax="false"
                                 action="list_to_cash_book_summery"
                                 update="@all" />
+                            
+                             <p:commandButton 
+                                id="btnManuallyMarkProcessIsNotRunning" 
+                                value="Mark Process it NOT ongoing"
+                                ajax="false"
+                                action="#{searchController.manuallyMarkProcessAsNotOngoing()}"/>
                         </h:panelGroup>
                     </p:panelGrid>
                     <f:facet id="footer" name="footer" >

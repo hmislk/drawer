@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
@@ -71,6 +72,12 @@ public abstract class AbstractFacade<T> {
 
     public void edit(T entity) {
         getEntityManager().merge(entity);
+    }
+
+    public void update(T entity) {
+        EntityManager em = getEntityManager();
+        em.merge(entity);
+        em.flush(); // Force immediate write to the database
     }
 
     public void remove(T entity) {
@@ -154,8 +161,8 @@ public abstract class AbstractFacade<T> {
         }
         return qry.getResultList();
     }
-    
-     public List<Object> findObjectBySQL(String temSQL, Map<String, Object> parameters, TemporalType tt) {
+
+    public List<Object> findObjectBySQL(String temSQL, Map<String, Object> parameters, TemporalType tt) {
         TypedQuery<Object> qry = getEntityManager().createQuery(temSQL, Object.class);
         Set s = parameters.entrySet();
         Iterator it = s.iterator();
@@ -202,7 +209,7 @@ public abstract class AbstractFacade<T> {
     public Date findDateByJpql(String temSQL, Map<String, Object> parameters) {
         return findDateByJpql(temSQL, parameters, TemporalType.DATE);
     }
-    
+
     public Date findDateByJpql(String temSQL, Map<String, Object> parameters, TemporalType tt) {
         TypedQuery<Date> qry = (TypedQuery<Date>) getEntityManager().createQuery(temSQL);
         Set s = parameters.entrySet();
@@ -219,15 +226,14 @@ public abstract class AbstractFacade<T> {
             }
         }
         try {
-            Date td= (Date) qry.getSingleResult();
-        //    //System.out.println("td = " + td);
+            Date td = (Date) qry.getSingleResult();
+            //    //System.out.println("td = " + td);
             return td;
         } catch (Exception e) {
             return null;
         }
     }
 
-    
     public double findDoubleByJpql(String temSQL, Map<String, Object> parameters) {
         return findDoubleByJpql(temSQL, parameters, TemporalType.DATE);
     }
@@ -361,19 +367,18 @@ public abstract class AbstractFacade<T> {
         return getEntityManager().createQuery(cq).getResultList();
     }
 
-      public List<T> findContains(String fieldName, String fieldValue) {
+    public List<T> findContains(String fieldName, String fieldValue) {
         javax.persistence.criteria.CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         javax.persistence.criteria.CriteriaQuery<T> cq = cb.createQuery(entityClass);
         javax.persistence.criteria.Root<T> rt = cq.from(entityClass);
         ParameterExpression<String> p = cb.parameter(String.class);
 //        Predicate predicateField = cb.like(rt.<String>get(fieldName), fieldValue);
-        Predicate predicateField = cb.like(cb.upper(rt.<String>get(fieldName)),"*"+ fieldValue.toLowerCase());
-    //    Predicate predicateRetired = cb.equal(rt.<Boolean>get("retired"), withoutRetired);
-    //    Predicate predicateFieldRetired = cb.and(predicateField, predicateRetired);
-    //    (cb.like(pet.get(Pet_.name), "*do"));
+        Predicate predicateField = cb.like(cb.upper(rt.<String>get(fieldName)), "*" + fieldValue.toLowerCase());
+        //    Predicate predicateRetired = cb.equal(rt.<Boolean>get("retired"), withoutRetired);
+        //    Predicate predicateFieldRetired = cb.and(predicateField, predicateRetired);
+        //    (cb.like(pet.get(Pet_.name), "*do"));
 
-       
-         if (!fieldValue.equals("")) {
+        if (!fieldValue.equals("")) {
             cq.where(predicateField);
         }
 
@@ -384,10 +389,9 @@ public abstract class AbstractFacade<T> {
         return getEntityManager().createQuery(cq).getResultList();
     }
 
-    
     public T findByField(String fieldName, String fieldValue, boolean withoutRetired) {
         List<T> lstAll = findExact(fieldName, fieldValue, true);
-       
+
         if (lstAll.isEmpty()) {
 //            //////System.out.println("Null");
             return null;
@@ -396,10 +400,10 @@ public abstract class AbstractFacade<T> {
             return lstAll.get(0);
         }
     }
-    
+
     public String findByFieldContains(String fieldName, String fieldValue) {
         List<T> lstAll = findContains(fieldName, fieldValue);
-       
+
         if (lstAll.isEmpty()) {
 //            //////System.out.println("Null");
             return "";
@@ -414,6 +418,51 @@ public abstract class AbstractFacade<T> {
         qry.setMaxResults(1);
         try {
             return qry.getResultList().get(0);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public T findFirstByJpql(String jpql) {
+        EntityManager em = getEntityManager();
+        em.flush(); // Ensure all changes are committed before querying
+
+        TypedQuery<T> qry = em.createQuery(jpql, entityClass);
+        qry.setHint("javax.persistence.cache.storeMode", "REFRESH"); // Bypass cache
+        qry.setMaxResults(1);
+
+        try {
+            return qry.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public T findFirstByJpql(String jpql, Map<String, Object> parameters, TemporalType tt) {
+        EntityManager em = getEntityManager();
+        em.flush(); // Ensure all changes are committed before querying
+
+        TypedQuery<T> qry = em.createQuery(jpql, entityClass);
+        qry.setHint("javax.persistence.cache.storeMode", "REFRESH"); // Bypass cache
+        qry.setMaxResults(1);
+
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            String paramName = entry.getKey();
+            Object paramValue = entry.getValue();
+
+            if (paramValue instanceof Date) {
+                qry.setParameter(paramName, (Date) paramValue, tt);
+            } else {
+                qry.setParameter(paramName, paramValue);
+            }
+        }
+
+        try {
+            return qry.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         } catch (Exception e) {
             return null;
         }
@@ -559,7 +608,7 @@ public abstract class AbstractFacade<T> {
             return null;
         }
     }
-    
+
     public List<Object[]> findAggregates(String temSQL) {
         TypedQuery<Object[]> qry = getEntityManager().createQuery(temSQL, Object[].class);
         try {
@@ -569,7 +618,7 @@ public abstract class AbstractFacade<T> {
             return null;
         }
     }
-    
+
     public List<Object[]> findAggregates(String temSQL, Map<String, Object> parameters) {
 //        //////System.out.println("find aggregates 2" );
         return findAggregates(temSQL, parameters, TemporalType.DATE);
@@ -581,26 +630,23 @@ public abstract class AbstractFacade<T> {
         Iterator it = s.iterator();
         while (it.hasNext()) {
             Map.Entry m = (Map.Entry) it.next();
-            Object pVal =  m.getValue();
+            Object pVal = m.getValue();
             String pPara = (String) m.getKey();
-            if(pVal instanceof Date){
+            if (pVal instanceof Date) {
                 Date pDate = (Date) pVal;
                 qry.setParameter(pPara, pDate, tt);
-            }else{
+            } else {
                 qry.setParameter(pPara, pVal);
             }
         }
         try {
             return qry.getResultList();
         } catch (Exception e) {
-        //    //System.out.println("e = " + e);
+            //    //System.out.println("e = " + e);
             return null;
         }
     }
-    
-    
-    
-    
+
     public List<Object> findObjects(String temSQL, Map<String, Object> parameters) {
         return findObjects(temSQL, parameters, TemporalType.DATE);
     }
@@ -611,12 +657,12 @@ public abstract class AbstractFacade<T> {
         Iterator it = s.iterator();
         while (it.hasNext()) {
             Map.Entry m = (Map.Entry) it.next();
-            Object pVal =  m.getValue();
+            Object pVal = m.getValue();
             String pPara = (String) m.getKey();
-            if(pVal instanceof Date){
+            if (pVal instanceof Date) {
                 Date pDate = (Date) pVal;
                 qry.setParameter(pPara, pDate, TemporalType.DATE);
-            }else{
+            } else {
                 qry.setParameter(pPara, pVal);
             }
         }
@@ -626,11 +672,7 @@ public abstract class AbstractFacade<T> {
             return null;
         }
     }
-    
-    
-    
-    
-    
+
     public Object[] findSingleAggregate(String temSQL, Map<String, Object> parameters) {
 //        //////System.out.println("find aggregates 2" );
         return findSingleAggregate(temSQL, parameters, TemporalType.DATE);
@@ -649,12 +691,12 @@ public abstract class AbstractFacade<T> {
         while (it.hasNext()) {
 //            //////System.out.println("5");
             Map.Entry m = (Map.Entry) it.next();
-            Object pVal =  m.getValue();
+            Object pVal = m.getValue();
             String pPara = (String) m.getKey();
-            if(pVal instanceof Date){
+            if (pVal instanceof Date) {
                 Date pDate = (Date) pVal;
                 qry.setParameter(pPara, pDate, TemporalType.DATE);
-            }else{
+            } else {
                 qry.setParameter(pPara, pVal);
             }
 //            //////System.out.println("Parameter " + pPara + "\tVal" + pVal);
@@ -667,8 +709,6 @@ public abstract class AbstractFacade<T> {
             return null;
         }
     }
-    
-    
 
     public Double findAggregateDbl(String temSQL, Map<String, Date> parameters) {
         Query qry = getEntityManager().createQuery(temSQL);
@@ -690,6 +730,7 @@ public abstract class AbstractFacade<T> {
             return 0.0;
         }
     }
+
     public Double findAggregateDblNew(String temSQL, Map<String, Date> parameters) {
         Query qry = getEntityManager().createQuery(temSQL);
         Set s = parameters.entrySet();
@@ -710,8 +751,8 @@ public abstract class AbstractFacade<T> {
             return 0.0;
         }
     }
-    
-    public Double findAggregateDbl(String temSQL, Map<String, Date> parameters,TemporalType tt) {
+
+    public Double findAggregateDbl(String temSQL, Map<String, Date> parameters, TemporalType tt) {
         Query qry = getEntityManager().createQuery(temSQL);
         Set s = parameters.entrySet();
         Iterator it = s.iterator();
@@ -763,7 +804,7 @@ public abstract class AbstractFacade<T> {
             return 0L;
         }
     }
-    
+
     public List<ItemQuantityAndValues> findItemQuantityAndValuesList(String temSQL, Map<String, Object> parameters, TemporalType tt) {
         TypedQuery<ItemQuantityAndValues> qry = getEntityManager().createQuery(temSQL, ItemQuantityAndValues.class);
         Set s = parameters.entrySet();

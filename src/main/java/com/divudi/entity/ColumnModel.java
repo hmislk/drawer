@@ -1,6 +1,7 @@
 package com.divudi.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
 
 /**
  *
@@ -25,6 +27,8 @@ public class ColumnModel implements Serializable, Comparable<ColumnModel> {
     @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private CashBookRowBundle cashBookRowBundle;
     private double orderNumber;
+     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     public Long getId() {
         return id;
@@ -33,6 +37,12 @@ public class ColumnModel implements Serializable, Comparable<ColumnModel> {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public ColumnModel() {
+        createdAt = new Date();
+    }
+    
+    
 
     @Override
     public int hashCode() {
@@ -94,6 +104,14 @@ public class ColumnModel implements Serializable, Comparable<ColumnModel> {
     @Override
     public int compareTo(ColumnModel other) {
         return Double.compare(this.orderNumber, other.orderNumber);
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
