@@ -5,17 +5,16 @@
     <jta-data-source>jdbc/drawer</jta-data-source>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
+      <!-- Generate DDL scripts and store them in c:/tmp/ -->
+      <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+      <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>
+      <property name="eclipselink.application-location" value="c:/tmp/"/>
       <!-- Logging Configuration (Minimal to avoid performance overhead) -->
       <property name="eclipselink.logging.level.sql" value="WARNING"/>
       <property name="eclipselink.logging.parameters" value="false"/>
-      <!-- DDL Generation (Production-Safe) -->
-      <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
-      <property name="eclipselink.ddl-generation.output-mode" value="none"/>
       <!-- Transaction Timeout Settings -->
       <property name="javax.persistence.lock.timeout" value="600000"/>
-      <!-- 10 min -->
       <property name="javax.persistence.query.timeout" value="600000"/>
-      <!-- 10 min -->
       <property name="eclipselink.jdbc.bind-parameters" value="true"/>
       <!-- Performance Enhancements (Batch Writing) -->
       <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
@@ -25,7 +24,7 @@
       <property name="eclipselink.connection-pool.default.min" value="100"/>
       <!-- Cache Settings (Ensures Data Consistency) -->
       <property name="eclipselink.cache.shared.default" value="false"/>
-      <property name="javax.persistence.schema-generation.database.action" value="create-or-extend-tables"/>
+      <property name="javax.persistence.schema-generation.database.action" value="create-tables"/>
     </properties>
   </persistence-unit>
 </persistence>
