@@ -305,8 +305,11 @@ public class SessionController implements Serializable, HttpSessionListener {
         Boolean available = true;
         List<WebUser> allUsers = getFacede().findAll();
         for (WebUser w : allUsers) {
-            if (userName.toLowerCase().equals(getSecurityController().decrypt(w.getName()).toLowerCase())) {
-                available = false;
+            if (w.getName() != null && userName != null) {
+                String decryptedName = getSecurityController().decrypt(w.getName());
+                if (decryptedName != null && userName.toLowerCase().equals(decryptedName.toLowerCase())) {
+                    available = false;
+                }
             }
         }
         return available;
@@ -342,36 +345,42 @@ public class SessionController implements Serializable, HttpSessionListener {
             // System.out.println("u.getId() = " + u.getCode());
             // System.out.println("u.getName() = " + u.getName());
             // System.out.println("userName = " + userName);
-            if (getSecurityController().decrypt(u.getName()).equalsIgnoreCase(userName)) {
+            if (u.getName() != null && userName != null) {
+                String decryptedName = getSecurityController().decrypt(u.getName());
+                if (decryptedName != null && decryptedName.equalsIgnoreCase(userName)) {
 
-                boolean passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
-
-                boolean usedForTesting = false;
-
-                if (passwordMatch || usedForTesting) {
-                    if (!canLogToDept(u, department)) {
-                        UtilityController.addErrorMessage("No privilage to Login This Department");
-                        return false;
-                    }
-                    if (getApplicationController().isLogged(u) != null) {
-                        UtilityController.addErrorMessage("This user already logged. Other instances will be logged out now.");
+                    boolean passwordMatch = false;
+                    if (passord != null && u.getWebUserPassword() != null) {
+                        passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
                     }
 
-                    u.setDepartment(department);
-                    u.setInstitution(institution);
+                    boolean usedForTesting = false;
 
-                    getFacede().edit(u);
+                    if (passwordMatch || usedForTesting) {
+                        if (!canLogToDept(u, department)) {
+                            UtilityController.addErrorMessage("No privilage to Login This Department");
+                            return false;
+                        }
+                        if (getApplicationController().isLogged(u) != null) {
+                            UtilityController.addErrorMessage("This user already logged. Other instances will be logged out now.");
+                        }
 
-                    setLoggedUser(u);
-                    setLogged(Boolean.TRUE);
-                    setActivated(u.isActivated());
-                    setRole(u.getRole());
-                    getWebUserBean().setLoggedUser(u);
+                        u.setDepartment(department);
+                        u.setInstitution(institution);
 
-                    recordLogin();
+                        getFacede().edit(u);
 
-                    UtilityController.addSuccessMessage("Logged successfully");
-                    return true;
+                        setLoggedUser(u);
+                        setLogged(Boolean.TRUE);
+                        setActivated(u.isActivated());
+                        setRole(u.getRole());
+                        getWebUserBean().setLoggedUser(u);
+
+                        recordLogin();
+
+                        UtilityController.addSuccessMessage("Logged successfully");
+                        return true;
+                    }
                 }
             }
         }
@@ -556,7 +565,10 @@ public class SessionController implements Serializable, HttpSessionListener {
     }
 
     public String getDisplayName() {
-        return getSecurityController().decrypt(getLoggedUser().getName());
+        if (getLoggedUser() != null && getLoggedUser().getName() != null) {
+            return getSecurityController().decrypt(getLoggedUser().getName());
+        }
+        return "";
     }
 
     /**
