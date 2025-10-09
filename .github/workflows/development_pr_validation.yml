@@ -1,0 +1,37 @@
+name: PR Validator
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - main
+      - '*-prod'
+
+jobs:
+  validate-jdbc-data-sources:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify JDBC Data Sources in persistence.xml
+        run: |
+          grep -q '<jta-data-source>${JDBC_DATASOURCE}</jta-data-source>' src/main/resources/META-INF/persistence.xml
+
+  validate-compilation:
+      needs: validate-jdbc-data-sources
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+
+        - name: Set up JDK 8
+          uses: actions/setup-java@v4
+          with:
+            distribution: 'temurin'
+            java-version: '8'
+
+        - name: Compile with Maven
+          run: mvn clean compile
