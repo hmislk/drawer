@@ -30,6 +30,9 @@ public class SecurityController implements Serializable {
     }
 
     public String encrypt(String word) {
+        if (word == null) {
+            return null;
+        }
         BasicTextEncryptor en = new BasicTextEncryptor();
         en.setPassword("health");
         try {
@@ -40,6 +43,9 @@ public class SecurityController implements Serializable {
     }
 
     public String hash(String word) {
+        if (word == null) {
+            return null;
+        }
         try {
             BasicPasswordEncryptor en = new BasicPasswordEncryptor();
             return en.encryptPassword(word);
@@ -49,11 +55,21 @@ public class SecurityController implements Serializable {
     }
 
     public boolean matchPassword(String planePassword, String encryptedPassword) {
-        BasicPasswordEncryptor en = new BasicPasswordEncryptor();
-        return en.checkPassword(planePassword, encryptedPassword);
+        if (planePassword == null || encryptedPassword == null) {
+            return false;
+        }
+        try {
+            BasicPasswordEncryptor en = new BasicPasswordEncryptor();
+            return en.checkPassword(planePassword, encryptedPassword);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String decrypt(String word) {
+        if (word == null) {
+            return null;
+        }
         BasicTextEncryptor en = new BasicTextEncryptor();
         en.setPassword("health");
         try {

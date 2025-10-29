@@ -304,12 +304,23 @@ public class SessionController implements Serializable, HttpSessionListener {
     public Boolean userNameAvailable(String userName) {
         Boolean available = true;
         List<WebUser> allUsers = getFacede().findAll();
+
+        if (getSecurityController() == null || userName == null) {
+            return available;
+        }
+
         for (WebUser w : allUsers) {
-            if (w.getName() != null && userName != null) {
-                String decryptedName = getSecurityController().decrypt(w.getName());
-                if (decryptedName != null && userName.toLowerCase().equals(decryptedName.toLowerCase())) {
-                    available = false;
-                }
+            if (w.getName() == null) {
+                continue;
+            }
+
+            String decryptedName = getSecurityController().decrypt(w.getName());
+            if (decryptedName == null) {
+                continue;
+            }
+
+            if (userName.toLowerCase().equals(decryptedName.toLowerCase())) {
+                available = false;
             }
         }
         return available;
@@ -339,48 +350,58 @@ public class SessionController implements Serializable, HttpSessionListener {
         String temSQL;
         temSQL = "SELECT u FROM WebUser u WHERE u.retired = false";
         List<WebUser> allUsers = getFacede().findBySQL(temSQL);
+
+        if (getSecurityController() == null) {
+            UtilityController.addErrorMessage("Security controller not initialized");
+            return false;
+        }
+
         for (WebUser u : allUsers) {
             // System.out.println("u = " + u);
             // System.out.println("u.getId() = " + u.getId());
             // System.out.println("u.getId() = " + u.getCode());
             // System.out.println("u.getName() = " + u.getName());
             // System.out.println("userName = " + userName);
-            if (u.getName() != null && userName != null) {
-                String decryptedName = getSecurityController().decrypt(u.getName());
-                if (decryptedName != null && decryptedName.equalsIgnoreCase(userName)) {
 
-                    boolean passwordMatch = false;
-                    if (passord != null && u.getWebUserPassword() != null) {
-                        passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
+            if (u.getName() == null) {
+                continue;
+            }
+
+            String decryptedName = getSecurityController().decrypt(u.getName());
+            if (decryptedName == null) {
+                continue;
+            }
+
+            if (decryptedName.equalsIgnoreCase(userName)) {
+
+                boolean passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
+
+                boolean usedForTesting = false;
+
+                if (passwordMatch || usedForTesting) {
+                    if (!canLogToDept(u, department)) {
+                        UtilityController.addErrorMessage("No privilage to Login This Department");
+                        return false;
+                    }
+                    if (getApplicationController().isLogged(u) != null) {
+                        UtilityController.addErrorMessage("This user already logged. Other instances will be logged out now.");
                     }
 
-                    boolean usedForTesting = false;
+                    u.setDepartment(department);
+                    u.setInstitution(institution);
 
-                    if (passwordMatch || usedForTesting) {
-                        if (!canLogToDept(u, department)) {
-                            UtilityController.addErrorMessage("No privilage to Login This Department");
-                            return false;
-                        }
-                        if (getApplicationController().isLogged(u) != null) {
-                            UtilityController.addErrorMessage("This user already logged. Other instances will be logged out now.");
-                        }
+                    getFacede().edit(u);
 
-                        u.setDepartment(department);
-                        u.setInstitution(institution);
+                    setLoggedUser(u);
+                    setLogged(Boolean.TRUE);
+                    setActivated(u.isActivated());
+                    setRole(u.getRole());
+                    getWebUserBean().setLoggedUser(u);
 
-                        getFacede().edit(u);
+                    recordLogin();
 
-                        setLoggedUser(u);
-                        setLogged(Boolean.TRUE);
-                        setActivated(u.isActivated());
-                        setRole(u.getRole());
-                        getWebUserBean().setLoggedUser(u);
-
-                        recordLogin();
-
-                        UtilityController.addSuccessMessage("Logged successfully");
-                        return true;
-                    }
+                    UtilityController.addSuccessMessage("Logged successfully");
+                    return true;
                 }
             }
         }
@@ -565,10 +586,11 @@ public class SessionController implements Serializable, HttpSessionListener {
     }
 
     public String getDisplayName() {
-        if (getLoggedUser() != null && getLoggedUser().getName() != null) {
-            return getSecurityController().decrypt(getLoggedUser().getName());
+        if (getSecurityController() == null || getLoggedUser() == null || getLoggedUser().getName() == null) {
+            return "";
         }
-        return "";
+        String decryptedName = getSecurityController().decrypt(getLoggedUser().getName());
+        return decryptedName != null ? decryptedName : "";
     }
 
     /**

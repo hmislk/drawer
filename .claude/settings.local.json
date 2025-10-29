@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/tmp/**)",
+      "Bash(D:\\Payara\\bin\\asadmin.bat list-connection-pools:*)",
+      "Bash(D:\\Payara\\bin\\asadmin.bat list-jdbc-resources:*)",
+      "Read(//d/Payara/bin/**)",
+      "Read(//d/Payara/glassfish/bin/**)",
+      "Bash(asadmin.bat list-jdbc-resources:*)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" list-connection-pools)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" list-jdbc-resources)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" list-jdbc-connection-pools)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" ping-connection-pool mysql_drawer_rootPool)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" ping-connection-pool coopAzure)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" get-property domain1.resources.jdbc-connection-pool.coopAzure.datasource-classname)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" get domain1.resources.jdbc-connection-pool.coopAzure.datasource-classname)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" get domain1.resources.jdbc-connection-pool.mysql_drawer_rootPool.datasource-classname)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" get domain1.resources.jdbc-connection-pool.coopAzure.property.driverClass)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" create-jdbc-connection-pool --datasourceclassname com.mysql.cj.jdbc.MysqlDataSource --restype javax.sql.DataSource --property user=hmis_admin:password=DHyMGgy7RRl8EPe:databaseName=rhdrawer:serverName=localhost:port=3336:useSSL=false:allowPublicKeyRetrieval=true:zeroDateTimeBehavior=CONVERT_TO_NULL rhdrawerPool)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" create-jdbc-resource --connectionpoolid rhdrawerPool jdbc/rhdrawer)",
+      "Bash(\"D:\\Payara\\glassfish\\bin\\asadmin.bat\" ping-connection-pool rhdrawerPool)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
