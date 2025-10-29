@@ -34,7 +34,7 @@
                         </p:ajaxStatus>
 
 
-                        <p:menubar styleClass="nonPrintBlock" style=" border: 0px;" rendered="#{sessionController.logged or true}" >
+                        <p:menubar styleClass="nonPrintBlock" style=" border: 0px;" rendered="#{sessionController.logged}" >
                             <p:menuitem  ajax="false"  value="Home" action="index" ></p:menuitem>
 
                             <p:submenu label="Cash Transaction" rendered="#{webUserController.hasPrivilege('CashTransaction')}">
@@ -68,12 +68,12 @@
                                 <p:menuitem  ajax="false"  action="/user_change_password" value="Change Password"  ></p:menuitem>
                                 <p:menuitem  ajax="false"  action="/user_preferances" value="Change Preferances"  ></p:menuitem>
                             </p:submenu>
-                            <p:submenu label="Administration"  >
-                                <p:menuitem  ajax="false"  action="/admin_manage_users" value="Manage Users"  ></p:menuitem>
-                                <p:menuitem  ajax="false"  action="/admin_mange_institutions_index" value="Manage Institutions" ></p:menuitem>
-                                <p:menuitem  ajax="false"  action="/admin_manage_staff_index" value="Manage Staff"  ></p:menuitem>
-                                <p:menuitem  ajax="false"  action="/admin_fees" value="Manage Prices/Charges/Packages"  ></p:menuitem>
-                                <p:menuitem ajax="false" action="/dataAdmin/admin_data_administration" value="Data Administration"  ></p:menuitem>
+                            <p:submenu label="Administration"  rendered="#{webUserController.hasPrivilege('Admin')}">
+                                <p:menuitem  ajax="false"  action="/admin_manage_users" value="Manage Users" rendered="#{webUserController.hasPrivilege('AdminManagingUsers')}" ></p:menuitem>
+                                <p:menuitem  ajax="false"  action="/admin_mange_institutions_index" value="Manage Institutions" rendered="#{webUserController.hasPrivilege('AdminInstitutions')}" ></p:menuitem>
+                                <p:menuitem  ajax="false"  action="/admin_manage_staff_index" value="Manage Staff" rendered="#{webUserController.hasPrivilege('AdminStaff')}" ></p:menuitem>
+                                <p:menuitem  ajax="false"  action="/admin_fees" value="Manage Prices/Charges/Packages" rendered="#{webUserController.hasPrivilege('AdminPrices')}" ></p:menuitem>
+                                <p:menuitem ajax="false" action="/dataAdmin/admin_data_administration" value="Data Administration" rendered="#{webUserController.hasPrivilege('AdminItems')}" ></p:menuitem>
 
 
 
@@ -93,7 +93,7 @@
 
             <h:panelGrid id="pgM" columns="1" style="width: 100%; border: 0px;" >
 
-                <h:panelGroup  >
+                <h:panelGroup rendered ="#{sessionController.logged}" >
                     <div style="min-height: 600px;" >
 
                         <ui:insert name="content"   >

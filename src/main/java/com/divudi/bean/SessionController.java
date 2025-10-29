@@ -304,8 +304,22 @@ public class SessionController implements Serializable, HttpSessionListener {
     public Boolean userNameAvailable(String userName) {
         Boolean available = true;
         List<WebUser> allUsers = getFacede().findAll();
+
+        if (getSecurityController() == null || userName == null) {
+            return available;
+        }
+
         for (WebUser w : allUsers) {
-            if (userName.toLowerCase().equals(getSecurityController().decrypt(w.getName()).toLowerCase())) {
+            if (w.getName() == null) {
+                continue;
+            }
+
+            String decryptedName = getSecurityController().decrypt(w.getName());
+            if (decryptedName == null) {
+                continue;
+            }
+
+            if (userName.toLowerCase().equals(decryptedName.toLowerCase())) {
                 available = false;
             }
         }
@@ -336,13 +350,29 @@ public class SessionController implements Serializable, HttpSessionListener {
         String temSQL;
         temSQL = "SELECT u FROM WebUser u WHERE u.retired = false";
         List<WebUser> allUsers = getFacede().findBySQL(temSQL);
+
+        if (getSecurityController() == null) {
+            UtilityController.addErrorMessage("Security controller not initialized");
+            return false;
+        }
+
         for (WebUser u : allUsers) {
             // System.out.println("u = " + u);
             // System.out.println("u.getId() = " + u.getId());
             // System.out.println("u.getId() = " + u.getCode());
             // System.out.println("u.getName() = " + u.getName());
             // System.out.println("userName = " + userName);
-            if (getSecurityController().decrypt(u.getName()).equalsIgnoreCase(userName)) {
+
+            if (u.getName() == null) {
+                continue;
+            }
+
+            String decryptedName = getSecurityController().decrypt(u.getName());
+            if (decryptedName == null) {
+                continue;
+            }
+
+            if (decryptedName.equalsIgnoreCase(userName)) {
 
                 boolean passwordMatch = getSecurityController().matchPassword(passord, u.getWebUserPassword());
 
@@ -556,7 +586,11 @@ public class SessionController implements Serializable, HttpSessionListener {
     }
 
     public String getDisplayName() {
-        return getSecurityController().decrypt(getLoggedUser().getName());
+        if (getSecurityController() == null || getLoggedUser() == null || getLoggedUser().getName() == null) {
+            return "";
+        }
+        String decryptedName = getSecurityController().decrypt(getLoggedUser().getName());
+        return decryptedName != null ? decryptedName : "";
     }
 
     /**

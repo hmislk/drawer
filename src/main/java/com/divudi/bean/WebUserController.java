@@ -143,8 +143,18 @@ public class WebUserController implements Serializable {
     }
 
     public void updateUser(WebUser wu) {
+        if (wu == null) {
+            UtilityController.addErrorMessage("No user to update");
+            return;
+        }
+
         System.out.println("wu.getName() = " + wu.getName());
-        wu.setName(getSecurityController().encrypt(wu.getName()));
+        if (getSecurityController() != null && wu.getName() != null) {
+            String encryptedName = getSecurityController().encrypt(wu.getName());
+            if (encryptedName != null) {
+                wu.setName(encryptedName);
+            }
+        }
         System.out.println("wu.getName() = " + wu.getName());
         getPersonFacade().edit(wu.getWebUserPerson());
         getFacade().edit(wu);
@@ -301,10 +311,19 @@ public class WebUserController implements Serializable {
     private void dycryptName() {
         List<WebUser> temp = items;
 
+        if (getSecurityController() == null) {
+            return;
+        }
+
         for (int i = 0; i < temp.size(); i++) {
             WebUser w = temp.get(i);
-            w.setName(getSecurityController().decrypt(w.getName()).toLowerCase());
-            temp.set(i, w);
+            if (w != null && w.getName() != null) {
+                String decryptedName = getSecurityController().decrypt(w.getName());
+                if (decryptedName != null) {
+                    w.setName(decryptedName.toLowerCase());
+                    temp.set(i, w);
+                }
+            }
         }
 
         items = temp;
@@ -379,10 +398,15 @@ public class WebUserController implements Serializable {
         if (allUsers == null) {
             return false;
         }
-        for (WebUser w : allUsers) {
 
-            if (userName != null && w != null && w.getName() != null) {
-                if (userName.toLowerCase().equals(getSecurityController().decrypt(w.getName()).toLowerCase())) {
+        if (getSecurityController() == null || userName == null) {
+            return false;
+        }
+
+        for (WebUser w : allUsers) {
+            if (w != null && w.getName() != null) {
+                String decryptedName = getSecurityController().decrypt(w.getName());
+                if (decryptedName != null && userName.toLowerCase().equals(decryptedName.toLowerCase())) {
                     //////System.out.println("Ift");
                     available = true;
                     return available;// ok. that is may be the issue. we will try with it ok
