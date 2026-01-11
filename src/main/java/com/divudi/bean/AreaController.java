@@ -86,10 +86,6 @@ public class AreaController implements Serializable {
         return ejbFacade;
     }
 
-    public void setEjbFacade(AreaFacade ejbFacade) {
-        this.ejbFacade = ejbFacade;
-    }
-
     public SessionController getSessionController() {
         return sessionController;
     }
